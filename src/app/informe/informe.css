@@ -1,0 +1,179 @@
+/* ============================================================
+   Informe de gestión
+   ------------------------------------------------------------
+   Pensado para salir impreso o en PDF: una hoja carta, con sus
+   saltos de página controlados y sin nada de la interfaz.
+   ============================================================ */
+
+.hoja {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  background: var(--color-superficie);
+  color: var(--color-tinta);
+}
+
+.portada {
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--color-acento);
+}
+
+.titulo-informe {
+  margin-top: 0.5rem;
+  font-size: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.subtitulo-informe {
+  margin-top: 0.5rem;
+  font-size: var(--text-media);
+  color: var(--color-tinta-2);
+}
+
+.datos-portada {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 1.75rem;
+}
+.datos-portada dt {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-tinta-3);
+}
+.datos-portada dd {
+  margin-top: 0.125rem;
+  font-size: var(--text-menuda);
+}
+
+.bloque {
+  margin-top: 2.25rem;
+  break-inside: avoid;
+}
+
+.bloque h2 {
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--text-titulo);
+}
+
+.entrada {
+  margin-top: 0.875rem;
+  font-size: var(--text-media);
+  line-height: 1.65;
+  color: var(--color-tinta-2);
+}
+.entrada strong {
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-top: 1.25rem;
+  background: var(--color-borde);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.cifra-informe {
+  padding: 0.875rem 1rem;
+  background: var(--color-superficie);
+}
+.cifra-informe .valor {
+  margin-top: 0.3rem;
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.cifra-informe .valor-alerta { color: var(--color-alerta); }
+
+.tabla-informe {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  font-size: var(--text-menuda);
+}
+.tabla-informe th {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-tinta-3);
+  border-bottom: 1px solid var(--color-borde-fuerte);
+}
+.tabla-informe td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+.tabla-informe .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.tabla-informe .mes { text-transform: capitalize; }
+
+/* Comparativo mensual: dos barras apiladas, legibles también en papel. */
+.barras {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.barra {
+  display: block;
+  height: 5px;
+  border-radius: 2px;
+  min-width: 2px;
+}
+.barra-recibidas { background: var(--color-acento); }
+.barra-resueltas { background: var(--color-exito); }
+
+.pie-informe {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+  font-size: var(--text-micro);
+  color: var(--color-tinta-3);
+}
+.pie-informe p + p { margin-top: 0.3rem; }
+
+/* --- Impresión --------------------------------------------- */
+@media print {
+  @page {
+    size: letter;
+    margin: 16mm 14mm;
+  }
+
+  .sin-imprimir { display: none !important; }
+
+  body { background: #fff; }
+
+  .hoja {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Sin saltos forzados: dejaban media página en blanco. Basta con que
+     ningún bloque se parta por la mitad; si no cabe, pasa entero. */
+  .bloque { break-inside: avoid; }
+
+  /* Que ninguna tabla se parta dejando el encabezado huérfano. */
+  .tabla-informe thead { display: table-header-group; }
+  .tabla-informe tr { break-inside: avoid; }
+
+  /* Los fondos de color se imprimen: son los que dan la lectura. */
+  .cifras, .cifra-informe, .barra {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "generado": "2026-10-01",
+  "fuente": "INE · Marco Geográfico Seccional (corte 31-ene-2025), descargado de https://storage.googleapis.com/mapoteca/MGS_CCL/SHAPEFILE.7z — archivo publicado en https://cartografia.ine.mx/sige8/productosCartograficos/bases",
+  "proyeccion": "EPSG:4326 (lon/lat). El origen viene en Cónica Conforme de Lambert y se reproyectó con mapshaper -proj wgs84.",
+  "capas": {
+    "mexico-estados": {
+      "archivo": "mexico-estados.json",
+      "rasgos": 32,
+      "bytes": 295057,
+      "origen": "ENTIDAD.shp",
+      "simplificacion": "3%",
+      "nota": "32 entidades federativas. clave = clave INEGI/INE de entidad, 2 dígitos."
+    },
+    "nl-municipios": {
+      "archivo": "nl-municipios.json",
+      "rasgos": 51,
+      "bytes": 333338,
+      "origen": "MUNICIPIO.shp (ENTIDAD=19)",
+      "simplificacion": "30%",
+      "nota": "51 municipios de Nuevo León. clave = clave INEGI/INE de municipio, 3 dígitos."
+    },
+    "nl-distritos-locales": {
+      "archivo": "nl-distritos-locales.json",
+      "rasgos": 26,
+      "bytes": 279751,
+      "origen": "DISTRITO_LOCAL.shp (ENTIDAD=19)",
+      "simplificacion": "50%",
+      "nota": "26 distritos electorales locales de Nuevo León. clave = 2 dígitos."
+    },
+    "mexico-distritos-federales": {
+      "archivo": "mexico-distritos-federales.json",
+      "rasgos": 300,
+      "bytes": 566406,
+      "origen": "DISTRITO_FEDERAL.shp",
+      "simplificacion": "2.5%",
+      "nota": "300 distritos electorales federales (distritación vigente aprobada en 2023). clave = entidad-distrito, p. ej. 19-05. Nuevo León tiene 14 distritos en esta distritación; la tabla `distritos` ambito='federal' todavía trae 12 (distritación 2017)."
+    }
+  }
+}

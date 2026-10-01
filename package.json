@@ -3,24 +3,51 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3200",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:up": "node db/local.mjs up",
+    "db:down": "node db/local.mjs down",
+    "db:reset": "node db/local.mjs reset",
+    "db:migrate": "tsx --env-file=.env.local db/migrate.mts",
+    "db:seed": "tsx --env-file=.env.local db/seed.mts",
+    "db:demo": "tsx --env-file=.env.local db/seed-demo.mts",
+    "db:diad": "tsx --env-file=.env.local db/seed-dia-d.mts",
+    "db:movilizacion": "tsx --env-file=.env.local db/seed-movilizacion.mts",
+    "db:estado": "tsx --env-file=.env.local db/estado.mts",
+    "db:probar": "tsx --env-file=.env.local db/pruebas/aislamiento.mts",
+    "db:secciones": "tsx --env-file=.env.local db/vincular-secciones.mts",
+    "probar:flujo": "tsx --env-file=.env.local herramientas/pruebas/flujo.mts",
+    "probar:permisos": "tsx --env-file=.env.local herramientas/pruebas/permisos.mts",
+    "probar:comunicacion": "tsx --env-file=.env.local herramientas/pruebas/comunicacion.mts",
+    "probar:portal": "tsx --env-file=.env.local herramientas/pruebas/portal.mts",
+    "probar:evidencia": "tsx --env-file=.env.local herramientas/pruebas/evidencia.mts"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "d3-geo": "^3.1.1",
+    "jose": "^6.2.12",
     "next": "16.3.8",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "embedded-postgres": "^18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "puppeteer-core": "^25.12.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

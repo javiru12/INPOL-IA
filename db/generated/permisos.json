@@ -1,0 +1,4718 @@
+{
+  "perfiles": [
+    {
+      "clave": "super_admin",
+      "nombre": "Súper Administrador"
+    },
+    {
+      "clave": "admin",
+      "nombre": "Administrador"
+    },
+    {
+      "clave": "operador_campo",
+      "nombre": "Operador de Campo"
+    },
+    {
+      "clave": "asignador",
+      "nombre": "Asignador"
+    },
+    {
+      "clave": "operador_gestion",
+      "nombre": "Operador de Gestión"
+    },
+    {
+      "clave": "gestor_social",
+      "nombre": "Gestor Social"
+    },
+    {
+      "clave": "rp_movilizadores",
+      "nombre": "R.P. de Movilizadores"
+    },
+    {
+      "clave": "lider_promotores",
+      "nombre": "Líder de Promotores"
+    },
+    {
+      "clave": "promotor_votos",
+      "nombre": "Promotor de Votos"
+    },
+    {
+      "clave": "marketing",
+      "nombre": "Marketing"
+    },
+    {
+      "clave": "representante_casilla",
+      "nombre": "Representante de Casilla"
+    }
+  ],
+  "funcionalidades": [
+    {
+      "clave": "encabezado.busqueda",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "operador_campo",
+        "asignador",
+        "operador_gestion",
+        "gestor_social",
+        "rp_movilizadores",
+        "lider_promotores",
+        "promotor_votos",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.dia_d",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Día D"
+      ],
+      "etiqueta": "Día D",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.entrevistas_pendientes_por_asignar",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Entrevistas Pendientes por asignar"
+      ],
+      "etiqueta": "Entrevistas Pendientes por asignar",
+      "fase": 5,
+      "perfiles": []
+    },
+    {
+      "clave": "encabezado.alertas.notas_de_sesion_por_asignar",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Notas de sesión por asignar"
+      ],
+      "etiqueta": "Notas de sesión por asignar",
+      "fase": 5,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.foto_apuntes_por_asignar",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Foto apuntes por asignar"
+      ],
+      "etiqueta": "Foto apuntes por asignar",
+      "fase": 5,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.audio_notas_de_sesion_pendientes_por_asignar",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Audio notas de sesión pendientes por asignar"
+      ],
+      "etiqueta": "Audio notas de sesión pendientes por asignar",
+      "fase": 5,
+      "perfiles": [
+        "operador_campo",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.peticiones_prioritarias",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Peticiones prioritarias"
+      ],
+      "etiqueta": "Peticiones prioritarias",
+      "fase": 5,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.mensajes_gestor_social",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Mensajes Gestor Social"
+      ],
+      "etiqueta": "Mensajes Gestor Social",
+      "fase": 5,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.mensajes_operador_de_campo",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Mensajes operador de Campo"
+      ],
+      "etiqueta": "Mensajes operador de Campo",
+      "fase": 5,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.mensajes_operador_de_gestion",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Mensajes operador de gestión"
+      ],
+      "etiqueta": "Mensajes operador de gestión",
+      "fase": 5,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.mensajes_asignador",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Mensajes Asignador"
+      ],
+      "etiqueta": "Mensajes Asignador",
+      "fase": 5,
+      "perfiles": [
+        "operador_campo",
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.peticiones_en_proceso",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Peticiones en proceso"
+      ],
+      "etiqueta": "Peticiones en proceso",
+      "fase": 5,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "encabezado.alertas.recordatorios_llamadas_por_realizar_a_movilizadores",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Alertas",
+        "Recordatorios llamadas por realizar a movilizadores"
+      ],
+      "etiqueta": "Recordatorios llamadas por realizar a movilizadores",
+      "fase": 5,
+      "perfiles": [
+        "operador_gestion",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "encabezado.fecha_hora",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Fecha / Hora"
+      ],
+      "etiqueta": "Fecha / Hora",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "operador_campo",
+        "asignador",
+        "operador_gestion",
+        "gestor_social",
+        "rp_movilizadores",
+        "lider_promotores",
+        "promotor_votos",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "encabezado.log_out",
+      "modulo": "Encabezado",
+      "ruta": [
+        "Encabezado",
+        "Log Out"
+      ],
+      "etiqueta": "Log Out",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "operador_campo",
+        "asignador",
+        "operador_gestion",
+        "gestor_social",
+        "rp_movilizadores",
+        "lider_promotores",
+        "promotor_votos",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.graficas.problematicas_principales",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Gráficas",
+        "Problemáticas Principales"
+      ],
+      "etiqueta": "Problemáticas Principales",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.graficas.problematicas_relevantes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Gráficas",
+        "Problemáticas Relevantes"
+      ],
+      "etiqueta": "Problemáticas Relevantes",
+      "fase": 4,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.graficas.estatus_de_peticiones",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Gráficas",
+        "Estatus de Peticiones"
+      ],
+      "etiqueta": "Estatus de Peticiones",
+      "fase": 4,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.graficas.peticiones_atendidas",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Gráficas",
+        "Peticiones Atendidas"
+      ],
+      "etiqueta": "Peticiones Atendidas",
+      "fase": 4,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.estatus_peticiones_totales.completadas",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Estatus peticiones totales",
+        "Completadas"
+      ],
+      "etiqueta": "Completadas",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.estatus_peticiones_totales.no_interpretadas",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Estatus peticiones totales",
+        "No interpretadas"
+      ],
+      "etiqueta": "No interpretadas",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.estatus_peticiones_totales.en_proceso",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Estatus peticiones totales",
+        "En proceso"
+      ],
+      "etiqueta": "En proceso",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.estatus_peticiones_totales.prioritarias",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Estatus peticiones totales",
+        "Prioritarias"
+      ],
+      "etiqueta": "Prioritarias",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.mensajes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Mensajes"
+      ],
+      "etiqueta": "Mensajes",
+      "fase": 4,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.audio_notas_pendientes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Audio Notas pendientes"
+      ],
+      "etiqueta": "Audio Notas pendientes",
+      "fase": 4,
+      "perfiles": [
+        "operador_campo",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.foto_apuntes_pendientes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Foto Apuntes pendientes"
+      ],
+      "etiqueta": "Foto Apuntes pendientes",
+      "fase": 4,
+      "perfiles": [
+        "operador_campo",
+        "asignador"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.actividades",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Actividades"
+      ],
+      "etiqueta": "Actividades",
+      "fase": 4,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.movilizadores_por_distrito",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Movilizadores por Distrito"
+      ],
+      "etiqueta": "Movilizadores por Distrito",
+      "fase": 4,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.registro_de_llamadas_con_notas",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Registro de llamadas con Notas"
+      ],
+      "etiqueta": "Registro de llamadas con Notas",
+      "fase": 4,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.asistencia_dia_d",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Asistencia Día D"
+      ],
+      "etiqueta": "Asistencia Día D",
+      "fase": 4,
+      "perfiles": [
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.ciudadanos_pendientes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Ciudadanos Pendientes"
+      ],
+      "etiqueta": "Ciudadanos Pendientes",
+      "fase": 4,
+      "perfiles": [
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.peticiones_en_proceso",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Peticiones en proceso"
+      ],
+      "etiqueta": "Peticiones en proceso",
+      "fase": 4,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listados.peticiones_prioritarias",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listados",
+        "Peticiones prioritarias"
+      ],
+      "etiqueta": "Peticiones prioritarias",
+      "fase": 4,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.calendario_eventos_proximo",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Calendario Eventos Próximo"
+      ],
+      "etiqueta": "Calendario Eventos Próximo",
+      "fase": 4,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.grafica_de_progreso_de_peticiones_completadas",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Gráfica de Progreso de Peticiones Completadas"
+      ],
+      "etiqueta": "Gráfica de Progreso de Peticiones Completadas",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.detalle_de_peticiones",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Detalle de peticiones"
+      ],
+      "etiqueta": "Detalle de peticiones",
+      "fase": 4,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.emails_sms_recientes_masivos",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Emails / SMS Recientes Masivos"
+      ],
+      "etiqueta": "Emails / SMS Recientes Masivos",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.filtro_drop_down_por_campana",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.promotores_de_votos_totales",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Promotores de Votos Totales"
+      ],
+      "etiqueta": "Promotores de Votos Totales",
+      "fase": 3,
+      "perfiles": [
+        "lider_promotores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.progreso_de_visistas_realizadas_a_traves_de_los_dias",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Progreso de Visistas realizadas (a traves de los días)"
+      ],
+      "etiqueta": "Progreso de Visistas realizadas (a traves de los días)",
+      "fase": 3,
+      "perfiles": [
+        "lider_promotores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.listado_de_los_promotores_de_voto_ordenado_por_los_que_llevan_mas_prospecciones",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Listado de los promotores de Voto ordenado por los que llevan mas prospecciones"
+      ],
+      "etiqueta": "Listado de los promotores de Voto ordenado por los que llevan mas prospecciones",
+      "fase": 3,
+      "perfiles": [
+        "lider_promotores"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.filtro_drop_down_por_candidato",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "panel_de_inicio.actividades_recientes",
+      "modulo": "Panel de Inicio",
+      "ruta": [
+        "Panel de Inicio",
+        "Actividades Recientes"
+      ],
+      "etiqueta": "Actividades Recientes",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.principales_problematicas_generales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Principales Problemáticas Generales"
+      ],
+      "etiqueta": "Principales Problemáticas Generales",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.agregar_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Agregar problematicas"
+      ],
+      "etiqueta": "Agregar problematicas",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.zonas_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Zonas principales con problemáticas"
+      ],
+      "etiqueta": "Zonas principales con problemáticas",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.filtro_drop_down_por_campana",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.filtro_drop_down_por_candidato",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.listado_de_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Listado de Problemáticas"
+      ],
+      "etiqueta": "Listado de Problemáticas",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.registro_recientes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Registro Recientes"
+      ],
+      "etiqueta": "Registro Recientes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.educacion.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Educación",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.educacion.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Educación",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.educacion.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Educación",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.educacion.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Educación",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.educacion.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Educación",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.seguridad.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Seguridad",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.seguridad.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Seguridad",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.seguridad.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Seguridad",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.seguridad.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Seguridad",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.seguridad.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Seguridad",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.trafico.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Trafico",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.trafico.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Trafico",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.trafico.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Trafico",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.trafico.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Trafico",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.trafico.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Trafico",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.ecologia.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Ecología",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.ecologia.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Ecología",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.ecologia.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Ecología",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.ecologia.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Ecología",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.ecologia.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Ecología",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.violencia.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Violencia",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.violencia.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Violencia",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.violencia.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Violencia",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.violencia.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Violencia",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.violencia.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Violencia",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.baches.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Baches",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.baches.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Baches",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.baches.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Baches",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.baches.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Baches",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.baches.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Baches",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.desempleo.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Desempleo",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.desempleo.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Desempleo",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.desempleo.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Desempleo",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.desempleo.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Desempleo",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.desempleo.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Desempleo",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.salud.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Salud",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.salud.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Salud",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.salud.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Salud",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.salud.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Salud",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.salud.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Salud",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.social.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Social",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.social.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Social",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.social.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Social",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.social.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Social",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.social.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Social",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.politica.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Política",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.politica.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Política",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.politica.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Política",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.politica.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Política",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.politica.mapa_de_distrito_con_reportes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Política",
+        "Mapa de distrito con reportes"
+      ],
+      "etiqueta": "Mapa de distrito con reportes",
+      "fase": null,
+      "perfiles": [
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.luminaria.listado_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Luminaria",
+        "Listado de Peticiones"
+      ],
+      "etiqueta": "Listado de Peticiones",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.luminaria.secciones_principales_con_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Luminaria",
+        "Secciones principales con problemáticas"
+      ],
+      "etiqueta": "Secciones principales con problemáticas",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.problematicas.estadistica_por_tipo_de_problematica.luminaria.mapa_de_distrito_con_mapeo_de_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Problemáticas",
+        "Estadística por tipo de problemática",
+        "Luminaria",
+        "Mapa de distrito con mapeo de peticiones"
+      ],
+      "etiqueta": "Mapa de distrito con mapeo de peticiones",
+      "fase": null,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.estadistica_general.estadisticas_por_recorrido",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Estadística General",
+        "Estadísticas por recorrido"
+      ],
+      "etiqueta": "Estadísticas por recorrido",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.listado_de_recorridos_generales.estadisticas_por_recorrido",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Listado de recorridos Generales",
+        "Estadísticas por recorrido"
+      ],
+      "etiqueta": "Estadísticas por recorrido",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.filtro_drop_down_por_campana",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.filtro_drop_down_por_candidato",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.calendario.detalle_de_actividad",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Calendario",
+        "Detalle de Actividad"
+      ],
+      "etiqueta": "Detalle de Actividad",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.calendario.agregar_recorrido",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Calendario",
+        "Agregar Recorrido"
+      ],
+      "etiqueta": "Agregar Recorrido",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.actividades_recientes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Actividades Recientes"
+      ],
+      "etiqueta": "Actividades Recientes",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.recorridos.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Recorridos",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.estadisticas_generales.estadisticas_por_evento_enfocada_a_peticiones",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Estadísticas Generales",
+        "Estadísticas por evento (Enfocada a peticiones)"
+      ],
+      "etiqueta": "Estadísticas por evento (Enfocada a peticiones)",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.estadisticas_generales.listado_de_asistentes_por_evento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Estadísticas Generales",
+        "Listado de asistentes por evento"
+      ],
+      "etiqueta": "Listado de asistentes por evento",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.listado_de_eventos_generales.estadisticas_por_evento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Listado de Eventos Generales",
+        "Estadísticas por evento"
+      ],
+      "etiqueta": "Estadísticas por evento",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.listado_de_eventos_generales.listado_de_asistentes_por_evento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Listado de Eventos Generales",
+        "Listado de asistentes por evento"
+      ],
+      "etiqueta": "Listado de asistentes por evento",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.listado_de_eventos_generales.listado_de_no_asistentes_por_evento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Listado de Eventos Generales",
+        "Listado de No asistentes por evento"
+      ],
+      "etiqueta": "Listado de No asistentes por evento",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario.detalle_actividad",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario",
+        "Detalle actividad"
+      ],
+      "etiqueta": "Detalle actividad",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario.agregar_evento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario",
+        "Agregar Evento"
+      ],
+      "etiqueta": "Agregar Evento",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.filtro_drop_down_por_campana",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.filtro_drop_down_por_candidato",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.actividades_recientes_por_candidato",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Actividades Recientes Por Candidato"
+      ],
+      "etiqueta": "Actividades Recientes Por Candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.actividades_recientes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Actividades Recientes"
+      ],
+      "etiqueta": "Actividades Recientes",
+      "fase": 2,
+      "perfiles": [
+        "admin",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.crear_nuevo_evento.envio_automatico_a_asistente",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Crear Nuevo evento",
+        "Envió Automático a asistente"
+      ],
+      "etiqueta": "Envió Automático a asistente",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.crear_nuevo_evento.notas_adicionales_privadas_visibles_para_administrador",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Crear Nuevo evento",
+        "Notas adicionales privadas visibles para administrador"
+      ],
+      "etiqueta": "Notas adicionales privadas visibles para administrador",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.editar_eventos.envio_automatico_a_asistente",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Editar Eventos",
+        "Envió Automático a asistente"
+      ],
+      "etiqueta": "Envió Automático a asistente",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.editar_eventos.notas_adicionales_privadas_visibles_para_administrador",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Editar Eventos",
+        "Notas adicionales privadas visibles para administrador"
+      ],
+      "etiqueta": "Notas adicionales privadas visibles para administrador",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.eliminar_eventos.envio_automatico_a_asistente",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Eliminar eventos",
+        "Envió Automático a asistente"
+      ],
+      "etiqueta": "Envió Automático a asistente",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.eliminar_eventos.notas_adicionales_privadas_visibles_para_administrador",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Eliminar eventos",
+        "Notas adicionales privadas visibles para administrador"
+      ],
+      "etiqueta": "Notas adicionales privadas visibles para administrador",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.calendario_eventos_actuales.detalle_eventos",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Calendario eventos actuales",
+        "Detalle eventos"
+      ],
+      "etiqueta": "Detalle eventos",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.calendario_eventos_actuales.lista_de_invitados",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Calendario eventos actuales",
+        "Lista de invitados"
+      ],
+      "etiqueta": "Lista de invitados",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.calendario_de_eventos.calendario_eventos_actuales.lista_de_asistentes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Calendario de eventos",
+        "Calendario eventos actuales",
+        "Lista de asistentes"
+      ],
+      "etiqueta": "Lista de asistentes",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.eventos.listado_de_asistentes_generales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Eventos",
+        "Listado de asistentes generales"
+      ],
+      "etiqueta": "Listado de asistentes generales",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.principales_problematicas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Principales problemáticas"
+      ],
+      "etiqueta": "Principales problemáticas",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.filtro_drop_down_por_campana",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 4,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.filtro_drop_down_por_candidato",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 4,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle"
+      ],
+      "etiqueta": "Detalle",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.listado",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Listado"
+      ],
+      "etiqueta": "Listado",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticiones_en_proceso.mensaje_duda_gestor_social",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de peticiones en proceso",
+        "Mensaje duda Gestor social"
+      ],
+      "etiqueta": "Mensaje duda Gestor social",
+      "fase": 4,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.historial_de_seguimiento",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Historial de seguimiento"
+      ],
+      "etiqueta": "Historial de seguimiento",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.notas_adicionales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Notas Adicionales"
+      ],
+      "etiqueta": "Notas Adicionales",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.reporte_de_actividades",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Reporte de actividades"
+      ],
+      "etiqueta": "Reporte de actividades",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.recordatorio_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.registro_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.directorio_de_contactos",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Directorio de contactos"
+      ],
+      "etiqueta": "Directorio de contactos",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.guion_llamada",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Guión llamada"
+      ],
+      "etiqueta": "Guión llamada",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.en_proceso.detalle_de_peticion.envio_de_mensajes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "En proceso",
+        "Detalle de petición",
+        "Envío de mensajes"
+      ],
+      "etiqueta": "Envío de mensajes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle"
+      ],
+      "etiqueta": "Detalle",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.listado",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Listado"
+      ],
+      "etiqueta": "Listado",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticiones_en_proceso.mensaje_duda_gestor_social",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de peticiones en proceso",
+        "Mensaje duda Gestor social"
+      ],
+      "etiqueta": "Mensaje duda Gestor social",
+      "fase": 4,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.historial",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.notas_adicionales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Notas Adicionales"
+      ],
+      "etiqueta": "Notas Adicionales",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.reporte_de_actividades",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Reporte de actividades"
+      ],
+      "etiqueta": "Reporte de actividades",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.recordatorio_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.registro_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.completadas.detalle_de_peticion.envio_de_mensajes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Completadas",
+        "Detalle de petición",
+        "Envío de mensajes"
+      ],
+      "etiqueta": "Envío de mensajes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle"
+      ],
+      "etiqueta": "Detalle",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.listado",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Listado"
+      ],
+      "etiqueta": "Listado",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticiones_en_proceso.mensaje_duda_gestor_social",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de peticiones en proceso",
+        "Mensaje duda Gestor social"
+      ],
+      "etiqueta": "Mensaje duda Gestor social",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.historial",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.notas_adicionales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Notas Adicionales"
+      ],
+      "etiqueta": "Notas Adicionales",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.reporte_de_actividades",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Reporte de actividades"
+      ],
+      "etiqueta": "Reporte de actividades",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.recordatorio_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.registro_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.no_interpretadas.detalle_de_peticion.envio_de_mensajes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "No interpretadas",
+        "Detalle de petición",
+        "Envío de mensajes"
+      ],
+      "etiqueta": "Envío de mensajes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle"
+      ],
+      "etiqueta": "Detalle",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.listado",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Listado"
+      ],
+      "etiqueta": "Listado",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticiones_en_proceso.mensaje_duda_gestor_social",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de peticiones en proceso",
+        "Mensaje duda Gestor social"
+      ],
+      "etiqueta": "Mensaje duda Gestor social",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.historial",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.notas_adicionales",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Notas Adicionales"
+      ],
+      "etiqueta": "Notas Adicionales",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.reporte_de_actividades",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Reporte de actividades"
+      ],
+      "etiqueta": "Reporte de actividades",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.recordatorio_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.registro_de_llamadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.guion_de_llamada",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Guión de llamada"
+      ],
+      "etiqueta": "Guión de llamada",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.directorio_de_contactos",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Directorio de contactos"
+      ],
+      "etiqueta": "Directorio de contactos",
+      "fase": 2,
+      "perfiles": [
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.estatus_peticiones_listado.prioritarias.detalle_de_peticion.envio_de_mensajes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Estatus peticiones (Listado)",
+        "Prioritarias",
+        "Detalle de petición",
+        "Envío de mensajes"
+      ],
+      "etiqueta": "Envío de mensajes",
+      "fase": 2,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.estadisticas_generales.graficas_de_progreso_de_peticiones_completadas",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Estadísticas generales",
+        "Gráficas de progreso de peticiones completadas"
+      ],
+      "etiqueta": "Gráficas de progreso de peticiones completadas",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "asignador",
+        "operador_gestion",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.busqueda",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Búsqueda"
+      ],
+      "etiqueta": "Búsqueda",
+      "fase": 4,
+      "perfiles": [
+        "asignador",
+        "operador_gestion",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "estadisticas.peticiones.email_sms_recientes",
+      "modulo": "Estadísticas",
+      "ruta": [
+        "Estadísticas",
+        "Peticiones",
+        "Email / SMS Recientes"
+      ],
+      "etiqueta": "Email / SMS Recientes",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades"
+      ],
+      "etiqueta": "Calendario de Actividades",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "operador_campo",
+        "gestor_social",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.filtro_drop_down_por_campana",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 4,
+      "perfiles": []
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.filtro_drop_down_por_candidato",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 4,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.agregar.evento",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Agregar",
+        "Evento"
+      ],
+      "etiqueta": "Evento",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.agregar.recorrido",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Agregar",
+        "Recorrido"
+      ],
+      "etiqueta": "Recorrido",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.detalle.evento",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Detalle",
+        "Evento"
+      ],
+      "etiqueta": "Evento",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "actividades.calendario_de_actividades.detalle.recorrido",
+      "modulo": "Actividades",
+      "ruta": [
+        "Actividades",
+        "Calendario de Actividades",
+        "Detalle",
+        "Recorrido"
+      ],
+      "etiqueta": "Recorrido",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.busqueda_avanzada",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Búsqueda Avanzada"
+      ],
+      "etiqueta": "Búsqueda Avanzada",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "promotor_votos",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.agregar_ciudadanos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Agregar Ciudadanos"
+      ],
+      "etiqueta": "Agregar Ciudadanos",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.editar_ciudadanos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Editar Ciudadanos"
+      ],
+      "etiqueta": "Editar Ciudadanos",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.estadisticas_generales_ciudadanos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Estadísticas generales ciudadanos"
+      ],
+      "etiqueta": "Estadísticas generales ciudadanos",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.lista_de_ciudadanos_pendientes_por_asistir.envio_correo_a_gestor_social",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Lista de ciudadanos pendientes por asistir",
+        "Envió correo a gestor social"
+      ],
+      "etiqueta": "Envió correo a gestor social",
+      "fase": 5,
+      "perfiles": [
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.listado_general_ciudadanos.detalle_ciudadanos.datos_ciudadano",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Listado General Ciudadanos",
+        "Detalle Ciudadanos",
+        "Datos Ciudadano"
+      ],
+      "etiqueta": "Datos Ciudadano",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing",
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.listado_general_ciudadanos.detalle_ciudadanos.asistencia",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Listado General Ciudadanos",
+        "Detalle Ciudadanos",
+        "Asistencia"
+      ],
+      "etiqueta": "Asistencia",
+      "fase": 5,
+      "perfiles": [
+        "representante_casilla"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.listado_general_ciudadanos.detalle_ciudadanos.historial",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Listado General Ciudadanos",
+        "Detalle Ciudadanos",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.listado_general_ciudadanos.detalle_ciudadanos.estatus_seguimiento",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Listado General Ciudadanos",
+        "Detalle Ciudadanos",
+        "Estatus seguimiento"
+      ],
+      "etiqueta": "Estatus seguimiento",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "registros.ciudadanos.listado_general_ciudadanos.detalle_ciudadanos.edicion_de_ciudadano_a_movilizador",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Ciudadanos",
+        "Listado General Ciudadanos",
+        "Detalle Ciudadanos",
+        "Edición de ciudadano a movilizador"
+      ],
+      "etiqueta": "Edición de ciudadano a movilizador",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.agregar_movilizadores",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Agregar Movilizadores"
+      ],
+      "etiqueta": "Agregar Movilizadores",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.editar_movilizadores",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Editar Movilizadores"
+      ],
+      "etiqueta": "Editar Movilizadores",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.datos_movilizador",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Datos Movilizador"
+      ],
+      "etiqueta": "Datos Movilizador",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.historial",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.listado_de_ciudadanos_pendiente_de_movilizar",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Listado de ciudadanos pendiente de movilizar"
+      ],
+      "etiqueta": "Listado de ciudadanos pendiente de movilizar",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.filtro_mapa_distrito",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Filtro mapa distrito"
+      ],
+      "etiqueta": "Filtro mapa distrito",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.estatus_seguimiento",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Estatus Seguimiento"
+      ],
+      "etiqueta": "Estatus Seguimiento",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social",
+        "rp_movilizadores",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.edicion_movilizador_a_ciudadano",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Edición movilizador a ciudadano"
+      ],
+      "etiqueta": "Edición movilizador a ciudadano",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.registro_de_llamadas",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.recordatorio_de_llamadas",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.movilizadores.listado_de_movilizadores.notas_adicionales",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Movilizadores",
+        "Listado de movilizadores",
+        "Notas adicionales"
+      ],
+      "etiqueta": "Notas adicionales",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.agregar_prospectos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Agregar Prospectos"
+      ],
+      "etiqueta": "Agregar Prospectos",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores",
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.total_de_prospectos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Total de prospectos"
+      ],
+      "etiqueta": "Total de prospectos",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.datos_ciudadanos",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Datos Ciudadanos"
+      ],
+      "etiqueta": "Datos Ciudadanos",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.historial",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 3,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.notas_adicionales",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Notas adicionales"
+      ],
+      "etiqueta": "Notas adicionales",
+      "fase": 3,
+      "perfiles": [
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.estatus_seguimiento",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Estatus Seguimiento"
+      ],
+      "etiqueta": "Estatus Seguimiento",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.edicion_de_prospecto_a_movilizador",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Edición de prospecto a movilizador"
+      ],
+      "etiqueta": "Edición de prospecto a movilizador",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores",
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.registro_de_llamadas",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Registro de llamadas"
+      ],
+      "etiqueta": "Registro de llamadas",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.prospecto_movilizadores.listado_prospectos_movilizadores.recordatorio_de_llamadas",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospecto movilizadores",
+        "Listado prospectos movilizadores",
+        "Recordatorio de llamadas"
+      ],
+      "etiqueta": "Recordatorio de llamadas",
+      "fase": 3,
+      "perfiles": [
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "registros.filtro_drop_down_por_campana",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "registros.filtro_drop_down_por_candidato",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 3,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "registros.simpatizante.alta",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Simpatizante",
+        "Alta"
+      ],
+      "etiqueta": "Alta",
+      "fase": 3,
+      "perfiles": [
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.simpatizante.edicion",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Simpatizante",
+        "Edición"
+      ],
+      "etiqueta": "Edición",
+      "fase": 3,
+      "perfiles": [
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.prospeccion.alta",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospección",
+        "Alta"
+      ],
+      "etiqueta": "Alta",
+      "fase": 3,
+      "perfiles": [
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.prospeccion.edicion",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Prospección",
+        "Edición"
+      ],
+      "etiqueta": "Edición",
+      "fase": 3,
+      "perfiles": [
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.registro_historial_visita.agregar_notas",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Registro Historial Visita",
+        "Agregar Notas"
+      ],
+      "etiqueta": "Agregar Notas",
+      "fase": 3,
+      "perfiles": [
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "registros.usuarios.listado_de_usuarios",
+      "modulo": "Registros",
+      "ruta": [
+        "Registros",
+        "Usuarios",
+        "Listado de usuarios"
+      ],
+      "etiqueta": "Listado de usuarios",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "marketing.estadisticas_generales",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Estadísticas Generales"
+      ],
+      "etiqueta": "Estadísticas Generales",
+      "fase": 4,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.crear_correo.bloque_personalizado",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Crear Correo",
+        "Bloque personalizado"
+      ],
+      "etiqueta": "Bloque personalizado",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.lista_de_correos.recibidos",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Lista de Correos",
+        "Recibidos"
+      ],
+      "etiqueta": "Recibidos",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.lista_de_correos.enviados",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Lista de Correos",
+        "Enviados"
+      ],
+      "etiqueta": "Enviados",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.lista_de_correos.importantes",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Lista de Correos",
+        "Importantes"
+      ],
+      "etiqueta": "Importantes",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.lista_de_correos.borradores",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Lista de Correos",
+        "Borradores"
+      ],
+      "etiqueta": "Borradores",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.correo.lista_de_correos.basura",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Correo",
+        "Lista de Correos",
+        "Basura"
+      ],
+      "etiqueta": "Basura",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.sms",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "SMS"
+      ],
+      "etiqueta": "SMS",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas"
+      ],
+      "etiqueta": "Campañas",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.generar_lista_de_campanas_por_segmento.automatizadas_de_mujeres",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Generar Lista de campañas por segmento",
+        "Automatizadas de mujeres"
+      ],
+      "etiqueta": "Automatizadas de mujeres",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.generar_lista_de_campanas_por_segmento.automatizadas_de_movilizadores",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Generar Lista de campañas por segmento",
+        "Automatizadas de movilizadores"
+      ],
+      "etiqueta": "Automatizadas de movilizadores",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.generar_lista_de_campanas_por_segmento.automatizadas_de_prospectos_de_movilizadores",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Generar Lista de campañas por segmento",
+        "Automatizadas de prospectos de movilizadores"
+      ],
+      "etiqueta": "Automatizadas de prospectos de movilizadores",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.generar_lista_de_campanas_por_segmento.automatizadas_de_hombres",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Generar Lista de campañas por segmento",
+        "Automatizadas de hombres"
+      ],
+      "etiqueta": "Automatizadas de hombres",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.generar_lista_de_campanas_por_segmento.automatizadas_de_ciudadanos",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Generar Lista de campañas por segmento",
+        "Automatizadas de ciudadanos"
+      ],
+      "etiqueta": "Automatizadas de ciudadanos",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.campanas.personalizar_listas_y_seguimiento_de_envios",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Campañas",
+        "Personalizar listas y seguimiento de envíos"
+      ],
+      "etiqueta": "Personalizar listas y seguimiento de envíos",
+      "fase": 4,
+      "perfiles": [
+        "marketing"
+      ]
+    },
+    {
+      "clave": "marketing.filtro_drop_down_por_campana",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 4,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "marketing.filtro_drop_down_por_candidato",
+      "modulo": "Marketing",
+      "ruta": [
+        "Marketing",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 4,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "configuracion.creacion_de_usuarios",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Creación de usuarios"
+      ],
+      "etiqueta": "Creación de usuarios",
+      "fase": 1,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.edicion_de_usuarios",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Edición de usuarios"
+      ],
+      "etiqueta": "Edición de usuarios",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "configuracion.eliminacion_de_usuarios",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Eliminación de usuarios"
+      ],
+      "etiqueta": "Eliminación de usuarios",
+      "fase": 2,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_de_problematicas",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta de problemáticas"
+      ],
+      "etiqueta": "Alta de problemáticas",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_de_programas_beneficiarios",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta de programas beneficiarios"
+      ],
+      "etiqueta": "Alta de programas beneficiarios",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_de_campana.ingresar_detalle_de_campanas",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta de campaña",
+        "Ingresar Detalle de Campañas"
+      ],
+      "etiqueta": "Ingresar Detalle de Campañas",
+      "fase": 5,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_de_campana.agregar_administradores_de_campana",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta de campaña",
+        "Agregar administradores de campaña"
+      ],
+      "etiqueta": "Agregar administradores de campaña",
+      "fase": 5,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_fuente_de_campana",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta Fuente de campaña"
+      ],
+      "etiqueta": "Alta Fuente de campaña",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_numero_de_contacto",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta numero de contacto"
+      ],
+      "etiqueta": "Alta numero de contacto",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.edicion_numero_de_contacto",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Edición Numero de contacto"
+      ],
+      "etiqueta": "Edición Numero de contacto",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_guiones_de_llamada",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta guiones de llamada"
+      ],
+      "etiqueta": "Alta guiones de llamada",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.edicion_guiones_de_llamada",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "edición guiones de llamada"
+      ],
+      "etiqueta": "edición guiones de llamada",
+      "fase": 3,
+      "perfiles": [
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "configuracion.promotes_de_votos.alta_de_promotor",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Promotes de Votos",
+        "Alta de promotor"
+      ],
+      "etiqueta": "Alta de promotor",
+      "fase": 3,
+      "perfiles": [
+        "lider_promotores"
+      ]
+    },
+    {
+      "clave": "configuracion.promotes_de_votos.detalle_del_promotor",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Promotes de Votos",
+        "Detalle del promotor"
+      ],
+      "etiqueta": "Detalle del promotor",
+      "fase": 3,
+      "perfiles": [
+        "lider_promotores"
+      ]
+    },
+    {
+      "clave": "configuracion.alta_de_candidatos",
+      "modulo": "Configuración",
+      "ruta": [
+        "Configuración",
+        "Alta de candidatos"
+      ],
+      "etiqueta": "Alta de candidatos",
+      "fase": 5,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "dia_d.mapa_de_distrito",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Mapa de Distrito"
+      ],
+      "etiqueta": "Mapa de Distrito",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "dia_d.vista_principal",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Vista Principal"
+      ],
+      "etiqueta": "Vista Principal",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "dia_d.total_ciudadanos_asistentes",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Total ciudadanos asistentes"
+      ],
+      "etiqueta": "Total ciudadanos asistentes",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "dia_d.filtro_drop_down_por_campana",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Filtro Drop Down por campaña"
+      ],
+      "etiqueta": "Filtro Drop Down por campaña",
+      "fase": 5,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "dia_d.filtro_drop_down_por_candidato",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Filtro Drop Down por candidato"
+      ],
+      "etiqueta": "Filtro Drop Down por candidato",
+      "fase": 5,
+      "perfiles": [
+        "super_admin"
+      ]
+    },
+    {
+      "clave": "dia_d.detalle_de_asistencia_de_movilizadores_con_ciudadanos_asignados",
+      "modulo": "Día D",
+      "ruta": [
+        "Día D",
+        "Detalle de asistencia de movilizadores con  ciudadanos asignados"
+      ],
+      "etiqueta": "Detalle de asistencia de movilizadores con  ciudadanos asignados",
+      "fase": 5,
+      "perfiles": [
+        "super_admin",
+        "admin",
+        "rp_movilizadores"
+      ]
+    },
+    {
+      "clave": "entrevistas.seleccion_de_evento",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Selección de evento"
+      ],
+      "etiqueta": "Selección de evento",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.funcionalidad_de_grabar",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Funcionalidad de grabar"
+      ],
+      "etiqueta": "Funcionalidad de grabar",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.funcionalidad_de_tomar_fotografias",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Funcionalidad de tomar fotografías"
+      ],
+      "etiqueta": "Funcionalidad de tomar fotografías",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.envio",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Envio"
+      ],
+      "etiqueta": "Envio",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.notas_adicionales",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Notas Adicionales"
+      ],
+      "etiqueta": "Notas Adicionales",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.movilizador",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Movilizador"
+      ],
+      "etiqueta": "Movilizador",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.agregar_notas",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Agregar notas"
+      ],
+      "etiqueta": "Agregar notas",
+      "fase": 1,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.actividades.calendario_de_eventos",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Actividades",
+        "Calendario de Eventos"
+      ],
+      "etiqueta": "Calendario de Eventos",
+      "fase": 2,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "entrevistas.actividades.ver_detalle_de_eventos",
+      "modulo": "Entrevistas",
+      "ruta": [
+        "Entrevistas",
+        "Actividades",
+        "Ver detalle de eventos"
+      ],
+      "etiqueta": "Ver detalle de eventos",
+      "fase": 2,
+      "perfiles": [
+        "operador_campo"
+      ]
+    },
+    {
+      "clave": "mensajes.ver_mensajes",
+      "modulo": "Mensajes",
+      "ruta": [
+        "Mensajes",
+        "Ver Mensajes"
+      ],
+      "etiqueta": "Ver Mensajes",
+      "fase": 2,
+      "perfiles": [
+        "operador_campo",
+        "asignador",
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "mensajes.responder_mensajes",
+      "modulo": "Mensajes",
+      "ruta": [
+        "Mensajes",
+        "Responder Mensajes"
+      ],
+      "etiqueta": "Responder Mensajes",
+      "fase": 2,
+      "perfiles": [
+        "operador_campo",
+        "asignador",
+        "operador_gestion",
+        "gestor_social"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.casilla_para_generar_campo",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Casilla para generar campo"
+      ],
+      "etiqueta": "Casilla para generar campo",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.indicador_de_prioridad.movilizador",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Indicador de prioridad",
+        "Movilizador"
+      ],
+      "etiqueta": "Movilizador",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.indicador_de_prioridad.prioridad_alta",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Indicador de prioridad",
+        "Prioridad Alta"
+      ],
+      "etiqueta": "Prioridad Alta",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.indicador_de_prioridad.prioridad_regular",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Indicador de prioridad",
+        "Prioridad Regular"
+      ],
+      "etiqueta": "Prioridad Regular",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.indicador_de_prioridad.prioridad_baja",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Indicador de prioridad",
+        "Prioridad Baja"
+      ],
+      "etiqueta": "Prioridad Baja",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.casilla_para_escribir_peticion",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Casilla para escribir petición"
+      ],
+      "etiqueta": "Casilla para escribir petición",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "creacion_de_peticion.boton_para_asignar",
+      "modulo": "Creación de Petición",
+      "ruta": [
+        "Creación de Petición",
+        "Boton para Asignar"
+      ],
+      "etiqueta": "Boton para Asignar",
+      "fase": 2,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "interpretacion.listado_de_entrevistas",
+      "modulo": "Interpretación",
+      "ruta": [
+        "Interpretación",
+        "Listado de entrevistas"
+      ],
+      "etiqueta": "Listado de entrevistas",
+      "fase": 1,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "interpretacion.busqueda_de_ciudadano",
+      "modulo": "Interpretación",
+      "ruta": [
+        "Interpretación",
+        "Busqueda de Ciudadano"
+      ],
+      "etiqueta": "Busqueda de Ciudadano",
+      "fase": 1,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "interpretacion.informaion_de_la_entrevista",
+      "modulo": "Interpretación",
+      "ruta": [
+        "Interpretación",
+        "Informaión de la entrevista"
+      ],
+      "etiqueta": "Informaión de la entrevista",
+      "fase": 1,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "interpretacion.seccion_de_llenado_de_entrevista",
+      "modulo": "Interpretación",
+      "ruta": [
+        "Interpretación",
+        "Sección de llenado de entrevista"
+      ],
+      "etiqueta": "Sección de llenado de entrevista",
+      "fase": 1,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "interpretacion.historial",
+      "modulo": "Interpretación",
+      "ruta": [
+        "Interpretación",
+        "Historial"
+      ],
+      "etiqueta": "Historial",
+      "fase": 1,
+      "perfiles": [
+        "asignador"
+      ]
+    },
+    {
+      "clave": "historial.listado_de_entrevistas_completadas",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Listado de entrevistas completadas"
+      ],
+      "etiqueta": "Listado de entrevistas completadas",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "historial.detalle_de_peticion",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Detalle de petición"
+      ],
+      "etiqueta": "Detalle de petición",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "historial.historial_de_la_peticion",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Historial de la petición"
+      ],
+      "etiqueta": "Historial de la petición",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "historial.informacion_basica_de_ciudadanos",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Información Básica de Ciudadanos"
+      ],
+      "etiqueta": "Información Básica de Ciudadanos",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "historial.edicion_de_peticiones_cerradas",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Edición de peticiones cerradas"
+      ],
+      "etiqueta": "Edición de peticiones cerradas",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "historial.audio_y_foto_de_la_entrevista",
+      "modulo": "Historial",
+      "ruta": [
+        "Historial",
+        "Audio y Foto de la entrevista"
+      ],
+      "etiqueta": "Audio y Foto de la entrevista",
+      "fase": 2,
+      "perfiles": [
+        "asignador",
+        "operador_gestion"
+      ]
+    },
+    {
+      "clave": "encuesta.llenado_de_preguntas",
+      "modulo": "Encuesta",
+      "ruta": [
+        "Encuesta",
+        "Llenado de Preguntas"
+      ],
+      "etiqueta": "Llenado de Preguntas",
+      "fase": 3,
+      "perfiles": [
+        "asignador",
+        "operador_gestion",
+        "promotor_votos"
+      ]
+    },
+    {
+      "clave": "encuesta.funcionalidad_de_prospeccion",
+      "modulo": "Encuesta",
+      "ruta": [
+        "Encuesta",
+        "Funcionalidad de Prospección"
+      ],
+      "etiqueta": "Funcionalidad de Prospección",
+      "fase": 3,
+      "perfiles": [
+        "asignador",
+        "operador_gestion",
+        "promotor_votos"
+      ]
+    }
+  ]
+}

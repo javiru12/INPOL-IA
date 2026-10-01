@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# base de datos local embebida (se recrea con npm run db:up)
+db/.data/
+
+# archivos adjuntos subidos en local
+db/.archivos/
+
+# capturas de pantalla de revisión
+herramientas/capturas/
