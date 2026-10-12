@@ -9,16 +9,29 @@ import bcrypt from 'bcryptjs'
 const sql = postgres(process.env.DATABASE_URL_ADMIN!, { max: 1 })
 const hash = await bcrypt.hash('inpol2026', 10)
 
+/**
+ * `estado` es la clave del INE del estado donde opera cada cliente. Va
+ * aquí y no solo en la migración que lo añadió: las migraciones corren
+ * antes que este script, así que cuando aquella hizo su `update` la tabla
+ * de clientes todavía estaba vacía y el estado se quedaba sin asignar.
+ * En una instalación nueva eso deja Territorio, Distritos y los mapas en
+ * blanco, sin más pista que una pantalla vacía.
+ */
 const clientes = [
-  { clave: 'monterrey', nombre: 'Zona Metropolitana de Monterrey', corto: 'Monterrey', acento: '#714a85' },
-  { clave: 'chihuahua', nombre: 'Gobierno de Chihuahua', corto: 'Chihuahua', acento: '#2a6690' },
+  { clave: 'monterrey', nombre: 'Zona Metropolitana de Monterrey', corto: 'Monterrey', acento: '#714a85', estado: '19' },
+  { clave: 'chihuahua', nombre: 'Gobierno de Chihuahua', corto: 'Chihuahua', acento: '#2a6690', estado: '08' },
 ]
 
 for (const c of clientes) {
   const [tenant] = await sql`
-    insert into tenants (clave, nombre, nombre_corto, color_acento, licencia_inicia, licencia_vence)
-    values (${c.clave}, ${c.nombre}, ${c.corto}, ${c.acento}, current_date, current_date + interval '1 year')
-    on conflict (clave) do update set nombre = excluded.nombre, nombre_corto = excluded.nombre_corto
+    insert into tenants (clave, nombre, nombre_corto, color_acento,
+                         licencia_inicia, licencia_vence, estado_id)
+    values (${c.clave}, ${c.nombre}, ${c.corto}, ${c.acento},
+            current_date, current_date + interval '1 year',
+            (select id from estados where clave = ${c.estado}))
+    on conflict (clave) do update set nombre = excluded.nombre,
+                                      nombre_corto = excluded.nombre_corto,
+                                      estado_id = coalesce(excluded.estado_id, tenants.estado_id)
     returning id, clave`
 
   await sql`select set_config('app.tenant_id', ${tenant.id}, false)`
