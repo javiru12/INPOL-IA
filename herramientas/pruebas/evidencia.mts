@@ -4,10 +4,23 @@
  */
 import puppeteer from 'puppeteer-core'
 import postgres from 'postgres'
+import { writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const BASE = 'http://localhost:3200'
-const FOTO = process.env.FOTO_PRUEBA!
+
+// La foto se genera aquí para que la prueba corra en cualquier máquina: un
+// archivo suelto no viaja en el repositorio. FOTO_PRUEBA apunta a otra.
+function fotoDePrueba() {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGM4YaOBFTEMLQkAdntLARs7+acAAAAASUVORK5CYII='
+  const ruta = join(tmpdir(), `inpol-evidencia-${process.pid}.png`)
+  writeFileSync(ruta, Buffer.from(png, 'base64'))
+  return ruta
+}
+
+const FOTO = process.env.FOTO_PRUEBA ?? fotoDePrueba()
 
 let fallos = 0
 function revisar(que: string, ok: boolean, detalle = '') {

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3200",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3200",
     "lint": "eslint",
     "db:up": "node db/local.mjs up",
     "db:down": "node db/local.mjs down",
@@ -22,7 +22,8 @@
     "probar:permisos": "tsx --env-file=.env.local herramientas/pruebas/permisos.mts",
     "probar:comunicacion": "tsx --env-file=.env.local herramientas/pruebas/comunicacion.mts",
     "probar:portal": "tsx --env-file=.env.local herramientas/pruebas/portal.mts",
-    "probar:evidencia": "tsx --env-file=.env.local herramientas/pruebas/evidencia.mts"
+    "probar:evidencia": "tsx --env-file=.env.local herramientas/pruebas/evidencia.mts",
+    "probar:mensajes": "tsx --env-file=.env.local herramientas/pruebas/mensajes.mts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

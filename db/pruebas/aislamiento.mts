@@ -28,7 +28,18 @@ for (const t of [monterrey, chihuahua]) {
     await tx`select set_config('app.tenant_id', ${t.id}, true)`
     return tx<{ correo: string }[]>`select correo from usuarios`
   })
-  const ajenos = filas.filter((f) => !f.correo.includes(t.clave))
+  // La pertenencia se comprueba contra `tenant_id`, que es lo que de
+  // verdad aísla. Antes se miraba si el correo contenía el nombre del
+  // cliente, y eso solo es cierto en los datos de demostración: en cuanto
+  // alguien da de alta a una persona con su correo de siempre, la prueba
+  // gritaba fuga donde no la había.
+  const propios = new Set(
+    (
+      await admin<{ correo: string }[]>`
+        select correo from usuarios where tenant_id = ${t.id}`
+    ).map((f) => f.correo),
+  )
+  const ajenos = filas.filter((f) => !propios.has(f.correo))
   revisar(
     `${t.clave.padEnd(10)} ve ${filas.length} usuarios, ninguno ajeno`,
     filas.length > 0 && ajenos.length === 0,
