@@ -1,5 +1,6 @@
 import 'server-only'
 import { conTenant } from '@/lib/db'
+import { ESTADOS, type EstadoProspeccion } from './estados'
 
 /**
  * Movilización: la pirámide que lleva gente a votar.
@@ -28,19 +29,8 @@ export const UMBRAL_REZAGO = 0.5
 /** A partir de aquí la meta se da por cumplida. */
 export const UMBRAL_CUMPLIDA = 1
 
-export const ESTADOS = ['prospecto', 'contactado', 'comprometido', 'confirmado'] as const
-export type EstadoProspeccion = (typeof ESTADOS)[number]
-
-export function esEstado(v: string | undefined): v is EstadoProspeccion {
-  return !!v && (ESTADOS as readonly string[]).includes(v)
-}
-
-export const ETIQUETA_ESTADO: Record<EstadoProspeccion, string> = {
-  prospecto: 'Prospecto',
-  contactado: 'Contactado',
-  comprometido: 'Comprometido',
-  confirmado: 'Confirmado',
-}
+export { ESTADOS, esEstado, ETIQUETA_ESTADO } from './estados'
+export type { EstadoProspeccion } from './estados'
 
 export const ETIQUETA_PROSPECTO: Record<string, string> = {
   nuevo: 'Nuevo',

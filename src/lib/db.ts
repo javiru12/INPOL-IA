@@ -1,9 +1,28 @@
+import 'server-only'
 import postgres from 'postgres'
 
 declare global {
   // eslint-disable-next-line no-var
   var __sql: ReturnType<typeof postgres> | undefined
 }
+
+const URL_BASE = process.env.DATABASE_URL!
+
+/**
+ * En local la base vive en la misma máquina; en la nube, detrás de un
+ * agrupador de conexiones. Las dos situaciones piden ajustes distintos:
+ *
+ * - **TLS** es obligatorio contra cualquier base remota, y estorba contra
+ *   el PostgreSQL embebido, que solo escucha en localhost.
+ * - **El agrupador en modo transacción** (puerto 6543 en Supabase) reparte
+ *   una misma conexión entre peticiones, así que las sentencias preparadas
+ *   se pierden de una a otra y fallan. Hay que apagarlas.
+ * - **Pocas conexiones por instancia**: en serverless cada petición puede
+ *   levantar su propia copia del proceso, y diez conexiones cada una agotan
+ *   el cupo de la base en cuanto entran varias personas a la vez.
+ */
+const esLocal = /@(localhost|127\.0\.0\.1|\[::1\])/.test(URL_BASE)
+const porAgrupador = /:6543\//.test(URL_BASE)
 
 /**
  * Conexión de la aplicación. Usa el rol `inpol_app`, que NO es dueño
@@ -12,10 +31,12 @@ declare global {
  */
 export const sql =
   global.__sql ??
-  postgres(process.env.DATABASE_URL!, {
-    max: 10,
+  postgres(URL_BASE, {
+    max: esLocal ? 10 : 3,
     idle_timeout: 20,
     transform: { undefined: null },
+    ...(esLocal ? {} : { ssl: 'require' as const }),
+    ...(porAgrupador ? { prepare: false } : {}),
   })
 
 if (process.env.NODE_ENV !== 'production') global.__sql = sql

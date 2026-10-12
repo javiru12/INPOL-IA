@@ -47,3 +47,6 @@ db/.archivos/
 
 # capturas de pantalla de revisión
 herramientas/capturas/
+
+# Scripts de sondeo y temporales de trabajo
+.scratch/

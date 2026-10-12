@@ -1,3 +1,4 @@
+import 'server-only'
 import { conTenant, sinTenant } from '@/lib/db'
 import {
   CATALOGOS,

@@ -10,7 +10,7 @@ import {
   type Candidato,
   type EstadoAccion,
 } from './acciones'
-import { ESTADOS, ETIQUETA_ESTADO, type EstadoProspeccion } from './consultas'
+import { ESTADOS, ETIQUETA_ESTADO, type EstadoProspeccion } from './estados'
 import { IconoBuscar } from '@/components/iconos'
 
 /**

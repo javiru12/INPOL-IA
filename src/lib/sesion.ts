@@ -71,6 +71,9 @@ export type Tenant = {
   nombre_corto: string | null
   color_acento: string | null
   licencia_vence: string | null
+  /** En qué estado opera. Sin esto no se le puede enseñar geografía. */
+  estado_id: string | null
+  estado_nombre: string | null
 }
 
 /**
@@ -85,20 +88,42 @@ export const tenantDeLaPeticion = cache(async (): Promise<Tenant | null> => {
   const sinPuerto = host.split(':')[0]
   const partes = sinPuerto.split('.')
 
+  // Una dirección IP no tiene subdominio: partirla por puntos daría '192'
+  // como clave de cliente y dejaría el selector de plaza en un bucle. Se
+  // entra por IP al probar desde otro aparato de la misma red.
+  const esIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(sinPuerto)
+
   let clave: string | undefined
-  if (partes.length > 1 && !['www', 'admin'].includes(partes[0])) {
+  if (!esIP && partes.length > 1 && !['www', 'admin'].includes(partes[0])) {
     clave = partes[0]
   }
-  if (!clave) clave = (await cookies()).get(COOKIE_TENANT)?.value
+
+  const porCookie = (await cookies()).get(COOKIE_TENANT)?.value
+  if (!clave) clave = porCookie
 
   if (!clave) return null
 
-  const [tenant] = await sinTenant<Tenant[]>`
-    select id, clave, nombre, nombre_corto, color_acento, licencia_vence::text
-    from tenants
-    where clave = ${clave} and activo = true`
+  const buscar = (c: string) => sinTenant<Tenant[]>`
+    select t.id, t.clave, t.nombre, t.nombre_corto, t.color_acento,
+           t.licencia_vence::text,
+           t.estado_id, e.nombre as estado_nombre
+    from tenants t
+    left join estados e on e.id = t.estado_id
+    where t.clave = ${c} and t.activo = true`
 
-  return tenant ?? null
+  const [tenant] = await buscar(clave)
+  if (tenant) return tenant
+
+  // El primer tramo del host no siempre es un cliente: puede ser el
+  // dominio de un túnel de pruebas, un `app.` o cualquier otro prefijo.
+  // Si no corresponde a ninguno, se cae a la cookie del selector de plaza
+  // en vez de devolver null, que dejaba la pantalla rebotando a /plaza.
+  if (porCookie && porCookie !== clave) {
+    const [porSelector] = await buscar(porCookie)
+    return porSelector ?? null
+  }
+
+  return null
 })
 
 export async function recordarTenant(clave: string) {
