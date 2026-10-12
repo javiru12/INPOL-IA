@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { leerSesion, tenantDeLaPeticion } from '@/lib/sesion'
-import { resumenDelPanel } from './consultas'
+import { resumenDelPanel, focoElectoral } from './consultas'
 import { agruparCola, ESTADO } from '@/lib/paleta'
 import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { BarrasHorizontales, BarrasTemporales } from '@/components/graficas'
@@ -22,7 +22,10 @@ export default async function Panel() {
   const sesion = await leerSesion()
   if (!tenant || !sesion) redirect('/entrar')
 
-  const r = await resumenDelPanel(tenant.id)
+  const [r, foco] = await Promise.all([
+    resumenDelPanel(tenant.id),
+    focoElectoral(tenant.id, tenant.estado_id),
+  ])
   const problematicas = agruparCola(r.porProblematica)
   const hayDatos = r.totales.total > 0
 
@@ -139,6 +142,66 @@ export default async function Panel() {
               </div>
               <MapaDelPanel municipios={r.porMunicipio} />
             </section>
+
+            {foco && foco.sin_resolver_total > 0 && (
+              <section className="panel px-4 py-3.5">
+                <div className="mb-3 flex items-baseline justify-between">
+                  <h2 className="text-[var(--text-base)] font-semibold">Dónde se decide</h2>
+                  <Link
+                    href="/prioridad"
+                    className="boton boton-llano !h-7 text-[var(--text-menuda)]"
+                  >
+                    Dónde actuar
+                  </Link>
+                </div>
+
+                <p className="flex items-baseline gap-2">
+                  <span
+                    className="cifra text-[length:var(--text-cifra)] font-semibold leading-none tracking-tight"
+                    style={{
+                      color:
+                        foco.sin_resolver_disputado > 0
+                          ? 'var(--color-aviso)'
+                          : 'var(--color-tinta)',
+                    }}
+                  >
+                    {foco.sin_resolver_disputado.toLocaleString('es-MX')}
+                  </span>
+                  <span className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+                    de {foco.sin_resolver_total.toLocaleString('es-MX')} peticiones sin resolver
+                    están en territorio disputado
+                  </span>
+                </p>
+                <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                  Secciones donde la elección de 2015 se ganó por menos de 10 puntos
+                  {foco.secciones_disputadas > 0 &&
+                    ` · ${foco.secciones_disputadas} secciones`}
+                </p>
+
+                {foco.distritos.length > 0 && (
+                  <ul className="mt-3 border-t border-[var(--color-borde)]">
+                    {foco.distritos.map((d) => (
+                      <li
+                        key={d.clave}
+                        className="flex items-center gap-3 border-b border-[var(--color-borde)] py-2 last:border-0"
+                      >
+                        <Link
+                          href={`/distritos/${d.clave}`}
+                          className="min-w-0 flex-1 truncate hover:text-[var(--color-acento-fuerte)]"
+                        >
+                          <span className="clave">{d.clave}</span>
+                          {d.cabecera && <span className="ml-1.5">{d.cabecera}</span>}
+                        </Link>
+                        <span className="clave shrink-0">{d.margen} pts de margen</span>
+                        <span className="num w-8 shrink-0 text-right font-medium">
+                          {d.sin_resolver}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
           </div>
 
           <section className="panel overflow-hidden">

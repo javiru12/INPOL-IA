@@ -39,6 +39,8 @@ export const NAVEGACION: Grupo[] = [
       { etiqueta: 'Estadísticas', ruta: '/estadisticas', icono: 'estadisticas', permisos: ['estadisticas'] },
       { etiqueta: 'Mapa', ruta: '/mapa', icono: 'mapa', permisos: ['estadisticas.problematicas'] },
       { etiqueta: 'Territorio', ruta: '/territorio', icono: 'estructura', permisos: ['estadisticas.problematicas'] },
+      { etiqueta: 'Distritos', ruta: '/distritos', icono: 'mapa', permisos: ['estadisticas.problematicas'] },
+      { etiqueta: 'Dónde actuar', ruta: '/prioridad', icono: 'estadisticas', permisos: ['estadisticas.problematicas'] },
     ],
   },
   {
