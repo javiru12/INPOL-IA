@@ -5,6 +5,15 @@ import { Marca } from '@/components/marca'
 
 export const metadata: Metadata = { title: 'Elegir plaza' }
 
+/**
+ * La lista de clientes sale de la base, así que esta pantalla no se puede
+ * congelar en el build: daría de alta una plaza y seguiría sin aparecer.
+ * Además, prerenderizarla obliga a tener la base levantada para compilar,
+ * lo que rompe cualquier despliegue donde el build corre antes que la
+ * conexión a datos.
+ */
+export const dynamic = 'force-dynamic'
+
 export default async function Plaza() {
   const clientes = await tenantsDisponibles()
 

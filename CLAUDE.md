@@ -62,6 +62,29 @@ migración.**
    página es el de cerrar sesión del encabezado.** Apunta al botón del
    formulario correcto.
 8. **Next 16 renombró `middleware` a `proxy`** (`src/proxy.ts`).
+9. **Un componente `'use client'` no puede importar nada que alcance
+   `@/lib/db`**, ni siquiera una constante: arrastra el driver de Postgres al
+   navegador y la compilación muere con `Can't resolve 'tls'`, dejando TODAS
+   las rutas en 500. `db.ts` lleva `server-only` para que el error sea claro.
+   Las constantes compartidas van en su propio archivo sin dependencias
+   (`movilizacion/estados.ts` es el patrón).
+10. **El INE reporta una fila por emblema marcado**, así que el voto de una
+    coalición viaja en claves propias (`PRI_PVEM`). Hay que sumarlas al
+    partido que encabeza: `fuerzaSql` de `src/lib/electoral.ts`.
+11. **Los porcentajes electorales van sobre votos válidos**, no sobre el
+    total: el total incluye los nulos (2.15% en 2015).
+12. **El driver infiere el tipo del parámetro.** Una cadena `'2026-11-15
+    09:30'` pasada a `::timestamp` se manda como `timestamptz`, Postgres ya
+    la interpreta en la zona de sesión, y el `at time zone` convierte por
+    segunda vez: las 9:30 se guardan como las 21:30. Hay que forzarla a
+    texto primero: `${valor}::text::timestamp at time zone 'America/Monterrey'`.
+13. **Un `<fieldset disabled>` no envía sus campos.** Si un valor se
+    muestra deshabilitado pero hace falta al guardar, va además en un
+    `<input type="hidden">`.
+14. **Valida fecha y hora antes de que lleguen a la base.** Un `::date` con
+    basura revienta la conexión con un 500 sin mensaje y deja la pantalla
+    muerta. Un `input[type=date]` manda basura en cuanto alguien teclea
+    dentro (y Puppeteer siempre teclea: en las pruebas, asigna `.value`).
 
 ## Convenciones
 
@@ -94,6 +117,8 @@ npm run db:migrate    # esquema + geografía + resultados electorales
 npm run db:seed       # dos clientes con 12 usuarios cada uno
 npm run db:demo       # 1,400 peticiones por cliente en 18 meses
 npm run db:secciones  # vincula ciudadanos y peticiones a secciones
+npm run db:movilizacion  # la red de movilizadores y sus promovidos
+npm run db:diad       # la jornada electoral (requiere db:movilizacion)
 npm run db:estado     # radiografía de la base
 npm run dev           # http://localhost:3200
 
@@ -102,6 +127,7 @@ npm run probar:flujo         # captura → seguimiento → cierre (navegador rea
 npm run probar:permisos      # que cada perfil vea y alcance solo lo suyo
 npm run probar:portal        # canal ciudadano, y lo que no debe filtrar
 npm run probar:evidencia     # adjuntos y su control de acceso
+npm run probar:mensajes      # recados del equipo, y lo que no se cruza
 npm run probar:comunicacion  # avisos y campañas
 ```
 
@@ -127,13 +153,24 @@ mismos nombres existen con `@chihuahua.inpol.mx` para probar el aislamiento.
 
 ## Estado
 
+Las altas, ediciones y bajas de **ciudadanos** y **actividades** ya
+existen (antes solo se podía dar de alta a un ciudadano de paso, al
+capturar una petición). Las bajas son lógicas: la persona tiene peticiones
+colgando y la actividad tiene las que se levantaron en ella.
+
 Construido: núcleo multitenant, peticiones, ciudadanos, actividades,
 estadísticas, territorio, mapas, estructura, comunicación, configuración,
 sala de mando, informe en PDF, portal ciudadano, evidencia adjunta, buscador
-global.
+global, movilización, **distritos**, **prioridad territorial** y **Día D**.
 
-En curso o pendiente: Día D, movilización electoral, captura en campo con
-audio y foto, beneficiarios y programas sociales, envío real de mensajes.
+En curso o pendiente: captura en campo con audio y foto, beneficiarios y
+programas sociales, envío real de mensajes, resultados electorales
+posteriores a 2015.
+
+**Cada cliente opera en un estado** (`tenants.estado_id`). La geografía
+electoral es catálogo público compartido, pero toda consulta que la toca se
+acota al estado del cliente: sin eso, el Gobierno de Chihuahua veía las
+secciones de Nuevo León. Hoy solo está cargado Nuevo León.
 
 El análisis de qué falta contra el catálogo del cliente está en
 `../QUE-FALTA.md`. El estado para el cliente, en `../ESTADO-PARA-GERARDO.md`.

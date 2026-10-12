@@ -18,6 +18,8 @@ npm run db:migrate   # esquema + geografía electoral + resultados 2015
 npm run db:seed      # los dos clientes con sus usuarios
 npm run db:demo      # 1,400 peticiones por cliente en 18 meses
 npm run db:secciones # vincula ciudadanos y peticiones a secciones
+npm run db:movilizacion  # la red de movilizadores y sus promovidos
+npm run db:diad      # la jornada electoral del Día D
 npm run dev          # http://localhost:3200
 ```
 
@@ -37,8 +39,13 @@ npm run db:migrate   # crea el esquema y carga la geografía electoral
 npm run db:seed      # dos clientes con sus usuarios
 npm run db:demo      # peticiones, ciudadanos y actividades de ejemplo
 npm run db:secciones # vincula los ciudadanos a secciones electorales reales
+npm run db:movilizacion  # la red de movilizadores y sus promovidos
+npm run db:diad      # la jornada electoral del Día D
 npm run dev          # http://localhost:3200
 ```
+
+> Los dos últimos no son opcionales si quieres ver Movilización y Día D con
+> datos: sin ellos esas pantallas salen vacías.
 
 Entra en `http://localhost:3200`, elige una plaza y accede con cualquiera de
 los usuarios de demostración:
@@ -84,6 +91,8 @@ npm run db:probar            # aislamiento entre clientes (8 comprobaciones)
 npm run probar:flujo         # captura → seguimiento → cierre, con navegador real
 npm run probar:permisos      # que cada perfil vea y alcance solo lo suyo
 npm run probar:portal        # el canal ciudadano, y lo que no debe filtrar
+npm run probar:evidencia     # adjuntos y su control de acceso
+npm run probar:mensajes      # recados del equipo, y lo que no se cruza
 npm run probar:comunicacion  # avisos y campañas
 ```
 
@@ -215,9 +224,20 @@ son los mismos para todos los clientes; lo que cambia es quién los ocupa.
 La navegación se construye según los permisos de quien entra: cada quien ve
 solo los módulos que le tocan.
 
+## Un cliente, un estado
+
+Cada cliente declara en qué estado opera (`tenants.estado_id`). La geografía
+electoral del INE es catálogo público y se comparte —dos campañas rivales en
+Nuevo León usan las mismas 2,602 secciones—, pero **toda consulta que la toca
+se acota al estado del cliente**. Sin eso, el Gobierno de Chihuahua abría
+Territorio y veía Monterrey, Apodaca y Guadalupe.
+
+Un cliente sin geografía cargada no ve territorio ajeno: la pantalla dice qué
+falta. Hoy solo está cargado Nuevo León.
+
 ## Pendientes
 
-- Cartografía de estados distintos de Nuevo León.
+- Cartografía y resultados de estados distintos de Nuevo León.
 - Conciliar la distritación federal (2017 contra 2023, ver arriba).
 - PostGIS para los polígonos de secciones y distritos (las columnas de
   latitud y longitud ya están previstas).
