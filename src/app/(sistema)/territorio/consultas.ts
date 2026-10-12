@@ -53,7 +53,11 @@ export type SeccionPrioritaria = {
  * catálogo global de secciones. Las secciones sin datos del cliente
  * salen igual, con sus cifras del INE y ceros en las columnas propias.
  */
-export async function listarSecciones(tenantId: string, f: FiltrosTerritorio) {
+export async function listarSecciones(
+  tenantId: string,
+  estadoId: string,
+  f: FiltrosTerritorio,
+) {
   const pagina = Math.max(1, f.pagina ?? 1)
   const salto = (pagina - 1) * POR_PAGINA
 
@@ -87,7 +91,8 @@ export async function listarSecciones(tenantId: string, f: FiltrosTerritorio) {
       left join ciu on ciu.seccion_id = s.id`
 
     const donde = tx`
-      where (${f.municipio ?? null}::text is null or m.nombre = ${f.municipio ?? null})
+      where s.estado_id = ${estadoId}
+        and (${f.municipio ?? null}::text is null or m.nombre = ${f.municipio ?? null})
         and (${f.distrito ?? null}::text is null or d.clave = ${f.distrito ?? null})`
 
     // La participación es votos emitidos sobre lista nominal de la misma
@@ -137,7 +142,11 @@ export async function listarSecciones(tenantId: string, f: FiltrosTerritorio) {
  * resolver. «Sin resolver» es todo lo que no quedó completado ni
  * cancelado, incluida la petición que nadie ha interpretado.
  */
-export async function seccionesPrioritarias(tenantId: string, f: FiltrosTerritorio) {
+export async function seccionesPrioritarias(
+  tenantId: string,
+  estadoId: string,
+  f: FiltrosTerritorio,
+) {
   return conTenant(tenantId, (tx) =>
     tx<SeccionPrioritaria[]>`
       select s.clave,
@@ -152,7 +161,8 @@ export async function seccionesPrioritarias(tenantId: string, f: FiltrosTerritor
       join municipios m on m.id = s.municipio_id
       left join distritos d on d.id = s.distrito_local_id and d.ambito = 'local'
       left join estatus_peticiones e on e.id = p.estatus_id
-      where (${f.municipio ?? null}::text is null or m.nombre = ${f.municipio ?? null})
+      where s.estado_id = ${estadoId}
+        and (${f.municipio ?? null}::text is null or m.nombre = ${f.municipio ?? null})
         and (${f.distrito ?? null}::text is null or d.clave = ${f.distrito ?? null})
       group by 1, 2, 3
       having count(*) filter (
@@ -167,7 +177,7 @@ export async function seccionesPrioritarias(tenantId: string, f: FiltrosTerritor
  * Participación histórica por distrito local. Solo catálogo global: no
  * hay nada del cliente aquí, así que va por `sinTenant`.
  */
-export async function participacionPorDistrito(f: FiltrosTerritorio) {
+export async function participacionPorDistrito(estadoId: string, f: FiltrosTerritorio) {
   return sinTenant<{ etiqueta: string; valor: number }[]>`
     select 'Distrito ' || d.clave as etiqueta,
            round(100.0 * sum(r.total_votos) / nullif(sum(s.lista_nominal), 0), 1)::float8 as valor
@@ -176,7 +186,7 @@ export async function participacionPorDistrito(f: FiltrosTerritorio) {
     join municipios m on m.id = s.municipio_id
     join resultados_seccion_totales r
       on r.seccion_id = s.id and r.anio = ${ANIO} and r.eleccion = ${ELECCION}
-    where d.ambito = 'local'
+    where d.ambito = 'local' and d.estado_id = ${estadoId}
       and (${f.municipio ?? null}::text is null or m.nombre = ${f.municipio ?? null})
       and (${f.distrito ?? null}::text is null or d.clave = ${f.distrito ?? null})
     group by 1
@@ -184,12 +194,13 @@ export async function participacionPorDistrito(f: FiltrosTerritorio) {
 }
 
 /** Opciones de los dos selectores. El de distritos se acota al municipio. */
-export async function catalogosDeTerritorio(municipio?: string) {
+export async function catalogosDeTerritorio(estadoId: string, municipio?: string) {
   const [municipios, distritos] = await Promise.all([
     sinTenant<{ valor: string; etiqueta: string; conteo: number }[]>`
       select m.nombre as valor, m.nombre as etiqueta, count(s.id)::int as conteo
       from municipios m
       join secciones s on s.municipio_id = m.id
+      where m.estado_id = ${estadoId}
       group by 1, 2
       order by 1`,
 
@@ -198,7 +209,7 @@ export async function catalogosDeTerritorio(municipio?: string) {
       from distritos d
       join secciones s on s.distrito_local_id = d.id
       join municipios m on m.id = s.municipio_id
-      where d.ambito = 'local'
+      where d.ambito = 'local' and d.estado_id = ${estadoId}
         and (${municipio ?? null}::text is null or m.nombre = ${municipio ?? null})
       group by 1, 2
       order by 1`,

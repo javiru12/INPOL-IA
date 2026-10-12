@@ -44,8 +44,12 @@ export type FilaRegion = {
  */
 export async function regionesConDatos(
   tenantId: string,
+  estadoId: string | null,
   ambito: Ambito,
 ): Promise<FilaRegion[]> {
+  // La cartografía es pública, pero cada cliente solo ve la de su estado.
+  if (!estadoId) return []
+
   const electoral = await sinTenant<
     Omit<FilaRegion, 'peticiones' | 'ciudadanos'>[]
   >`
@@ -58,6 +62,7 @@ export async function regionesConDatos(
       ${ambito === 'municipio'
         ? sinTenant`join municipios m on m.id = s.municipio_id`
         : sinTenant`join distritos d on d.id = s.distrito_local_id`}
+      where s.estado_id = ${estadoId}
     ),
     votos as (
       select b.clave, r.partido, sum(r.votos)::int as votos
@@ -113,6 +118,7 @@ export async function regionesConDatos(
         : tx`join distritos d on d.id = s.distrito_local_id`}
       left join ciudadanos c on c.seccion_id = s.id
       left join peticiones p on p.seccion_id = s.id
+      where s.estado_id = ${estadoId}
       group by 1`,
   )
 

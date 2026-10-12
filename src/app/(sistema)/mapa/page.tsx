@@ -32,7 +32,7 @@ export default async function MapaTerritorial({
   const metrica: Metrica =
     (METRICAS.find((m) => m.valor === texto(sp.metrica))?.valor as Metrica) ?? 'peticiones'
 
-  const regiones = await regionesConDatos(tenant.id, ambito)
+  const regiones = await regionesConDatos(tenant.id, tenant.estado_id, ambito)
   const definicion = METRICAS.find((m) => m.valor === metrica)!
   const capa = AMBITOS.find((a) => a.valor === ambito)!
 

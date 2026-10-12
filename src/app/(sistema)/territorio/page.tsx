@@ -108,12 +108,33 @@ export default async function Territorio({
     pagina: Number(texto(sp.pagina) ?? 1) || 1,
   }
 
-  const [r, prioritarias, porDistrito, catalogos] = await Promise.all([
-    listarSecciones(tenant.id, filtros),
-    seccionesPrioritarias(tenant.id, filtros),
-    participacionPorDistrito(filtros),
-    catalogosDeTerritorio(filtros.municipio),
-  ])
+  // Sin estado asignado no hay territorio que enseñar: antes de esto, un
+  // cliente de Chihuahua veía las secciones de Nuevo León.
+  const estadoId = tenant.estado_id
+
+  const [r, prioritarias, porDistrito, catalogos] = estadoId
+    ? await Promise.all([
+        listarSecciones(tenant.id, estadoId, filtros),
+        seccionesPrioritarias(tenant.id, estadoId, filtros),
+        participacionPorDistrito(estadoId, filtros),
+        catalogosDeTerritorio(estadoId, filtros.municipio),
+      ])
+    : [
+        {
+          filas: [],
+          pagina: 1,
+          indicadores: {
+            secciones: 0,
+            con_peticiones: 0,
+            lista_nominal: 0,
+            peticiones: 0,
+            maximo_peticiones: 0,
+          },
+        },
+        [],
+        [],
+        { municipios: [], distritos: [] },
+      ]
 
   const ind = r.indicadores
   const promedio = ind.secciones ? ind.peticiones / ind.secciones : 0

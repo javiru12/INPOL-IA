@@ -59,12 +59,15 @@ export async function buscarEnTodo(termino: string): Promise<Hallazgo[]> {
       return { ciudadanos, peticiones, colonias }
     }),
 
-    // Catálogo global: la geografía electoral no pertenece a un cliente.
+    // La geografía electoral es catálogo público y no pertenece a un
+    // cliente, pero sí se acota al estado donde opera: buscar «1548» no
+    // debe devolver una sección de otro estado.
     sinTenant<{ clave: string; municipio: string | null; lista_nominal: number | null }[]>`
       select s.clave, m.nombre as municipio, s.lista_nominal
       from secciones s
       left join municipios m on m.id = s.municipio_id
       where s.clave like ${q + '%'}
+        and s.estado_id = ${tenant.estado_id}
       order by s.clave limit 4`,
   ])
 
