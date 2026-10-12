@@ -6,6 +6,7 @@ import { detalleDeActividad, tipoValido } from '../../consultas'
 import { delDia } from '../../fechas'
 import { cifra, fechaLarga } from '@/lib/formato'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
+import { BajaActividad } from './baja'
 
 export const metadata: Metadata = { title: 'Detalle de actividad' }
 
@@ -73,9 +74,15 @@ export default async function DetalleActividad({
         .filter(Boolean)
         .join(' · ')}
       acciones={
-        <Link href="/actividades" className="boton boton-neutro">
-          Volver a actividades
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <BajaActividad id={id} tipo={tipo} activo={a.activo} />
+          <Link href={`/actividades/${tipo}/${id}/editar`} className="boton boton-primario">
+            Editar
+          </Link>
+          <Link href="/actividades" className="boton boton-neutro">
+            Volver a actividades
+          </Link>
+        </div>
       }
     >
       <div className="grid gap-3 lg:grid-cols-[1.45fr_1fr]">

@@ -1,5 +1,5 @@
 import 'server-only'
-import { conTenant } from '@/lib/db'
+import { conTenant, sinTenant } from '@/lib/db'
 
 export const POR_PAGINA = 25
 
@@ -160,6 +160,7 @@ export type Ciudadano = {
   codigo_postal: string | null
   municipio: string | null
   seccion: string | null
+  activo: boolean
 }
 
 export type PeticionDelCiudadano = {
@@ -205,7 +206,8 @@ export async function obtenerCiudadano(tenantId: string, id: string) {
              c.colonia,
              c.codigo_postal,
              m.nombre as municipio,
-             s.clave as seccion
+             s.clave as seccion,
+             c.activo
       from ciudadanos c
       left join municipios m on m.id = c.municipio_id
       left join secciones s on s.id = c.seccion_id
@@ -227,5 +229,50 @@ export async function obtenerCiudadano(tenantId: string, id: string) {
       order by p.fecha_apertura desc nulls last`
 
     return { ciudadano, peticiones }
+  })
+}
+
+/** Municipios del estado donde opera el cliente, para el selector del alta. */
+export async function municipiosDelCliente(estadoId: string | null) {
+  if (!estadoId) return []
+  return sinTenant<{ id: string; nombre: string }[]>`
+    select id, nombre
+    from municipios
+    where estado_id = ${estadoId}
+    order by nombre`
+}
+
+/** La ficha tal como la necesita el formulario de edición. */
+export async function ciudadanoParaEditar(tenantId: string, id: string) {
+  return conTenant(tenantId, async (tx) => {
+    const [c] = await tx<
+      {
+        id: string
+        nombre: string | null
+        apellido_paterno: string | null
+        apellido_materno: string | null
+        sexo: string | null
+        fecha_nacimiento: string | null
+        telefono_movil: string | null
+        telefono_fijo: string | null
+        correo: string | null
+        calle: string | null
+        numero_ext: string | null
+        numero_int: string | null
+        colonia: string | null
+        codigo_postal: string | null
+        municipio_id: string | null
+        seccion_clave: string | null
+      }[]
+    >`
+      select c.id, c.nombre, c.apellido_paterno, c.apellido_materno, c.sexo,
+             c.fecha_nacimiento::text, c.telefono_movil, c.telefono_fijo, c.correo,
+             c.calle, c.numero_ext, c.numero_int, c.colonia, c.codigo_postal,
+             c.municipio_id::text, s.clave as seccion_clave
+      from ciudadanos c
+      left join secciones s on s.id = c.seccion_id
+      where c.id = ${id}
+      limit 1`
+    return c ?? null
   })
 }

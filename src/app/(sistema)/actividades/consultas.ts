@@ -1,5 +1,5 @@
 import 'server-only'
-import { conTenant } from '@/lib/db'
+import { conTenant, sinTenant } from '@/lib/db'
 
 export const POR_PAGINA = 25
 
@@ -61,6 +61,7 @@ export type DetalleActividad = {
   reales: number | null
   logistica: string | null
   notas: string | null
+  activo: boolean
 }
 
 export type PeticionDeActividad = {
@@ -232,11 +233,12 @@ export async function detalleDeActividad(
                    r.asistentes_programados as programados,
                    r.asistentes_reales as reales,
                    r.detalle_logistica as logistica,
-                   r.notas_adicionales as notas
+                   r.notas_adicionales as notas,
+                   r.activo
             from recorridos r
             left join usuarios u on u.id = r.usuario_responsable_id
             left join vestimentas v on v.id = r.vestimenta_id
-            where r.id = ${id}::uuid and r.activo`
+            where r.id = ${id}::uuid`
         : await tx<DetalleActividad[]>`
             select e.id,
                    e.titulo,
@@ -259,12 +261,13 @@ export async function detalleDeActividad(
                    e.asistentes_programados as programados,
                    e.asistentes_reales as reales,
                    e.detalle_logistica as logistica,
-                   e.notas_adicionales as notas
+                   e.notas_adicionales as notas,
+                   e.activo
             from eventos e
             left join usuarios u on u.id = e.usuario_responsable_id
             left join vestimentas v on v.id = e.vestimenta_id
             left join tipos_visita tv on tv.id = e.tipo_visita_id
-            where e.id = ${id}::uuid and e.activo`
+            where e.id = ${id}::uuid`
 
     if (!actividad) return null
 
@@ -294,5 +297,82 @@ export async function detalleDeActividad(
             order by p.fecha_apertura desc nulls last`
 
     return { ...actividad, peticiones }
+  })
+}
+
+/** Catálogos del formulario de alta: municipios del estado y el equipo. */
+export async function catalogosDeActividad(tenantId: string, estadoId: string | null) {
+  const municipios = estadoId
+    ? await sinTenant<{ id: string; nombre: string }[]>`
+        select id, nombre from municipios where estado_id = ${estadoId} order by nombre`
+    : []
+
+  const responsables = await conTenant(tenantId, (tx) =>
+    tx<{ id: string; nombre: string }[]>`
+      select id,
+             coalesce(
+               nullif(trim(concat_ws(' ', nombre, apellido_paterno, apellido_materno)), ''),
+               correo) as nombre
+      from usuarios
+      where activo
+      order by 2`,
+  )
+
+  return { municipios, responsables }
+}
+
+export type ActividadEditable = {
+  id: string
+  titulo: string | null
+  descripcion: string | null
+  fecha: string | null
+  hora_inicia: string | null
+  hora_termina: string | null
+  lugar: string | null
+  colonia: string | null
+  municipio_id: string | null
+  seccion_clave: string | null
+  responsable_id: string | null
+  asistentes_programados: number | null
+  notas: string | null
+  activo: boolean
+}
+
+/** La actividad tal como la necesita el formulario de edición. */
+export async function actividadParaEditar(
+  tenantId: string,
+  tipo: 'evento' | 'recorrido',
+  id: string,
+) {
+  return conTenant(tenantId, async (tx) => {
+    const filas =
+      tipo === 'evento'
+        ? await tx<ActividadEditable[]>`
+            select e.id, e.titulo, e.descripcion,
+                   e.fecha_evento::text as fecha,
+                   to_char(e.hora_inicia at time zone 'America/Monterrey', 'HH24:MI') as hora_inicia,
+                   to_char(e.hora_termina at time zone 'America/Monterrey', 'HH24:MI') as hora_termina,
+                   e.calle as lugar, e.colonia, e.municipio_id::text,
+                   s.clave as seccion_clave,
+                   e.usuario_responsable_id::text as responsable_id,
+                   e.asistentes_programados, e.notas_adicionales as notas, e.activo
+            from eventos e
+            left join secciones s on s.id = e.seccion_id
+            where e.id = ${id} limit 1`
+        : await tx<ActividadEditable[]>`
+            select r.id, r.titulo, r.descripcion,
+                   r.fecha_recorrido::text as fecha,
+                   to_char(r.hora_inicia at time zone 'America/Monterrey', 'HH24:MI') as hora_inicia,
+                   to_char(r.hora_termina at time zone 'America/Monterrey', 'HH24:MI') as hora_termina,
+                   r.punto_inicia as lugar, r.colonia, r.municipio_id::text,
+                   s.clave as seccion_clave,
+                   r.usuario_responsable_id::text as responsable_id,
+                   r.asistentes_programados, r.notas_adicionales as notas, r.activo
+            from recorridos r
+            left join secciones s on s.id = r.seccion_id
+            where r.id = ${id} limit 1`
+
+    const a = filas[0]
+    return a ? { ...a, tipo } : null
   })
 }

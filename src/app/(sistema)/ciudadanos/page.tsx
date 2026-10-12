@@ -54,6 +54,11 @@ export default async function Ciudadanos({
     <Pagina
       titulo="Ciudadanos"
       descripcion="Padrón de personas registradas por la estructura de campaña"
+      acciones={
+        <Link href="/ciudadanos/nuevo" className="boton boton-primario">
+          Nuevo ciudadano
+        </Link>
+      }
     >
       <Filtros
         busqueda={{ nombre: 'q', marcador: 'Buscar por nombre, colonia o teléfono…' }}

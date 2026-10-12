@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import { obtenerCiudadano, etiquetaSexo } from '../consultas'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
+import { BotonBaja } from './baja'
 import { fechaLarga, fechaCorta, cifra } from '@/lib/formato'
 
 export const metadata: Metadata = { title: 'Ficha ciudadana' }
@@ -89,9 +90,15 @@ export default async function FichaCiudadano({
       titulo={c.nombre ?? 'Ciudadano sin nombre'}
       descripcion={contexto.join(' · ')}
       acciones={
-        <Link href="/ciudadanos" className="boton boton-neutro">
-          Volver al listado
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <BotonBaja id={c.id} activo={c.activo} />
+          <Link href={`/ciudadanos/${c.id}/editar`} className="boton boton-primario">
+            Editar
+          </Link>
+          <Link href="/ciudadanos" className="boton boton-neutro">
+            Volver al listado
+          </Link>
+        </div>
       }
     >
       <div className="grid items-start gap-3 lg:grid-cols-[21rem_1fr]">

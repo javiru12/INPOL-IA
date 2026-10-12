@@ -115,6 +115,9 @@ export default async function Actividades({
           >
             Lista
           </Link>
+          <Link href="/actividades/nueva" className="boton boton-primario !h-8 ml-1.5">
+            Nueva actividad
+          </Link>
         </div>
       }
     >

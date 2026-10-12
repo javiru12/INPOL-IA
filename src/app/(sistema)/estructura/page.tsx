@@ -138,7 +138,9 @@ export default async function Estructura({
   const conCarga = r.personas.filter((p) => p.asignadas > 0)
   const mediaAbiertas = conCarga.length ? r.totales.abiertas / conCarga.length : 0
 
-  const ambito = texto(sp.municipio) ?? 'los municipios con demanda capturada'
+  const municipio = texto(sp.municipio)
+  const ambito = municipio ?? 'los municipios con demanda capturada'
+  const sinNadaAqui = r.personas.length - conCarga.length
 
   return (
     <Pagina
@@ -215,9 +217,21 @@ export default async function Estructura({
           {/* 1 · ¿Quién compone el equipo y qué carga lleva? ---------- */}
           <section className="panel mt-3 overflow-hidden">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
-              <h2 className="text-[var(--text-base)] font-semibold">El equipo</h2>
+              <h2 className="text-[var(--text-base)] font-semibold">
+                El equipo
+                {municipio && (
+                  <span className="ml-2 font-normal text-[var(--color-tinta-2)]">
+                    en {municipio}
+                  </span>
+                )}
+              </h2>
+              {/* Al filtrar por municipio la lista no se acorta: el equipo
+                  sigue completo y a quien no trabaja ahí se le ven ceros.
+                  Sin decirlo, el filtro parece no haber hecho nada. */}
               <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                Elige a una persona para ver su territorio
+                {municipio
+                  ? `${cifra(conCarga.length)} con trabajo aquí · ${cifra(sinNadaAqui)} sin nada en este municipio`
+                  : 'Elige a una persona para ver su territorio'}
               </p>
             </div>
             <div className="overflow-x-auto">
@@ -257,6 +271,7 @@ export default async function Estructura({
                       elegida={elegida?.id === p.id}
                       href={enlace({ persona: elegida?.id === p.id ? null : p.id })}
                       maximo={Math.max(...r.personas.map((x) => x.asignadas), 1)}
+                      filtrando={Boolean(municipio)}
                     />
                   ))}
                 </tbody>
@@ -611,22 +626,29 @@ function FilaPersona({
   elegida,
   href,
   maximo,
+  filtrando,
 }: {
   persona: Persona
   elegida: boolean
   href: string
   maximo: number
+  /** Hay un municipio puesto: quien no trabaja ahí se atenúa. */
+  filtrando: boolean
 }) {
   const quema = persona.rezagadas > 0
   const pocosCierres = persona.mediana !== null && persona.resueltas < MINIMO_PARA_MEDIANA
   const ancho = (persona.asignadas / maximo) * 100
+  const fuera = filtrando && persona.asignadas === 0
 
   return (
     <tr
+      title={fuera ? 'No tiene nada turnado en el municipio filtrado' : undefined}
       style={
         elegida
           ? { background: 'var(--color-acento-suave)', boxShadow: 'inset 3px 0 0 var(--color-acento)' }
-          : undefined
+          : fuera
+            ? { opacity: 0.45 }
+            : undefined
       }
     >
       <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
