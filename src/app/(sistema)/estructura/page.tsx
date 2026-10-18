@@ -3,6 +3,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import {
+  organigrama,
+  posiblesResponsables,
   panelDeEstructura,
   esOrden,
   esPinta,
@@ -16,6 +18,8 @@ import {
 import { LienzoEquipo } from './lienzo'
 import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { Filtros } from '@/components/filtros'
+import { Organigrama } from './organigrama'
+import { FiltrosEquipo } from './filtros-equipo'
 import { BarrasHorizontales } from '@/components/graficas'
 import { cifra } from '@/lib/formato'
 import { ESTADO } from '@/lib/paleta'
@@ -63,13 +67,20 @@ const RIESGOS: Record<Riesgo, { etiqueta: string; tono: 'alerta' | 'aviso' | 'da
   },
 }
 
-const COLUMNAS: { clave: Orden; titulo: string; num: boolean; ayuda?: string }[] = [
+const COLUMNAS: {
+  clave: Orden
+  titulo: string
+  num: boolean
+  ayuda?: string
+  /** Se esconde en pantallas estrechas para que la tabla quepa sin scroll. */
+  secundaria?: boolean
+}[] = [
   { clave: 'nombre', titulo: 'Persona', num: false },
-  { clave: 'secciones', titulo: 'Secciones', num: true, ayuda: 'Secciones donde ha atendido al menos una petición' },
+  { clave: 'secciones', titulo: 'Secciones', num: true, secundaria: true, ayuda: 'Secciones donde ha atendido al menos una petición' },
   { clave: 'asignadas', titulo: 'Asignadas', num: true },
   { clave: 'resueltas', titulo: 'Resueltas', num: true },
   { clave: 'tasa', titulo: '% resolución', num: true },
-  { clave: 'mediana', titulo: 'Mediana días', num: true, ayuda: 'Días que tarda en cerrar, mediana de lo que ya resolvió' },
+  { clave: 'mediana', titulo: 'Mediana días', num: true, secundaria: true, ayuda: 'Días que tarda en cerrar, mediana de lo que ya resolvió' },
   { clave: 'abiertas', titulo: 'Abiertas hoy', num: true, ayuda: 'Todo lo que no quedó Completada ni Cancelada' },
   { clave: 'rezagadas', titulo: 'En rezago', num: true, ayuda: `Abiertas con más de ${UMBRAL_REZAGO} días` },
 ]
@@ -104,12 +115,16 @@ export default async function Estructura({
   const crudoPinta = texto(sp.pinta)
   const pinta: Pinta = esPinta(crudoPinta) ? crudoPinta : 'carga'
 
-  const r = await panelDeEstructura(tenant.id, {
-    municipio: texto(sp.municipio),
-    persona: texto(sp.persona),
-    orden,
-    dir,
-  })
+  const [r, arbol, responsables] = await Promise.all([
+    panelDeEstructura(tenant.id, {
+      municipio: texto(sp.municipio),
+      persona: texto(sp.persona),
+      orden,
+      dir,
+    }),
+    organigrama(tenant.id),
+    posiblesResponsables(tenant.id),
+  ])
 
   const elegida = r.personas.find((p) => p.id === texto(sp.persona)) ?? null
 
@@ -147,11 +162,19 @@ export default async function Estructura({
       titulo="Estructura de atención"
       descripcion="Quién responde por cada zona del territorio y cómo va su carga de trabajo"
       acciones={
-        elegida ? (
-          <Link href={enlace({ persona: null })} className="boton boton-neutro">
-            Ver a todo el equipo
+        <div className="flex items-center gap-2">
+          {elegida && (
+            <Link href={enlace({ persona: null })} className="boton boton-neutro">
+              Ver a todo el equipo
+            </Link>
+          )}
+          {/* El alta de personal vive en Configuración, que es donde se
+              define su perfil y su contraseña; aquí solo se enlaza para
+              que nadie la busque en esta pantalla y no la encuentre. */}
+          <Link href="/configuracion/usuarios/nuevo" className="boton boton-primario">
+            Agregar integrante
           </Link>
-        ) : undefined
+        </div>
       }
     >
       <Filtros
@@ -214,6 +237,14 @@ export default async function Estructura({
             />
           </div>
 
+          {/* 0 · La estructura formal, tal como se capturó -----------
+              Va antes que la deducida del trabajo porque responde otra
+              pregunta: no «quién atiende esta zona» sino «de quién
+              depende cada quien». */}
+          <div className="mt-3">
+            <Organigrama nodos={arbol} responsables={responsables} />
+          </div>
+
           {/* 1 · ¿Quién compone el equipo y qué carga lleva? ---------- */}
           <section className="panel mt-3 overflow-hidden">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
@@ -225,14 +256,20 @@ export default async function Estructura({
                   </span>
                 )}
               </h2>
-              {/* Al filtrar por municipio la lista no se acorta: el equipo
-                  sigue completo y a quien no trabaja ahí se le ven ceros.
-                  Sin decirlo, el filtro parece no haber hecho nada. */}
-              <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                {municipio
-                  ? `${cifra(conCarga.length)} con trabajo aquí · ${cifra(sinNadaAqui)} sin nada en este municipio`
-                  : 'Elige a una persona para ver su territorio'}
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Al filtrar por municipio la lista no se acorta: el
+                    equipo sigue completo y a quien no trabaja ahí se le
+                    ven ceros. Sin decirlo, el filtro parece no haber
+                    hecho nada. */}
+                <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                  {municipio
+                    ? `${cifra(conCarga.length)} con trabajo aquí · ${cifra(sinNadaAqui)} sin nada en este municipio`
+                    : 'Elige a una persona para ver su territorio'}
+                </p>
+                <FiltrosEquipo
+                  perfiles={[...new Set(r.personas.map((p) => nombrePerfil(p.perfil)))].sort()}
+                />
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="tabla">
@@ -244,7 +281,7 @@ export default async function Estructura({
                       return (
                         <th
                           key={c.clave}
-                          className={c.num ? 'num' : undefined}
+                          className={`${c.num ? 'num' : ''}${c.secundaria ? ' hidden 2xl:table-cell' : ''}`.trim() || undefined}
                           title={c.ayuda}
                           aria-sort={activa ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                         >
@@ -280,7 +317,7 @@ export default async function Estructura({
             <p className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-2 text-[var(--text-micro)] text-[var(--color-tinta-3)]">
               {r.formal.vinculos > 0
                 ? `Hay ${cifra(r.formal.vinculos)} relaciones de jerarquía capturadas en ${cifra(r.formal.estructuras)} estructuras formales.`
-                : 'Todavía no hay jerarquía formal capturada (estructuras y sus relaciones están vacías). Lo que se muestra se deduce del trabajo realmente asignado a cada persona.'}
+                : 'Esta tabla no sale del organigrama: se deduce del trabajo realmente asignado a cada quien. Son dos cosas distintas y conviene mirarlas juntas.'}
             </p>
           </section>
 
@@ -642,6 +679,8 @@ function FilaPersona({
 
   return (
     <tr
+      data-persona={persona.nombre}
+      data-perfil={nombrePerfil(persona.perfil)}
       title={fuera ? 'No tiene nada turnado en el municipio filtrado' : undefined}
       style={
         elegida
@@ -663,7 +702,7 @@ function FilaPersona({
           {persona.nombre}
         </Link>
       </td>
-      <td className="num">
+      <td className="num hidden 2xl:table-cell">
         {persona.secciones ? cifra(persona.secciones) : '—'}
         {persona.municipios > 0 && (
           <span className="clave ml-1.5">{persona.municipios} mun.</span>
@@ -693,7 +732,7 @@ function FilaPersona({
       {/* Una mediana sobre dos o tres cierres no es un tiempo típico:
           se muestra apagada para que nadie la lea como tal. */}
       <td
-        className="num"
+        className="num hidden 2xl:table-cell"
         style={pocosCierres ? { color: 'var(--color-tinta-3)' } : undefined}
         title={
           pocosCierres

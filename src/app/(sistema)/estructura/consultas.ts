@@ -561,3 +561,100 @@ function ordenar(filas: Persona[], orden: Orden, dir: 'asc' | 'desc') {
     return signo * (a[orden] - b[orden])
   })
 }
+
+export type NodoOrganigrama = {
+  id: string
+  nombre: string
+  correo: string
+  perfil: string | null
+  responsable_id: string | null
+  nivel: number
+  /** Cuántas personas cuelgan de aquí, contando toda la rama. */
+  a_cargo: number
+  asignadas: number
+  abiertas: number
+}
+
+/**
+ * El organigrama tal como quedó capturado, no el deducido del trabajo.
+ *
+ * Son dos cosas distintas y conviene no confundirlas: «quién atiende qué
+ * zona» sale de las peticiones y cambia solo; «quién responde ante quién»
+ * lo captura un administrador y es la estructura formal.
+ */
+export async function organigrama(tenantId: string): Promise<NodoOrganigrama[]> {
+  return conTenant(tenantId, async (tx) => {
+    return tx<NodoOrganigrama[]>`
+      with recursive arbol as (
+        select u.id, u.usuario_responsable_id, 0 as nivel
+        from usuarios u
+        where u.activo and u.usuario_responsable_id is null
+        union all
+        select h.id, h.usuario_responsable_id, a.nivel + 1
+        from usuarios h
+        join arbol a on a.id = h.usuario_responsable_id
+        where h.activo and a.nivel < 20
+      ),
+      -- Cuántos cuelgan de cada quien, contando toda la rama hacia abajo.
+      rama as (
+        select jefe.id as jefe_id, count(*)::int as a_cargo
+        from usuarios jefe
+        join lateral (
+          with recursive abajo as (
+            select id from usuarios where usuario_responsable_id = jefe.id and activo
+            union all
+            select u.id from usuarios u
+            join abajo b on b.id = u.usuario_responsable_id
+            where u.activo
+          )
+          select id from abajo
+        ) d on true
+        where jefe.activo
+        group by jefe.id
+      ),
+      carga as (
+        select o.usuario_id,
+               count(*)::int as asignadas,
+               count(*) filter (
+                 where coalesce(e.descripcion, '') not in ('Completada', 'Cancelada')
+               )::int as abiertas
+        from peticiones p
+        join operadores o on o.id = p.operador_id
+        left join estatus_peticiones e on e.id = p.estatus_id
+        group by 1
+      )
+      select u.id,
+             coalesce(
+               nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno, u.apellido_materno)), ''),
+               u.correo) as nombre,
+             u.correo,
+             pf.nombre as perfil,
+             u.usuario_responsable_id as responsable_id,
+             a.nivel,
+             coalesce(r.a_cargo, 0) as a_cargo,
+             coalesce(c.asignadas, 0) as asignadas,
+             coalesce(c.abiertas, 0) as abiertas
+      from arbol a
+      join usuarios u on u.id = a.id
+      left join perfiles pf on pf.clave = u.perfil_clave
+      left join rama r on r.jefe_id = u.id
+      left join carga c on c.usuario_id = u.id
+      order by a.nivel, nombre`
+  })
+}
+
+/** Quiénes pueden ser responsables de alguien, para el selector. */
+export async function posiblesResponsables(tenantId: string) {
+  return conTenant(tenantId, (tx) =>
+    tx<{ id: string; nombre: string; perfil: string | null }[]>`
+      select u.id,
+             coalesce(
+               nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno, u.apellido_materno)), ''),
+               u.correo) as nombre,
+             pf.nombre as perfil
+      from usuarios u
+      left join perfiles pf on pf.clave = u.perfil_clave
+      where u.activo
+      order by 2`,
+  )
+}

@@ -14,6 +14,7 @@
     "db:seed": "tsx --env-file=.env.local db/seed.mts",
     "db:demo": "tsx --env-file=.env.local db/seed-demo.mts",
     "db:diad": "tsx --env-file=.env.local db/seed-dia-d.mts",
+    "db:jerarquia": "tsx --env-file=.env.local db/seed-jerarquia.mts",
     "db:movilizacion": "tsx --env-file=.env.local db/seed-movilizacion.mts",
     "db:estado": "tsx --env-file=.env.local db/estado.mts",
     "db:probar": "tsx --env-file=.env.local db/pruebas/aislamiento.mts",
