@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { IconoCampana } from './iconos'
+import { marcarTodoRevisado } from '@/app/acciones-alertas'
 import type { Alerta } from '@/lib/alertas'
 
 const COLOR = {
@@ -21,8 +22,14 @@ const COLOR = {
  */
 export function Campana({ alertas }: { alertas: Alerta[] }) {
   const [abierto, setAbierto] = useState(false)
+  const [marcando, iniciar] = useTransition()
   const caja = useRef<HTMLDivElement>(null)
+
   const total = alertas.reduce((suma, a) => suma + a.cifra, 0)
+  // El globo rojo solo cuenta lo que esta persona todavía no ha mirado.
+  // Lo ya revisado sigue en la lista, pero deja de reclamar.
+  const pendientes = alertas.filter((a) => !a.vista)
+  const porRevisar = pendientes.reduce((suma, a) => suma + a.cifra, 0)
 
   useEffect(() => {
     if (!abierto) return
@@ -48,17 +55,17 @@ export function Campana({ alertas }: { alertas: Alerta[] }) {
         type="button"
         onClick={() => setAbierto((v) => !v)}
         className="boton boton-llano !h-8 !w-8 !p-0 relative"
-        aria-label={total ? `Alertas: ${total} pendientes` : 'Alertas: nada pendiente'}
+        aria-label={porRevisar ? `Alertas: ${porRevisar} sin revisar` : 'Alertas: nada sin revisar'}
         aria-expanded={abierto}
-        data-alertas={total}
+        data-alertas={porRevisar}
       >
         <IconoCampana />
-        {total > 0 && (
+        {porRevisar > 0 && (
           <span
             className="cifra absolute -right-0.5 -top-0.5 grid h-[15px] min-w-[15px] place-items-center rounded-full px-1 text-[length:var(--text-micro)] font-semibold leading-none text-white"
             style={{ background: 'var(--color-alerta)' }}
           >
-            {total > 99 ? '99+' : total}
+            {porRevisar > 99 ? '99+' : porRevisar}
           </span>
         )}
       </button>
@@ -72,10 +79,22 @@ export function Campana({ alertas }: { alertas: Alerta[] }) {
         >
           <div className="flex items-baseline justify-between border-b border-[var(--color-borde)] px-4 py-2.5">
             <span className="rotulo">Alertas</span>
-            {total > 0 && (
-              <span className="cifra text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
-                {total} pendiente{total === 1 ? '' : 's'}
-              </span>
+            {pendientes.length > 0 ? (
+              <button
+                type="button"
+                disabled={marcando}
+                onClick={() => iniciar(() => void marcarTodoRevisado())}
+                className="boton boton-llano !h-6 !px-1.5 text-[var(--text-micro)]"
+                title="No borra el trabajo pendiente: deja de avisarte hasta que la cifra suba"
+              >
+                {marcando ? 'Marcando…' : 'Marcar todas como vistas'}
+              </button>
+            ) : (
+              total > 0 && (
+                <span className="cifra text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                  {total} pendiente{total === 1 ? '' : 's'} · todas revisadas
+                </span>
+              )
             )}
           </div>
 
@@ -91,6 +110,8 @@ export function Campana({ alertas }: { alertas: Alerta[] }) {
                     href={a.ruta}
                     onClick={() => setAbierto(false)}
                     className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--color-acento-suave)]"
+                    style={a.vista ? { opacity: 0.5 } : undefined}
+                    title={a.vista ? 'Ya la revisaste; volverá a destacar si la cifra sube' : undefined}
                   >
                     <span
                       aria-hidden="true"

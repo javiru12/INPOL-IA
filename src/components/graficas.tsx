@@ -1,8 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-type Dato = { etiqueta: string; valor: number; color?: string }
+type Dato = {
+  etiqueta: string
+  valor: number
+  color?: string
+  /** A dónde lleva el doble clic. Viaja con el dato y no como función:
+      un componente de servidor no puede pasarle una función a uno de
+      cliente. */
+  href?: string
+}
 
 /**
  * Barras horizontales ordenadas por magnitud.
@@ -72,6 +81,7 @@ export function BarrasTemporales({
   altura?: number
 }) {
   const [encima, setEncima] = useState<number | null>(null)
+  const router = useRouter()
   const maximo = Math.max(...datos.map((d) => d.valor), 1)
 
   // Escala redondeada hacia arriba para que la cuadrícula caiga en cifras limpias.
@@ -98,10 +108,14 @@ export function BarrasTemporales({
           return (
             <div
               key={d.etiqueta}
-              className="group relative flex flex-1 flex-col items-center justify-end"
+              className={`group relative flex flex-1 flex-col items-center justify-end${
+                d.href ? ' cursor-pointer' : ''
+              }`}
               style={{ height: altura }}
               onMouseEnter={() => setEncima(i)}
               onMouseLeave={() => setEncima(null)}
+              onDoubleClick={d.href ? () => router.push(d.href!) : undefined}
+              title={d.href ? 'Doble clic para ver estas peticiones' : undefined}
             >
               {activo && (
                 <div
@@ -111,6 +125,7 @@ export function BarrasTemporales({
                 >
                   <span className="font-medium">{d.valor.toLocaleString('es-MX')}</span>
                   <span className="ml-1.5 text-white/60">{d.etiqueta}</span>
+                  {d.href && <span className="ml-1.5 text-white/40">doble clic para abrir</span>}
                 </div>
               )}
               <div

@@ -67,11 +67,17 @@ export default async function Panel() {
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-[var(--text-base)] font-semibold">Peticiones por mes</h2>
                 <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                  Últimos 12 meses
+                  Últimos 12 meses · doble clic para ver el mes
                 </span>
               </div>
               <BarrasTemporales
-                datos={r.porMes.map((m) => ({ ...m, etiqueta: mesCorto(m.etiqueta) }))}
+                datos={r.porMes.map((m) => ({
+                  valor: m.valor,
+                  etiqueta: mesCorto(m.etiqueta),
+                  // El 'AAAA-MM' crudo es lo que entiende el filtro; la
+                  // barra solo enseña el mes abreviado.
+                  href: `/peticiones?mes=${m.etiqueta}`,
+                }))}
               />
             </section>
 

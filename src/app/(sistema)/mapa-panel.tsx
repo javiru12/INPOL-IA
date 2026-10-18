@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { FeatureCollection, Geometry } from 'geojson'
 import { Mapa, type Region } from '@/components/mapa'
 import { cifra } from '@/lib/formato'
@@ -15,6 +16,7 @@ export function MapaDelPanel({
   municipios: { clave: string; nombre: string; peticiones: number }[]
 }) {
   const [geo, setGeo] = useState<FeatureCollection<Geometry, Region> | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     let vigente = true
@@ -52,14 +54,26 @@ export function MapaDelPanel({
 
   // En el panel el mapa es un resumen: arranca acercado donde hay
   // operación y sin el control de encuadre, que aquí no cabe.
+  //
+  // Elegir un municipio abre sus peticiones: el mapa dice dónde está la
+  // demanda, y lo siguiente que uno quiere es verla.
   return (
-    <Mapa
-      geojson={geo}
-      datos={datos}
-      unidad="peticiones"
-      altura={240}
-      enfocadoAlInicio
-      controlDeEnfoque={false}
-    />
+    <>
+      <Mapa
+        geojson={geo}
+        datos={datos}
+        unidad="peticiones"
+        altura={240}
+        enfocadoAlInicio
+        controlDeEnfoque={false}
+        onElegir={(clave) => {
+          const m = municipios.find((x) => x.clave === clave)
+          if (m) router.push(`/peticiones?municipio=${encodeURIComponent(m.nombre)}`)
+        }}
+      />
+      <p className="mt-1.5 text-center text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+        Elige un municipio para ver sus peticiones
+      </p>
+    </>
   )
 }

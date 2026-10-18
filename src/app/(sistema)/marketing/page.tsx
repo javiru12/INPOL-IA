@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import { exigirAcceso } from '@/lib/acceso'
+import { FilaAbrible } from '@/components/fila-abrible'
 import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { Filtros, Paginador } from '@/components/filtros'
 import { IconoVer } from '@/components/iconos'
@@ -143,11 +144,15 @@ export default async function Comunicacion({
                 </thead>
                 <tbody>
                   {avisos.filas.map((a) => (
-                    <tr key={a.id}>
+                    <FilaAbrible key={a.id} href={`/peticiones/${a.id}`}>
+                      {/* El folio se pinta como enlace de verdad: antes
+                          solo se subrayaba al pasar encima y nadie veía
+                          que desde ahí se abre el expediente. */}
                       <td className="clave">
                         <Link
                           href={`/peticiones/${a.id}`}
-                          className="hover:text-[var(--color-acento-fuerte)] hover:underline"
+                          className="font-medium underline decoration-dotted underline-offset-2 hover:decoration-solid"
+                          style={{ color: 'var(--color-acento-fuerte)' }}
                         >
                           {a.folio}
                         </Link>
@@ -196,7 +201,7 @@ export default async function Comunicacion({
                           tieneCorreo={!!a.correo}
                         />
                       </td>
-                    </tr>
+                    </FilaAbrible>
                   ))}
                 </tbody>
               </table>
