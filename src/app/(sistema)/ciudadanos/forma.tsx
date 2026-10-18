@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
 import { crearCiudadano, editarCiudadano, type EstadoAccion } from './acciones'
+import { CampoFecha } from '@/components/campos-fecha'
 
 export type DatosCiudadano = {
   id: string
@@ -70,10 +71,9 @@ export function FormaCiudadano({
               <option value="M">Mujer</option>
             </select>
           </label>
-          <Campo
+          <CampoFecha
             nombre="fechaNacimiento"
             etiqueta="Fecha de nacimiento"
-            tipo="date"
             valor={v?.fecha_nacimiento}
           />
         </div>

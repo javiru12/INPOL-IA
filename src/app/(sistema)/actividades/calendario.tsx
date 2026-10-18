@@ -56,9 +56,15 @@ function Dia({
         background: celda.delMes ? undefined : 'var(--color-superficie-2)',
       }}
     >
-      <div className="mb-1 flex h-[1.125rem] items-center">
-        <span
-          className="inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full px-1 text-[var(--text-micro)] font-semibold tabular-nums"
+      {/* El día abre el alta con esa fecha ya puesta, y el signo aparece
+          al pasar por encima: un «+» fijo en cada casilla llenaría el mes
+          de ruido. Las actividades existentes ya se abren desde su
+          propia pastilla. */}
+      <div className="group/dia mb-1 flex h-[1.125rem] items-center justify-between">
+        <Link
+          href={`/actividades/nueva?fecha=${celda.iso}`}
+          title={`Nueva actividad el ${celda.dia}`}
+          className="inline-flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full px-1 text-[var(--text-micro)] font-semibold tabular-nums hover:ring-2 hover:ring-[var(--color-acento-borde)]"
           style={
             esHoy
               ? { background: 'var(--color-acento)', color: '#fff' }
@@ -66,7 +72,14 @@ function Dia({
           }
         >
           {celda.dia}
-        </span>
+        </Link>
+        <Link
+          href={`/actividades/nueva?fecha=${celda.iso}`}
+          aria-label={`Agregar actividad el ${celda.dia}`}
+          className="hidden h-[1.125rem] w-[1.125rem] items-center justify-center rounded-[var(--radius-xs)] text-[var(--color-tinta-3)] hover:bg-[var(--color-acento-suave)] hover:text-[var(--color-acento-fuerte)] group-hover/dia:flex"
+        >
+          +
+        </Link>
       </div>
 
       <div className="space-y-[3px]" style={{ opacity: celda.delMes ? 1 : 0.55 }}>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
 import { guardarActividad, type EstadoAccion } from './acciones'
+import { CampoFecha, CampoHora } from '@/components/campos-fecha'
 
 export type DatosActividad = {
   id: string
@@ -27,10 +28,13 @@ export function FormaActividad({
   municipios,
   responsables,
   actividad,
+  fechaInicial,
 }: {
   municipios: { id: string; nombre: string }[]
   responsables: { id: string; nombre: string }[]
   actividad?: DatosActividad
+  /** Día elegido en el calendario, para no volver a teclearlo. */
+  fechaInicial?: string
 }) {
   const esEdicion = Boolean(actividad)
   const [estado, accion] = useActionState<EstadoAccion, FormData>(guardarActividad, {})
@@ -110,10 +114,10 @@ export function FormaActividad({
 
       <section className="panel px-4 py-4">
         <h2 className="mb-4 text-[var(--text-base)] font-semibold">Cuándo</h2>
-        <Campo nombre="fecha" etiqueta="Fecha" tipo="date" requerido valor={v?.fecha} />
+        <CampoFecha nombre="fecha" etiqueta="Fecha" requerido valor={v?.fecha ?? fechaInicial} />
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <Campo nombre="horaInicia" etiqueta="Hora de inicio" tipo="time" valor={v?.hora_inicia} />
-          <Campo nombre="horaTermina" etiqueta="Hora de término" tipo="time" valor={v?.hora_termina} />
+          <CampoHora nombre="horaInicia" etiqueta="Hora de inicio" valor={v?.hora_inicia} />
+          <CampoHora nombre="horaTermina" etiqueta="Hora de término" valor={v?.hora_termina} />
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <label className="block">
