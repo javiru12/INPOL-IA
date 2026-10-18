@@ -5,6 +5,8 @@ import { tenantDeLaPeticion } from '@/lib/sesion'
 import { listarPeticiones, POR_PAGINA } from './consultas'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { Filtros, Paginador } from '@/components/filtros'
+import { SeleccionEnLote } from './seleccion'
+import { FilaAbrible } from '@/components/fila-abrible'
 import { IconoVer } from '@/components/iconos'
 import { fechaCorta } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
@@ -38,8 +40,43 @@ export default async function Peticiones({
     estatus: texto(sp.estatus),
     problematica: texto(sp.problematica),
     prioridad: texto(sp.prioridad),
+    pendientes: texto(sp.pendientes) === 'si',
+    mes: texto(sp.mes),
+    municipio: texto(sp.municipio),
     pagina: Number(texto(sp.pagina) ?? 1) || 1,
   })
+
+  // Recortes que no viven en los selectores pero sí acotan la lista.
+  const conSp = (quitar: string) => {
+    const q = new URLSearchParams()
+    for (const [k, v] of Object.entries(sp)) {
+      if (typeof v === 'string' && v.trim() && k !== quitar && k !== 'pagina') q.set(k, v)
+    }
+    const t = q.toString()
+    return t ? `/peticiones?${t}` : '/peticiones'
+  }
+
+  const MES = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+  ]
+  const nombreDeMes = (m: string) => {
+    const [a, n] = m.split('-')
+    const i = Number(n) - 1
+    return MES[i] ? `${MES[i]} de ${a}` : m
+  }
+
+  const recortes = [
+    texto(sp.pendientes) === 'si'
+      ? { llave: 'pendientes', texto: 'sin resolver', sinEste: conSp('pendientes') }
+      : null,
+    texto(sp.mes)
+      ? { llave: 'mes', texto: nombreDeMes(texto(sp.mes)!), sinEste: conSp('mes') }
+      : null,
+    texto(sp.municipio)
+      ? { llave: 'municipio', texto: texto(sp.municipio)!, sinEste: conSp('municipio') }
+      : null,
+  ].filter((x): x is { llave: string; texto: string; sinEste: string } => x !== null)
 
   return (
     <Pagina
@@ -73,6 +110,30 @@ export default async function Peticiones({
         ]}
       />
 
+      {/* Los recortes que llegan desde otra pantalla —un mes de la
+          gráfica, un municipio del mapa, la alerta de urgentes— no están
+          en los selectores de arriba. Si no se dijeran aquí, el total
+          saldría distinto al de la pantalla anterior sin explicación. */}
+      {recortes.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="rotulo">Viendo solo</span>
+          {recortes.map((c) => (
+            <Link
+              key={c.llave}
+              href={c.sinEste}
+              className="distintivo gap-1.5 hover:opacity-80"
+              style={{ background: 'var(--color-acento-suave)', color: 'var(--color-acento-fuerte)' }}
+              title="Quitar este recorte"
+            >
+              {c.texto}
+              <span aria-hidden="true">×</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <SeleccionEnLote estatus={r.estatusConId} />
+
       {r.total === 0 ? (
         <Vacio
           titulo="Ninguna petición coincide"
@@ -84,10 +145,18 @@ export default async function Peticiones({
             <table className="tabla">
               <thead>
                 <tr>
+                  <th className="w-8">
+                    <input
+                      type="checkbox"
+                      data-todas=""
+                      aria-label="Seleccionar todas las de esta página"
+                      className="cursor-pointer"
+                    />
+                  </th>
                   <th>Folio</th>
                   <th>Ciudadano</th>
                   <th>Petición</th>
-                  <th>Colonia</th>
+                  <th className="hidden 2xl:table-cell">Colonia</th>
                   <th>Prioridad</th>
                   <th>Estatus</th>
                   <th className="num">Fecha</th>
@@ -96,7 +165,15 @@ export default async function Peticiones({
               </thead>
               <tbody>
                 {r.filas.map((p) => (
-                  <tr key={p.id}>
+                  <FilaAbrible key={p.id} href={`/peticiones/${p.id}`}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        data-peticion={p.id}
+                        aria-label={`Seleccionar la petición ${p.folio}`}
+                        className="cursor-pointer"
+                      />
+                    </td>
                     <td className="clave">{p.folio}</td>
                     <td className="whitespace-nowrap font-medium">
                       <Link
@@ -106,7 +183,7 @@ export default async function Peticiones({
                         {p.ciudadano ?? '—'}
                       </Link>
                     </td>
-                    <td className="max-w-[28rem]">
+                    <td className="w-full max-w-0">
                       <span className="block truncate" title={p.descripcion ?? undefined}>
                         {p.descripcion ?? '—'}
                       </span>
@@ -114,7 +191,7 @@ export default async function Peticiones({
                         {[p.problematica, p.subproblematica].filter(Boolean).join(' · ')}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                    <td className="hidden whitespace-nowrap text-[var(--color-tinta-2)] 2xl:table-cell">
                       {p.colonia ?? '—'}
                     </td>
                     <td>
@@ -139,7 +216,7 @@ export default async function Peticiones({
                         <IconoVer />
                       </Link>
                     </td>
-                  </tr>
+                  </FilaAbrible>
                 ))}
               </tbody>
             </table>

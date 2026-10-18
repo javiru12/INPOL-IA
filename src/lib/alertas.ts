@@ -28,9 +28,11 @@ export type Alerta = {
   cifra: number
   ruta: string
   tono: 'alerta' | 'aviso' | 'dato' | 'acento'
+  /** Ya revisada: la cifra no ha subido desde la última vez que se miró. */
+  vista: boolean
 }
 
-type Definicion = Omit<Alerta, 'cifra'> & {
+type Definicion = Omit<Alerta, 'cifra' | 'vista'> & {
   /** Prefijos del catálogo de funcionalidades que habilitan la alerta. */
   permisos: string[]
 }
@@ -56,7 +58,11 @@ const CATALOGO: Definicion[] = [
     clave: 'peticiones_urgentes',
     etiqueta: 'Peticiones urgentes sin resolver',
     apoyo: 'Prioridad urgente, todavía abiertas',
-    ruta: '/peticiones?prioridad=Urgente',
+    // La alerta cuenta solo las que siguen abiertas, así que el enlace
+    // tiene que llevar ese mismo recorte: sin él, la pantalla abría con
+    // las 139 urgentes de siempre y las 17 pendientes se perdían entre
+    // las ya completadas.
+    ruta: '/peticiones?prioridad=Urgente&pendientes=si',
     tono: 'alerta',
     permisos: [
       'encabezado.alertas.peticiones_prioritarias',
@@ -163,16 +169,54 @@ export const alertasDelUsuario = cache(async (): Promise<Alerta[]> => {
             and ${pide('avisos_pendientes')}::boolean) as avisos_pendientes`,
   )
 
+  // Qué cifra ya revisó esta persona de cada alerta. Mientras el número
+  // no suba, la alerta sigue ahí pero deja de reclamar atención: el
+  // trabajo pendiente no desaparece por haberlo mirado, pero tampoco
+  // tiene por qué volver a gritar cada vez que se abre el sistema.
+  const revisadas = await conTenant(tenant.id, (tx) =>
+    tx<{ clave: string; cifra_vista: number }[]>`
+      select clave, cifra_vista from alertas_vistas where usuario_id = ${uid}`,
+  )
+  const yaVisto = new Map(revisadas.map((r) => [r.clave, r.cifra_vista]))
+
   // Se arma a mano y no con un `...a` para no mandarle al cliente la
   // lista de permisos de cada alerta.
   return visibles
-    .map((a) => ({
-      clave: a.clave,
-      etiqueta: a.etiqueta,
-      apoyo: a.apoyo,
-      ruta: a.ruta,
-      tono: a.tono,
-      cifra: cifras?.[a.clave as keyof Cifras] ?? 0,
-    }))
+    .map((a) => {
+      const cifra = cifras?.[a.clave as keyof Cifras] ?? 0
+      return {
+        clave: a.clave,
+        etiqueta: a.etiqueta,
+        apoyo: a.apoyo,
+        ruta: a.ruta,
+        tono: a.tono,
+        cifra,
+        vista: cifra <= (yaVisto.get(a.clave) ?? -1),
+      }
+    })
     .filter((a) => a.cifra > 0)
 })
+
+/**
+ * Deja constancia de que esta persona ya revisó lo que hay ahora. No
+ * borra nada: si mañana hay una urgente más, la alerta vuelve a
+ * destacarse sola.
+ */
+export async function marcarAlertasRevisadas() {
+  const tenant = await tenantDeLaPeticion()
+  const sesion = await leerSesion()
+  if (!tenant || !sesion) return
+
+  const alertas = await alertasDelUsuario()
+  if (alertas.length === 0) return
+
+  await conTenant(tenant.id, async (tx) => {
+    for (const a of alertas) {
+      await tx`
+        insert into alertas_vistas (tenant_id, usuario_id, clave, cifra_vista, visto_en)
+        values (${tenant.id}, ${sesion.usuarioId}, ${a.clave}, ${a.cifra}, now())
+        on conflict (tenant_id, usuario_id, clave)
+        do update set cifra_vista = excluded.cifra_vista, visto_en = now()`
+    }
+  })
+}

@@ -3,9 +3,16 @@ import 'server-only'
 /**
  * Serializa filas a CSV para Excel en español.
  *
- * Lleva BOM UTF-8 y separador de punto y coma: sin eso, Excel en una
- * máquina con configuración regional de México abre el archivo con los
- * acentos rotos y todas las columnas encimadas en la primera celda.
+ * Tres cosas, y las tres hacen falta:
+ *
+ * - **BOM UTF-8**, o Excel abre los acentos rotos.
+ * - **Punto y coma** como separador, que es lo que espera Excel con
+ *   configuración regional de México.
+ * - **La línea `sep=;` al principio.** El separador correcto no basta: al
+ *   abrir el archivo de un doble clic, Excel usa el de su configuración
+ *   regional y no el del archivo, así que en una máquina en inglés todo
+ *   caía encimado en la primera columna. Esta línea se la impone y
+ *   funciona en cualquier idioma y en Mac.
  */
 export function aCsv(
   columnas: { clave: string; titulo: string }[],
@@ -22,7 +29,7 @@ export function aCsv(
     ...filas.map((f) => columnas.map((c) => escapar(f[c.clave])).join(';')),
   ]
 
-  return '﻿' + lineas.join('\r\n') + '\r\n'
+  return '﻿' + 'sep=;\r\n' + lineas.join('\r\n') + '\r\n'
 }
 
 export function respuestaCsv(contenido: string, nombre: string) {

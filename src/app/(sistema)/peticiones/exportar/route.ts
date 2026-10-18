@@ -26,6 +26,7 @@ export async function GET(peticion: Request) {
   const estatus = texto('estatus')
   const problematica = texto('problematica')
   const prioridad = texto('prioridad')
+  const pendientes = url.searchParams.get('pendientes') === 'si'
 
   const filas = await conTenant(tenant.id, async (tx) => {
     const datos = await tx<Record<string, unknown>[]>`
@@ -62,6 +63,7 @@ export async function GET(peticion: Request) {
         and (${estatus}::text is null or e.descripcion = ${estatus})
         and (${problematica}::text is null or pr.titulo = ${problematica})
         and (${prioridad}::text is null or pri.descripcion = ${prioridad})
+        and (not ${pendientes} or coalesce(e.descripcion, '') not in ('Completada', 'Cancelada'))
       order by p.fecha_apertura desc nulls last`
 
     await tx`
