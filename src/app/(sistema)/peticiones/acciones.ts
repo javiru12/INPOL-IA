@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { conTenant } from '@/lib/db'
 import { leerSesion, tenantDeLaPeticion } from '@/lib/sesion'
 import { guardar } from '@/lib/almacen'
+import { MAXIMO_EN_LOTE } from './limites'
 
 const Seguimiento = z.object({
   peticionId: z.string().uuid(),
@@ -301,4 +302,84 @@ export async function quitarAdjunto(
   if (!peticionId) return { error: 'No encontramos ese adjunto' }
   revalidatePath(`/peticiones/${peticionId}`)
   return { ok: true }
+}
+
+const CambioEnLote = z.object({
+  ids: z.array(z.string().uuid()).min(1, 'No seleccionaste ninguna petición'),
+  estatusId: z.string().uuid({ message: 'Elige a qué estatus moverlas' }),
+})
+
+/**
+ * Cambia el estatus de varias peticiones de una vez.
+ *
+ * Mueve exactamente lo mismo que el cambio de una sola —incluida la
+ * fecha de cierre y el renglón de seguimiento por cada petición— porque
+ * un cambio hecho en lote no es un cambio de segunda: tiene que dejar el
+ * mismo rastro, o el historial de una petición dependerá de cómo la
+ * tocaron.
+ *
+ * Todo va en una transacción: si una falla, no se queda la mitad movida.
+ */
+export async function cambiarEstatusEnLote(
+  _previo: EstadoAccion,
+  datos: FormData,
+): Promise<EstadoAccion & { movidas?: number }> {
+  const tenant = await tenantDeLaPeticion()
+  const sesion = await leerSesion()
+  if (!tenant || !sesion) return { error: 'La sesión expiró. Vuelve a entrar.' }
+
+  const analisis = CambioEnLote.safeParse({
+    ids: datos.getAll('ids').map(String),
+    estatusId: datos.get('estatusId'),
+  })
+  if (!analisis.success) return { error: analisis.error.issues[0].message }
+
+  const { ids, estatusId } = analisis.data
+  if (ids.length > MAXIMO_EN_LOTE) {
+    return { error: `Son demasiadas de una vez. El máximo por tanda es ${MAXIMO_EN_LOTE}.` }
+  }
+
+  const movidas = await conTenant(tenant.id, async (tx) => {
+    const [destino] = await tx<{ descripcion: string }[]>`
+      select descripcion from estatus_peticiones where id = ${estatusId}`
+    if (!destino) return 0
+
+    // El estatus de antes se lee ahora, antes de moverlas: después ya no
+    // habría forma de saber de dónde venía cada una.
+    const antes = await tx<{ id: string; estatus: string | null }[]>`
+      select p.id, e.descripcion as estatus
+      from peticiones p
+      left join estatus_peticiones e on e.id = p.estatus_id
+      where p.id in ${tx(ids)}`
+
+    if (antes.length === 0) return 0
+
+    await tx`
+      update peticiones
+         set estatus_id = ${estatusId},
+             fecha_cierre = case when ${destino.descripcion} = 'Completada'
+                                 then coalesce(fecha_cierre, now()) else null end
+       where id in ${tx(antes.map((a) => a.id))}`
+
+    for (const a of antes) {
+      await tx`
+        insert into peticion_seguimientos
+          (tenant_id, peticion_id, usuario_id, tipo, detalle, estatus_anterior, estatus_nuevo)
+        values (${tenant.id}, ${a.id}, ${sesion.usuarioId}, 'cambio_estatus',
+                ${`Cambió el estatus a «${destino.descripcion}» junto con otras ${antes.length - 1}`},
+                ${a.estatus ?? null}, ${destino.descripcion})`
+    }
+
+    await tx`
+      insert into bitacora (tenant_id, usuario_id, accion, entidad, detalle)
+      values (${tenant.id}, ${sesion.usuarioId}, 'cambio', 'peticiones',
+              ${tx.json({ enLote: antes.length, a: destino.descripcion })})`
+
+    return antes.length
+  })
+
+  if (movidas === 0) return { error: 'No se encontró ninguna de esas peticiones' }
+
+  revalidatePath('/peticiones')
+  return { ok: true, movidas }
 }

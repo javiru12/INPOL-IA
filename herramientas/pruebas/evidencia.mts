@@ -82,6 +82,15 @@ const [fila] = await sql<{ id: string; clase: string; momento: string; bytes: st
   where tenant_id = ${t.id} and peticion_id = ${peticion.id} and activo`
 revisar('se registró en la base', Boolean(fila), fila ? `${fila.clase} · ${fila.momento} · ${fila.bytes} bytes` : '')
 
+// La imagen del adjunto y su renglón en el historial no llegan a la
+// pantalla a la vez, así que hay que esperar al texto en vez de darlo por
+// puesto en cuanto se ve la foto.
+await p
+  .waitForFunction(() => document.body.innerText.includes('Adjuntó una foto'), {
+    timeout: 20000,
+  })
+  .catch(() => {})
+
 revisar('quedó anotado en el historial de la petición',
   (await p.$eval('body', (b) => b.innerText)).includes('Adjuntó una foto'))
 

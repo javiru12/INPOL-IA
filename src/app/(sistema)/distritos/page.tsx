@@ -242,7 +242,9 @@ function FilaDeDistrito({
       <td className="num font-medium" style={{ color: colorMargen }}>
         {d.margen === null ? '—' : `${d.margen.toFixed(1)}`}
         {d.margen !== null && d.segundo && (
-          <span className="clave ml-1 font-normal">sobre {nombreDeFuerza(d.segundo)}</span>
+          <span className="clave ml-1 hidden font-normal 2xl:inline">
+            sobre {nombreDeFuerza(d.segundo)}
+          </span>
         )}
       </td>
       <td className="num">
