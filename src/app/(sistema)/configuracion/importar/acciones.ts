@@ -133,8 +133,9 @@ export async function importar(_previo: Resultado, datos: FormData): Promise<Res
     const marca = `${fuente}${baseLegal ? ` · ${baseLegal}` : ''}`
     let n = 0
 
-    for (let i = 0; i < registros.length; i += 300) {
-      const tanda = registros.slice(i, i + 300)
+    const porVez = porSentencia(destino)
+    for (let i = 0; i < registros.length; i += porVez) {
+      const tanda = registros.slice(i, i + porVez)
       n += await meter(tx, destino, tanda, tenant.id, tenant.estado_id, marca, sesion.usuarioId)
     }
 
@@ -164,6 +165,23 @@ export async function importar(_previo: Resultado, datos: FormData): Promise<Res
  * pasan. Lo usan tanto la carga de un archivo chico como la de lotes,
  * para que una fila se rechace por la misma razón en los dos caminos.
  */
+/**
+ * Cuántos registros entran en una sentencia.
+ *
+ * El límite duro es el de parámetros del protocolo de Postgres, 65,535.
+ * Se deja la mitad de margen y se divide entre las columnas del
+ * destino, porque cada columna de cada fila es un parámetro.
+ *
+ * El número anterior era 300 fijo, y eso costaba caro en la nube: un
+ * lote de cinco mil filas hacía diecisiete viajes de ida y vuelta a la
+ * base, y a cien milisegundos cada uno eso era casi todo el tiempo de
+ * la carga. De 300 a varios miles por sentencia, los viajes bajan en la
+ * misma proporción.
+ */
+function porSentencia(destino: Destino) {
+  return Math.max(200, Math.floor(30000 / Math.max(1, destino.campos.length)))
+}
+
 function validar(destino: Destino, mapeo: Record<string, number>, filas: string[][]) {
   const rechazos = new Map<string, number>()
   const rechazar = (motivo: string) => rechazos.set(motivo, (rechazos.get(motivo) ?? 0) + 1)
@@ -442,9 +460,10 @@ export async function cargarLote(
 
     const marca = `${imp.fuente}${imp.base_legal ? ` · ${imp.base_legal}` : ''}`
     let n = 0
-    for (let i = 0; i < validas.length; i += 300) {
+    const porVez = porSentencia(destino)
+    for (let i = 0; i < validas.length; i += porVez) {
       n += await meter(
-        tx, destino, validas.slice(i, i + 300),
+        tx, destino, validas.slice(i, i + porVez),
         tenant.id, tenant.estado_id, marca, sesion.usuarioId,
       )
     }
