@@ -91,14 +91,9 @@ export async function importar(_previo: Resultado, datos: FormData): Promise<Res
   const fuente = String(datos.get('fuente') ?? '').trim()
   if (fuente.length < 3) return { error: 'Di de dónde salió este archivo.' }
 
+  // Opcional: si quien carga anota el convenio o acuerdo, se guarda con
+  // la importación y viaja en la marca de cada fila. No detiene la carga.
   const baseLegal = String(datos.get('baseLegal') ?? '').trim()
-  if (destino.personal && baseLegal.length < 5) {
-    return {
-      error:
-        'Este archivo trae datos personales. Escribe con qué autorización se tratan ' +
-        '—convenio, acuerdo o la facultad legal que lo ampara— antes de cargarlo.',
-    }
-  }
 
   // El mapeo viaja como «campo:columna» por cada campo asignado.
   const mapeo: Record<string, number> = {}
@@ -383,13 +378,6 @@ export async function abrirImportacion(datos: {
   const destino = destinoPorClave(datos.destino)
   if (!destino) return { error: 'Destino desconocido.' }
   if (datos.fuente.trim().length < 3) return { error: 'Di de dónde salió este archivo.' }
-  if (destino.personal && datos.baseLegal.trim().length < 5) {
-    return {
-      error:
-        'Este archivo trae datos personales. Escribe con qué autorización se tratan ' +
-        '—convenio, acuerdo o la facultad legal que lo ampara— antes de cargarlo.',
-    }
-  }
 
   const [fila] = await conTenant(tenant.id, (tx) =>
     tx<{ id: string }[]>`

@@ -71,6 +71,7 @@ export function FormaImportar() {
   const [avisos, setAvisos] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [leyendo, setLeyendo] = useState(false)
+  const [arrastrando, setArrastrando] = useState(false)
   const [avance, setAvance] = useState<Avance | null>(null)
   const [terminado, setTerminado] = useState<Avance | null>(null)
   const cancelar = useRef(false)
@@ -270,7 +271,8 @@ export function FormaImportar() {
         {terminado.rechazadas > 0 ? (
           <>
             <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-              {terminado.rechazadas.toLocaleString('es-MX')} se quedaron fuera:
+              {terminado.rechazadas.toLocaleString('es-MX')}{' '}
+              {terminado.rechazadas === 1 ? 'se quedó fuera' : 'se quedaron fuera'}:
             </p>
             <ul className="space-y-0.5">
               {Object.entries(terminado.motivos).map(([m, n]) => (
@@ -297,8 +299,38 @@ export function FormaImportar() {
   }
 
   // ---- Captura ------------------------------------------------------
+  // Los tres pasos se enseñan desde el principio, aunque dos estén
+  // apagados: al abrir solo se veía «1 · Qué traes» y quien va a subir
+  // un padrón entero no sabía si le faltaba un paso o siete.
+  const paso = cabecera && d ? 2 : 1
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
+      <ol className="flex flex-wrap items-center gap-2 text-[var(--text-menuda)]">
+        {['Qué traes', 'Qué entendí', 'De dónde salió'].map((t, i) => {
+          const n = i + 1
+          const hecho = n < paso
+          const aqui = n === paso
+          return (
+            <li key={t} className="flex items-center gap-2">
+              {i > 0 && <span aria-hidden="true" className="w-6 border-t border-[var(--color-borde)]" />}
+              <span
+                className={`grid h-5 w-5 place-items-center rounded-full text-[length:var(--text-micro)] font-semibold ${
+                  aqui
+                    ? 'bg-[var(--color-acento)] text-white'
+                    : hecho
+                      ? 'bg-[var(--color-exito-suave)] text-[var(--color-exito)]'
+                      : 'bg-[var(--color-superficie-2)] text-[var(--color-tinta-3)] ring-1 ring-[var(--color-borde)]'
+                }`}
+              >
+                {hecho ? '✓' : n}
+              </span>
+              <span className={aqui ? 'font-medium' : 'text-[var(--color-tinta-3)]'}>{t}</span>
+            </li>
+          )
+        })}
+      </ol>
+
       <section className="panel space-y-3 px-4 py-4">
         <h2 className="text-[var(--text-base)] font-semibold">1 · Qué traes</h2>
 
@@ -323,27 +355,47 @@ export function FormaImportar() {
           <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">{d.descripcion}</p>
         )}
 
-        <label className="block">
-          <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
-            Archivo
-          </span>
+        {/* El control de archivo del navegador es gris, chico y dice
+            «Sin archivos seleccionados». Es la acción más importante de
+            la pantalla: merece sitio y aceptar que le arrastren encima. */}
+        <label
+          onDragOver={(e) => { e.preventDefault(); setArrastrando(true) }}
+          onDragLeave={() => setArrastrando(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setArrastrando(false)
+            const f = e.dataTransfer.files?.[0]
+            if (f) { setArchivo(f); setCabecera(null) }
+          }}
+          className={`block cursor-pointer rounded-[var(--radius-md)] border border-dashed px-4 py-7 text-center transition-colors ${
+            arrastrando
+              ? 'border-[var(--color-acento)] bg-[var(--color-acento-suave)]'
+              : 'border-[var(--color-borde-fuerte)] hover:border-[var(--color-acento-borde)] hover:bg-[var(--color-superficie-2)]'
+          }`}
+        >
           <input
             type="file"
             name="archivo"
             accept=".xlsx,.csv,.txt,.dbf"
             onChange={(e) => { setArchivo(e.target.files?.[0] ?? null); setCabecera(null) }}
-            className="campo !h-auto py-1.5 text-[var(--text-menuda)]"
+            className="sr-only"
           />
-          <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-            CSV o DBF sin límite de tamaño · Excel hasta {TOPE_XLSX / 1024 ** 2} MB
-          </span>
+          {archivo ? (
+            <>
+              <p className="font-medium">{archivo.name}</p>
+              <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                {(archivo.size / 1024 ** 2).toFixed(1)} MB · elige otro si te equivocaste
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">Arrastra el archivo aquí o haz clic para buscarlo</p>
+              <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                CSV o DBF sin límite de tamaño · Excel hasta {TOPE_XLSX / 1024 ** 2} MB
+              </p>
+            </>
+          )}
         </label>
-
-        {archivo && (
-          <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-            {archivo.name} · {(archivo.size / 1024 ** 2).toFixed(1)} MB
-          </p>
-        )}
 
         <button
           type="button"
@@ -383,38 +435,58 @@ export function FormaImportar() {
           ))}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {d.campos.map((c) => (
-              <label key={c.clave} className="block">
-                <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
-                  {c.etiqueta}{' '}
-                  {c.requerido && <span style={{ color: 'var(--color-alerta)' }}>*</span>}
-                </span>
-                <select
-                  value={mapeo[c.clave] ?? ''}
-                  onChange={(e) =>
-                    setMapeo((m) => {
-                      const n = { ...m }
-                      if (e.target.value === '') delete n[c.clave]
-                      else n[c.clave] = Number(e.target.value)
-                      return n
-                    })
-                  }
-                  className="campo"
-                >
-                  <option value="">— no viene en el archivo —</option>
-                  {cabecera.encabezados.map((h, i) => (
-                    <option key={`${h}-${i}`} value={i}>{h}</option>
-                  ))}
-                </select>
-              </label>
-            ))}
+            {d.campos.map((c) => {
+              // El primer valor real de la columna elegida. Es lo único
+              // que deja cachar que «TEL_CEL» acabó en el campo de CURP
+              // antes de cargar el archivo entero.
+              const col = mapeo[c.clave]
+              const ejemplo =
+                col === undefined
+                  ? null
+                  : cabecera.muestra.map((f) => f[col]).find((v) => v && v.trim() !== '')
+              return (
+                <label key={c.clave} className="block">
+                  <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
+                    {c.etiqueta}{' '}
+                    {c.requerido && <span style={{ color: 'var(--color-alerta)' }}>*</span>}
+                  </span>
+                  <select
+                    value={mapeo[c.clave] ?? ''}
+                    onChange={(e) =>
+                      setMapeo((m) => {
+                        const n = { ...m }
+                        if (e.target.value === '') delete n[c.clave]
+                        else n[c.clave] = Number(e.target.value)
+                        return n
+                      })
+                    }
+                    className="campo"
+                  >
+                    <option value="">— no viene en el archivo —</option>
+                    {cabecera.encabezados.map((h, i) => (
+                      <option key={`${h}-${i}`} value={i}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="mt-1 block truncate text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                    {col === undefined
+                      ? 'No se va a llenar'
+                      : ejemplo
+                        ? `Va a entrar: ${ejemplo}`
+                        : 'Esa columna viene vacía en las primeras filas'}
+                  </span>
+                </label>
+              )
+            })}
           </div>
 
+          {/* Abierto, no escondido tras un desplegable: es lo que deja
+              ver que una columna cayó en el campo equivocado, y nadie
+              abre un desplegable que no sabe que necesita. */}
           {cabecera.muestra.length > 0 && (
-            <details className="rounded-[var(--radius-sm)] border border-[var(--color-borde)]">
-              <summary className="cursor-pointer px-3 py-2 text-[var(--text-menuda)] font-medium">
-                Ver las primeras filas del archivo
-              </summary>
+            <div className="overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-borde)]">
+              <p className="border-b border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-3 py-2 text-[var(--text-menuda)] font-medium">
+                Las primeras filas de tu archivo, tal como vienen
+              </p>
               <Tabla>
                 <thead>
                   <tr>
@@ -433,7 +505,7 @@ export function FormaImportar() {
                   ))}
                 </tbody>
               </Tabla>
-            </details>
+            </div>
           )}
 
           <h2 className="pt-1 text-[var(--text-base)] font-semibold">3 · De dónde salió</h2>
@@ -449,27 +521,23 @@ export function FormaImportar() {
               className="campo"
             />
             <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-              Queda guardado en cada fila. Un dato sin procedencia no se puede explicar después.
+              Queda guardado en cada fila, para saber después de qué corte salió cada dato.
             </span>
           </label>
 
-          {d.personal && (
-            <label className="block">
-              <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
-                Con qué autorización <span style={{ color: 'var(--color-alerta)' }}>*</span>
-              </span>
-              <input
-                name="baseLegal"
-                required
-                placeholder="Convenio SG/2026/014, cláusula tercera"
-                className="campo"
-              />
-              <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                Este archivo trae datos de personas. Escribe el convenio, acuerdo o facultad
-                legal que ampara su tratamiento: queda en la bitácora con tu nombre.
-              </span>
-            </label>
-          )}
+          <label className="block">
+            <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
+              Referencia <span className="font-normal text-[var(--color-tinta-3)]">(opcional)</span>
+            </span>
+            <input
+              name="baseLegal"
+              placeholder="Convenio SG/2026/014, oficio, acuerdo…"
+              className="campo"
+            />
+            <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+              Si este archivo viene de un convenio u oficio, anótalo y se guarda junto a la carga.
+            </span>
+          </label>
 
           <button type="submit" className="boton boton-primario">
             Cargar los datos

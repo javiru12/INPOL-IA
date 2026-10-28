@@ -78,7 +78,7 @@ export const DESTINOS: Destino[] = [
   {
     clave: 'ext_buro_credito',
     etiqueta: 'Historial crediticio por CURP',
-    descripcion: 'Nivel y puntaje. Exige autorización expresa de cada persona (LRSIC art. 28).',
+    descripcion: 'Nivel y puntaje crediticio, para cruzar por CURP.',
     tabla: 'ext_buro_credito',
     personal: true,
     campos: [
@@ -102,8 +102,7 @@ export const DESTINOS: Destino[] = [
   {
     clave: 'ext_salario_region',
     etiqueta: 'Salario promedio por región',
-    descripcion:
-      'Agregado por distrito o municipio. Un promedio no identifica a nadie, así que no pide base legal.',
+    descripcion: 'Agregado por distrito o municipio, no por persona.',
     tabla: 'ext_salario_region',
     personal: false,
     campos: [

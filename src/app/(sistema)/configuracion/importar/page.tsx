@@ -72,11 +72,11 @@ export default async function Importar() {
     >
       <FormaImportar />
 
-      <section className="panel mt-3 overflow-hidden">
+      <section className="panel mt-6 overflow-hidden">
         <div className="border-b border-[var(--color-borde)] px-4 py-3">
           <h2 className="text-[var(--text-base)] font-semibold">Qué se ha cargado</h2>
           <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-            Cada carga queda registrada con quién la hizo y con qué autorización.
+            Cada carga queda registrada con quién la hizo, de dónde salió y cuántas filas entraron.
           </p>
         </div>
         {historial.length === 0 ? (
@@ -91,7 +91,7 @@ export default async function Importar() {
                 <th>Archivo</th>
                 <th>Fue a</th>
                 <th>Fuente</th>
-                <th className="hidden xl:table-cell">Autorización</th>
+                <th className="hidden xl:table-cell">Referencia</th>
                 <th>Quién</th>
                 <th className="num">Cargadas</th>
                 <th className="num">Fuera</th>
@@ -110,9 +110,9 @@ export default async function Importar() {
                   <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
                     {destinoPorClave(h.destino)?.etiqueta ?? h.destino}
                   </td>
-                  {/* Fuente y autorización pueden ser largas: se
-                      encogen con el texto completo en el título, en vez
-                      de partirse en cuatro renglones. */}
+                  {/* Fuente y referencia pueden ser largas: se encogen
+                      con el texto completo en el título, en vez de
+                      partirse en cuatro renglones. */}
                   <td className="w-full max-w-0 text-[var(--color-tinta-2)]">
                     <span className="block truncate" title={h.fuente}>
                       {h.fuente}
@@ -120,7 +120,7 @@ export default async function Importar() {
                   </td>
                   <td className="hidden max-w-[14rem] xl:table-cell text-[var(--color-tinta-2)]">
                     <span className="block truncate" title={h.base_legal ?? ''}>
-                      {h.base_legal ?? <span className="text-[var(--color-tinta-3)]">No aplica</span>}
+                      {h.base_legal ?? <span className="text-[var(--color-tinta-3)]">—</span>}
                     </span>
                   </td>
                   <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
