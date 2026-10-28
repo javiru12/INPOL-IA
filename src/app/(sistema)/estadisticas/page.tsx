@@ -24,6 +24,15 @@ import { FilaAbrible } from '@/components/fila-abrible'
 
 export const metadata: Metadata = { title: 'Estadísticas' }
 
+/** Las preguntas que responde la pantalla, una por pestaña. */
+const PESTANAS = [
+  { llave: 'ritmo', texto: 'Ritmo y cumplimiento' },
+  { llave: 'equipo', texto: 'Cómo va cada quien' },
+  { llave: 'demanda', texto: 'De dónde llega y quién pide' },
+] as const
+
+type Vista = (typeof PESTANAS)[number]['llave']
+
 /** Etapas ordenadas: rampa de un tono, más avanzada más oscura. */
 const EMBUDO = [RAMPA_SECUENCIAL[2], RAMPA_SECUENCIAL[4], RAMPA_SECUENCIAL[6]]
 /** Mediana y percentil 90 son la misma medida en dos puntos: un tono, dos pasos. */
@@ -146,6 +155,20 @@ export default async function Estadisticas({
     return `/estadisticas?${q.toString()}`
   }
 
+  // La pestaña viaja en la URL, igual que los filtros: un tablero se
+  // manda por mensaje y tiene que abrir donde lo dejaste.
+  const vista: Vista = PESTANAS.some((t) => t.llave === sp.vista)
+    ? (sp.vista as Vista)
+    : 'ritmo'
+
+  const enlacePestana = (llave: Vista) => {
+    const q = new URLSearchParams(base)
+    q.delete('vista')
+    if (llave !== 'ritmo') q.set('vista', llave)
+    const cola = q.toString()
+    return cola ? `/estadisticas?${cola}` : '/estadisticas'
+  }
+
   const fuentes = agruparCola(r.porFuente, 8)
   const dependencias = agruparCola(r.porDependencia, 8)
   const totalFuente = r.porFuente.reduce((s, f) => s + f.valor, 0)
@@ -169,6 +192,11 @@ export default async function Estadisticas({
     >
       {filtros}
 
+      {/* Esta pantalla era una tira de nueve bloques parecidos: para
+          llegar a «quién pide» había que pasar por delante de todo lo
+          demás. Cada pestaña responde una pregunta distinta, y las
+          cuatro cifras de arriba se quedan en las tres porque son el
+          encabezado, no una sección. */}
       <div className="franja">
         <Indicador
           etiqueta="Peticiones capturadas"
@@ -199,6 +227,24 @@ export default async function Estadisticas({
         />
       </div>
 
+      <nav className="mt-6 flex items-center gap-1 border-b border-[var(--color-borde)]">
+        {PESTANAS.map((t) => (
+          <Link
+            key={t.llave}
+            href={enlacePestana(t.llave)}
+            className={`-mb-px border-b-2 px-3 py-2 text-[var(--text-menuda)] font-medium transition-colors ${
+              vista === t.llave
+                ? 'border-[var(--color-acento)] text-[var(--color-acento-fuerte)]'
+                : 'border-transparent text-[var(--color-tinta-2)] hover:text-[var(--color-tinta)]'
+            }`}
+          >
+            {t.texto}
+          </Link>
+        ))}
+      </nav>
+
+      {vista === 'ritmo' && (
+        <>
       {/* 1 · ¿Estamos mejorando o empeorando? ------------------------- */}
       <section className="panel mt-3 px-4 py-3.5">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -394,7 +440,11 @@ export default async function Estadisticas({
         </section>
       </div>
 
-      {/* 3 · ¿Cómo va cada quien? ------------------------------------ */}
+        </>
+      )}
+
+      {vista === 'equipo' && (
+      /* 3 · ¿Cómo va cada quien? ------------------------------------ */
       <section className="panel mt-3 overflow-hidden">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
           <h2 className="text-[var(--text-base)] font-semibold">Cómo va cada responsable</h2>
@@ -470,6 +520,10 @@ export default async function Estadisticas({
         )}
       </section>
 
+      )}
+
+      {vista === 'demanda' && (
+        <>
       {/* 4 · ¿De dónde llega la demanda? ----------------------------- */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <section className="panel px-4 py-3.5">
@@ -558,7 +612,8 @@ export default async function Estadisticas({
           </Tabla>
         )}
       </section>
-
+        </>
+      )}
     </Pagina>
   )
 }
