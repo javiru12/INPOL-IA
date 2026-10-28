@@ -17,7 +17,13 @@ function opcionesPerfil(perfiles: Perfil[]) {
 }
 
 /** Alta. La contraseña entra aquí y sale cifrada: nunca se guarda en claro. */
-export function AltaUsuario({ perfiles }: { perfiles: Perfil[] }) {
+export function AltaUsuario({
+  perfiles,
+  posiblesJefes,
+}: {
+  perfiles: Perfil[]
+  posiblesJefes: { id: string; nombre: string; perfil: string | null }[]
+}) {
   const [estado, accion] = useActionState<EstadoAccion, FormData>(crearUsuario, {})
 
   return (
@@ -59,6 +65,19 @@ export function AltaUsuario({ perfiles }: { perfiles: Perfil[] }) {
           ayuda="El perfil decide qué módulos ve y qué puede tocar en cada uno."
         />
 
+        {/* De quién depende. Se captura al dar de alta y no después:
+            una persona sin lugar en el organigrama no aparece en el
+            árbol y nadie se acuerda de volver a ponerla. */}
+        <Selector
+          nombre="responsable"
+          etiqueta="Depende de"
+          vacio="Nadie — es cabeza de la estructura"
+          opciones={posiblesJefes.map((j) => ({
+            valor: j.id,
+            texto: j.perfil ? `${j.nombre} · ${j.perfil}` : j.nombre,
+          }))}
+        />
+
         <Campo
           nombre="contrasena"
           etiqueta="Contraseña inicial"
@@ -85,18 +104,24 @@ export type DatosUsuario = {
   puesto: string | null
   telefono_movil: string | null
   activo: boolean
+  usuario_responsable_id: string | null
 }
 
 /** Edición: datos y perfil, estado de acceso y restablecimiento de contraseña. */
 export function EdicionUsuario({
   usuario,
   perfiles,
+  posiblesJefes,
+  cuelga,
   esUnoMismo,
   puedeCambiar,
   puedeDarDeBaja,
 }: {
   usuario: DatosUsuario
   perfiles: Perfil[]
+  posiblesJefes: { id: string; nombre: string; perfil: string | null }[]
+  /** Qué queda colgando si se le da de baja. */
+  cuelga: { equipo: number; peticiones: number; actividades: number }
   esUnoMismo: boolean
   puedeCambiar: boolean
   puedeDarDeBaja: boolean
@@ -106,6 +131,7 @@ export function EdicionUsuario({
       <FormaDatos
         usuario={usuario}
         perfiles={perfiles}
+        posiblesJefes={posiblesJefes}
         esUnoMismo={esUnoMismo}
         puedeCambiar={puedeCambiar}
       />
@@ -113,6 +139,8 @@ export function EdicionUsuario({
       <div className="space-y-3">
         <FormaEstado
           usuario={usuario}
+          posiblesJefes={posiblesJefes}
+          cuelga={cuelga}
           esUnoMismo={esUnoMismo}
           puedeDarDeBaja={puedeDarDeBaja}
         />
@@ -125,11 +153,13 @@ export function EdicionUsuario({
 function FormaDatos({
   usuario,
   perfiles,
+  posiblesJefes,
   esUnoMismo,
   puedeCambiar,
 }: {
   usuario: DatosUsuario
   perfiles: Perfil[]
+  posiblesJefes: { id: string; nombre: string; perfil: string | null }[]
   esUnoMismo: boolean
   puedeCambiar: boolean
 }) {
@@ -154,10 +184,34 @@ function FormaDatos({
         />
       </div>
 
+      {/* El correo se puede cambiar: la gente cambia de dirección y
+          antes había que dar de baja y volver a dar de alta, lo que
+          rompía el historial de esa persona. */}
+      <Campo
+        nombre="correo"
+        etiqueta="Correo"
+        tipo="email"
+        valor={usuario.correo}
+        requerido
+      />
+
       <div className="grid gap-3 sm:grid-cols-2">
         <Campo nombre="telefono" etiqueta="Teléfono móvil" tipo="tel" valor={usuario.telefono_movil} />
         <Campo nombre="puesto" etiqueta="Puesto" valor={usuario.puesto} />
       </div>
+
+      <Selector
+        nombre="responsable"
+        etiqueta="Depende de"
+        valor={usuario.usuario_responsable_id ?? ''}
+        vacio="Nadie — es cabeza de la estructura"
+        opciones={posiblesJefes
+          .filter((j) => j.id !== usuario.id)
+          .map((j) => ({
+            valor: j.id,
+            texto: j.perfil ? `${j.nombre} · ${j.perfil}` : j.nombre,
+          }))}
+      />
 
       <Selector
         nombre="perfil"
@@ -193,14 +247,19 @@ function FormaDatos({
  */
 function FormaEstado({
   usuario,
+  posiblesJefes,
+  cuelga,
   esUnoMismo,
   puedeDarDeBaja,
 }: {
   usuario: DatosUsuario
+  posiblesJefes: { id: string; nombre: string; perfil: string | null }[]
+  cuelga: { equipo: number; peticiones: number; actividades: number }
   esUnoMismo: boolean
   puedeDarDeBaja: boolean
 }) {
   const [estado, accion] = useActionState<EstadoAccion, FormData>(cambiarEstadoUsuario, {})
+  const pendiente = cuelga.equipo + cuelga.peticiones + cuelga.actividades
 
   return (
     <form action={accion} className="panel space-y-3 px-4 py-4">
@@ -213,6 +272,41 @@ function FormaEstado({
           ? 'Puede entrar al sistema con su correo y contraseña.'
           : 'No puede entrar. Su historial y sus peticiones siguen intactos.'}
       </p>
+
+      {/* Si de esta persona cuelga gente o trabajo sin cerrar, hay que
+          decir quién se hace cargo antes de darla de baja. Si no, su
+          equipo se queda sin jefe en el organigrama y sus pendientes
+          sin dueño: no desaparecen, solo dejan de estar en la bandeja
+          de alguien y nadie se entera hasta que el ciudadano reclama. */}
+      {usuario.activo && pendiente > 0 && (
+        <div
+          className="space-y-2 rounded-[var(--radius-sm)] px-3 py-2.5"
+          style={{ background: 'var(--color-aviso-suave)' }}
+        >
+          <p className="text-[var(--text-menuda)]" style={{ color: 'var(--color-aviso)' }}>
+            De esta persona cuelgan{' '}
+            {[
+              cuelga.equipo && `${cuelga.equipo} del equipo`,
+              cuelga.peticiones && `${cuelga.peticiones} peticiones sin resolver`,
+              cuelga.actividades && `${cuelga.actividades} actividades`,
+            ]
+              .filter(Boolean)
+              .join(', ')}
+            .
+          </p>
+          <Selector
+            nombre="sucesor"
+            etiqueta="Quién se hace cargo"
+            vacio="Elige a alguien…"
+            opciones={posiblesJefes
+              .filter((j) => j.id !== usuario.id)
+              .map((j) => ({
+                valor: j.id,
+                texto: j.perfil ? `${j.nombre} · ${j.perfil}` : j.nombre,
+              }))}
+          />
+        </div>
+      )}
 
       <Aviso estado={estado} />
 

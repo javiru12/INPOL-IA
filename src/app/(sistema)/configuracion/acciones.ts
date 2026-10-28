@@ -114,6 +114,8 @@ const DatosUsuario = {
   perfil: z.string().trim().min(1, 'Elige un perfil'),
   telefono: opcional(30),
   puesto: opcional(120),
+  // De quién depende en el organigrama. Vacío = es cabeza.
+  responsable: z.string().trim().optional(),
 }
 
 const NuevoUsuario = z.object({
@@ -122,7 +124,13 @@ const NuevoUsuario = z.object({
   contrasena: CONTRASENA,
 })
 
-const CambioUsuario = z.object({ ...DatosUsuario, id: z.string().uuid() })
+const CambioUsuario = z.object({
+  ...DatosUsuario,
+  id: z.string().uuid(),
+  // El correo sí se puede cambiar al editar: la gente cambia de
+  // dirección y antes había que dar de baja y volver a dar de alta.
+  correo: z.string().trim().toLowerCase().email('El correo no es válido'),
+})
 
 async function perfilExiste(clave: string) {
   const [p] = await sinTenant<{ clave: string }[]>`
@@ -152,10 +160,12 @@ export async function crearUsuario(
       const [u] = await tx<{ id: string }[]>`
         insert into usuarios
           (tenant_id, perfil_clave, nombre, apellido_paterno, apellido_materno,
-           correo, contrasena_hash, telefono_movil, puesto, creado_por)
+           correo, contrasena_hash, telefono_movil, puesto, creado_por,
+           usuario_responsable_id)
         values (${ctx.tenantId}, ${d.perfil}, ${d.nombre}, ${d.apellidoPaterno ?? null},
                 ${d.apellidoMaterno ?? null}, ${d.correo}, ${hash},
-                ${d.telefono ?? null}, ${d.puesto ?? null}, ${ctx.usuarioId})
+                ${d.telefono ?? null}, ${d.puesto ?? null}, ${ctx.usuarioId},
+                ${d.responsable || null}::uuid)
         returning id`
 
       await anotar(tx, ctx, 'alta', 'usuarios', u.id, {
@@ -230,6 +240,11 @@ export async function actualizarUsuario(
           apellido_materno = ${d.apellidoMaterno ?? null},
           telefono_movil = ${d.telefono ?? null},
           puesto = ${d.puesto ?? null},
+          correo = ${d.correo},
+          -- El disparador de la base rechaza los círculos, incluido el
+          -- de vuelta larga: si A manda a B y B a C, poner a C de jefe
+          -- de A no pasa.
+          usuario_responsable_id = ${d.responsable || null}::uuid,
           actualizado_por = ${ctx.usuarioId}
       where id = ${d.id}`
 
@@ -251,6 +266,8 @@ export async function actualizarUsuario(
 const EstadoUsuario = z.object({
   id: z.string().uuid(),
   activo: z.enum(['true', 'false']),
+  // A quién le queda su gente y su trabajo pendiente al darlo de baja.
+  sucesor: z.string().trim().optional(),
 })
 
 export async function cambiarEstadoUsuario(
@@ -264,6 +281,7 @@ export async function cambiarEstadoUsuario(
   if (!analisis.success) return { error: 'No se entendió qué hacer con el usuario.' }
   const { id } = analisis.data
   const activar = analisis.data.activo === 'true'
+  const sucesor = analisis.data.sucesor || null
 
   const resultado = await conTenant(ctx.tenantId, async (tx) => {
     const [antes] = await tx<{ perfil_clave: string; activo: boolean; correo: string }[]>`
@@ -296,25 +314,136 @@ export async function cambiarEstadoUsuario(
       }
     }
 
+    // Lo que cuelga de esta persona. Darla de baja sin mover esto deja
+    // a su gente sin jefe en el organigrama y sus pendientes sin dueño:
+    // no desaparecen, simplemente dejan de aparecer en la bandeja de
+    // alguien y nadie se entera hasta que el ciudadano reclama.
+    let traspaso = { equipo: 0, peticiones: 0, actividades: 0 }
+
+    if (!activar) {
+      const [cuelga] = await tx<{ equipo: number; peticiones: number; actividades: number }[]>`
+        select
+          (select count(*) from usuarios
+            where usuario_responsable_id = ${id} and activo)::int as equipo,
+          (select count(*) from peticiones p
+            join operadores o on o.id = p.operador_id
+            left join estatus_peticiones e on e.id = p.estatus_id
+            where o.usuario_id = ${id}
+              and coalesce(e.descripcion, '') not in ('Completada', 'Cancelada'))::int as peticiones,
+          (select count(*) from eventos where usuario_responsable_id = ${id})::int
+          + (select count(*) from recorridos where usuario_responsable_id = ${id})::int
+          as actividades`
+
+      const pendiente = cuelga.equipo + cuelga.peticiones + cuelga.actividades
+
+      if (pendiente > 0 && !sucesor) {
+        const partes = [
+          cuelga.equipo && `${cuelga.equipo} persona(s) a su cargo`,
+          cuelga.peticiones && `${cuelga.peticiones} petición(es) sin resolver`,
+          cuelga.actividades && `${cuelga.actividades} actividad(es)`,
+        ].filter(Boolean)
+        return {
+          error:
+            `Tiene ${partes.join(', ')}. Elige quién se hace cargo antes de ` +
+            'darlo de baja: si no, su gente se queda sin jefe en el ' +
+            'organigrama y sus pendientes sin dueño.',
+        }
+      }
+
+      if (sucesor) {
+        if (sucesor === id) return { error: 'No se puede traspasar a sí mismo.' }
+        const [quien] = await tx<{ id: string }[]>`
+          select id from usuarios where id = ${sucesor}::uuid and activo`
+        if (!quien) return { error: 'Quien recibe el traspaso no está activo.' }
+
+        // Si quien recibe cuelga de quien se va —el caso normal: se
+        // promueve a alguien de su propio equipo— primero hay que
+        // sacarlo de debajo. Si no, al moverle el equipo quedaría
+        // colgando de sí mismo y el disparador rechaza la operación
+        // entera con un mensaje que nadie sabría interpretar.
+        await tx`
+          update usuarios
+          set usuario_responsable_id = (
+            select usuario_responsable_id from usuarios where id = ${id}
+          )
+          where id = ${sucesor}::uuid`
+
+        const equipo = await tx`
+          update usuarios set usuario_responsable_id = ${sucesor}::uuid
+          where usuario_responsable_id = ${id} and activo and id <> ${sucesor}::uuid`
+
+        // Las peticiones se mueven por el operador, que es la figura a
+        // la que están atadas; si quien recibe no tiene ficha de
+        // operador no hay a dónde moverlas y se dice.
+        const [op] = await tx<{ id: string }[]>`
+          select id from operadores where usuario_id = ${sucesor}::uuid limit 1`
+        const peticiones = op
+          ? await tx`
+              update peticiones p
+              set operador_id = ${op.id}
+              from operadores o
+              left join estatus_peticiones e2 on true
+              where o.id = p.operador_id and o.usuario_id = ${id}
+                and coalesce(
+                  (select e.descripcion from estatus_peticiones e where e.id = p.estatus_id),
+                  '') not in ('Completada', 'Cancelada')`
+          : { count: 0 }
+
+        // Las actividades viven en dos tablas según su tipo.
+        const ev = await tx`
+          update eventos set usuario_responsable_id = ${sucesor}::uuid
+          where usuario_responsable_id = ${id}`
+        const re = await tx`
+          update recorridos set usuario_responsable_id = ${sucesor}::uuid
+          where usuario_responsable_id = ${id}`
+        const actividades = { count: ev.count + re.count }
+
+        traspaso = {
+          equipo: equipo.count,
+          peticiones: peticiones.count,
+          actividades: actividades.count,
+        }
+      }
+    }
+
     await tx`
       update usuarios
-      set activo = ${activar}, actualizado_por = ${ctx.usuarioId}
+      set activo = ${activar},
+          -- Quien se va deja de colgar de nadie: si no, sigue
+          -- apareciendo en el árbol bajo su antiguo jefe.
+          usuario_responsable_id = case when ${activar} then usuario_responsable_id else null end,
+          actualizado_por = ${ctx.usuarioId}
       where id = ${id}`
 
     await anotar(tx, ctx, activar ? 'cambio' : 'baja', 'usuarios', id, {
       correo: antes.correo,
       activo: activar,
+      sucesor,
+      traspaso_equipo: traspaso.equipo,
+      traspaso_peticiones: traspaso.peticiones,
+      traspaso_actividades: traspaso.actividades,
     })
 
-    return { ok: true as const }
+    return { ok: true as const, traspaso }
   })
 
   if (resultado.error) return resultado
   revalidatePath('/configuracion')
   revalidatePath(`/configuracion/usuarios/${id}`)
+  const t = 'traspaso' in resultado ? resultado.traspaso : null
+  const movido = t && (t.equipo || t.peticiones || t.actividades)
+    ? ` · se traspasaron ${[
+        t.equipo && `${t.equipo} del equipo`,
+        t.peticiones && `${t.peticiones} peticiones`,
+        t.actividades && `${t.actividades} actividades`,
+      ].filter(Boolean).join(', ')}`
+    : ''
+
   return {
     ok: true,
-    mensaje: activar ? 'El usuario ya puede entrar' : 'El usuario ya no puede entrar',
+    mensaje: activar
+      ? 'El usuario ya puede entrar'
+      : `El usuario ya no puede entrar${movido}`,
   }
 }
 

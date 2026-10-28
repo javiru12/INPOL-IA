@@ -6,7 +6,7 @@ import { exigirAcceso } from '@/lib/acceso'
 import { permisosDelUsuario } from '@/lib/permisos'
 import { Pagina } from '@/components/pagina'
 import { PERMISOS, alcanza } from '../../catalogo'
-import { perfilesActivos } from '../../consultas'
+import { perfilesActivos, jefesPosibles } from '../../consultas'
 import { AltaUsuario } from '../forma'
 
 export const metadata: Metadata = { title: 'Nuevo usuario' }
@@ -23,7 +23,10 @@ export default async function NuevoUsuario() {
     redirect('/sin-acceso?ruta=/configuracion/usuarios/nuevo')
   }
 
-  const perfiles = await perfilesActivos()
+  const [perfiles, posiblesJefes] = await Promise.all([
+    perfilesActivos(),
+    jefesPosibles(tenant.id),
+  ])
 
   return (
     <Pagina
@@ -35,7 +38,7 @@ export default async function NuevoUsuario() {
         </Link>
       }
     >
-      <AltaUsuario perfiles={perfiles} />
+      <AltaUsuario perfiles={perfiles} posiblesJefes={posiblesJefes} />
     </Pagina>
   )
 }

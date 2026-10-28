@@ -58,6 +58,7 @@ export type Usuario = {
   ultimo_acceso: string | null
   creado_en: string | null
   activo: boolean
+  usuario_responsable_id: string | null
 }
 
 export async function usuarioPorId(tenantId: string, id: string) {
@@ -67,7 +68,7 @@ export async function usuarioPorId(tenantId: string, id: string) {
              puesto, telefono_movil, telefono_fijo,
              ultimo_acceso::text as ultimo_acceso,
              creado_en::text as creado_en,
-             activo
+             activo, usuario_responsable_id::text
       from usuarios
       where id = ${id}`,
   )
@@ -308,4 +309,44 @@ export async function datosDelCliente(tenantId: string) {
       where id = ${tenantId}`,
   )
   return t ?? null
+}
+
+/**
+ * Quién puede figurar como jefe de alguien.
+ *
+ * Sale de los usuarios activos del cliente. No se excluyen los que ya
+ * dependen de otro: la estructura tiene varios niveles y un gestor es
+ * jefe de su gente aunque él mismo responda ante alguien. Los círculos
+ * los impide el disparador de la base, no esta lista.
+ */
+export async function jefesPosibles(tenantId: string) {
+  return conTenant(tenantId, (tx) =>
+    tx<{ id: string; nombre: string; perfil: string | null }[]>`
+      select u.id,
+             nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as nombre,
+             p.nombre as perfil
+      from usuarios u
+      left join perfiles p on p.clave = u.perfil_clave
+      where u.activo
+      order by 2`,
+  )
+}
+
+/** Qué queda sin dueño si se da de baja a esta persona. */
+export async function loQueCuelgaDe(tenantId: string, usuarioId: string) {
+  const [r] = await conTenant(tenantId, (tx) =>
+    tx<{ equipo: number; peticiones: number; actividades: number }[]>`
+      select
+        (select count(*) from usuarios
+          where usuario_responsable_id = ${usuarioId} and activo)::int as equipo,
+        (select count(*) from peticiones p
+          join operadores o on o.id = p.operador_id
+          left join estatus_peticiones e on e.id = p.estatus_id
+          where o.usuario_id = ${usuarioId}
+            and coalesce(e.descripcion, '') not in ('Completada', 'Cancelada'))::int as peticiones,
+        (select count(*) from eventos where usuario_responsable_id = ${usuarioId})::int
+          + (select count(*) from recorridos where usuario_responsable_id = ${usuarioId})::int
+          as actividades`,
+  )
+  return r ?? { equipo: 0, peticiones: 0, actividades: 0 }
 }

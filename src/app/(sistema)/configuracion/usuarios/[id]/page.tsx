@@ -7,7 +7,7 @@ import { permisosDelUsuario } from '@/lib/permisos'
 import { Pagina, Distintivo } from '@/components/pagina'
 import { fechaHora, fechaLarga } from '@/lib/formato'
 import { PERMISOS, alcanza } from '../../catalogo'
-import { perfilesActivos, usuarioPorId } from '../../consultas'
+import { perfilesActivos, usuarioPorId, jefesPosibles, loQueCuelgaDe } from '../../consultas'
 import { EdicionUsuario } from '../forma'
 
 export const metadata: Metadata = { title: 'Usuario' }
@@ -25,7 +25,11 @@ export default async function Usuario({ params }: { params: Promise<{ id: string
   if (!usuario) notFound()
 
   const permisos = await permisosDelUsuario()
-  const perfiles = await perfilesActivos()
+  const [perfiles, posiblesJefes, cuelga] = await Promise.all([
+    perfilesActivos(),
+    jefesPosibles(tenant.id),
+    loQueCuelgaDe(tenant.id, id),
+  ])
 
   const nombre =
     [usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno]
@@ -52,6 +56,8 @@ export default async function Usuario({ params }: { params: Promise<{ id: string
       <EdicionUsuario
         usuario={usuario}
         perfiles={perfiles}
+        posiblesJefes={posiblesJefes}
+        cuelga={cuelga}
         esUnoMismo={usuario.id === sesion.usuarioId}
         puedeCambiar={alcanza(permisos, PERMISOS.usuariosCambio)}
         puedeDarDeBaja={alcanza(permisos, PERMISOS.usuariosBaja)}
