@@ -119,43 +119,7 @@ export async function importar(_previo: Resultado, datos: FormData): Promise<Res
     return { error: e instanceof Error ? e.message : 'No pude leer el archivo.' }
   }
 
-  const rechazos = new Map<string, number>()
-  const rechazar = (motivo: string) => rechazos.set(motivo, (rechazos.get(motivo) ?? 0) + 1)
-
-  const registros: Record<string, string | null>[] = []
-  for (const fila of tabla.filas) {
-    const r: Record<string, string | null> = {}
-    let valida = true
-
-    for (const c of destino.campos) {
-      const i = mapeo[c.clave]
-      const bruto = i === undefined ? '' : (fila[i] ?? '').trim()
-
-      if (!bruto) {
-        if (c.requerido) { rechazar(`Sin ${c.etiqueta}`); valida = false; break }
-        r[c.clave] = null
-        continue
-      }
-      if (c.tipo === 'curp') {
-        const v = bruto.toUpperCase()
-        if (!CURP.test(v)) { rechazar('CURP con estructura inválida'); valida = false; break }
-        r[c.clave] = v
-      } else if (c.tipo === 'numero') {
-        const n = Number(bruto.replace(/[^0-9.\-]/g, ''))
-        if (!Number.isFinite(n)) { rechazar(`${c.etiqueta} no es un número`); valida = false; break }
-        r[c.clave] = String(n)
-      } else if (c.tipo === 'fecha') {
-        const v = /^\d{4}-\d{2}-\d{2}$/.test(bruto)
-          ? bruto
-          : (/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(bruto)
-              ? `${RegExp.$3}-${RegExp.$2}-${RegExp.$1}`
-              : null)
-        if (!v) { rechazar(`${c.etiqueta} no es una fecha`); valida = false; break }
-        r[c.clave] = v
-      } else r[c.clave] = bruto
-    }
-    if (valida) registros.push(r)
-  }
+  const { validas: registros, rechazos } = validar(destino, mapeo, tabla.filas)
 
   if (registros.length === 0) {
     return {
@@ -193,6 +157,50 @@ export async function importar(_previo: Resultado, datos: FormData): Promise<Res
     rechazadas: tabla.filas.length - registros.length,
     motivos: [...rechazos].map(([motivo, cuantas]) => ({ motivo, cuantas })),
   }
+}
+
+/**
+ * Convierte filas crudas en registros listos, apartando las que no
+ * pasan. Lo usan tanto la carga de un archivo chico como la de lotes,
+ * para que una fila se rechace por la misma razón en los dos caminos.
+ */
+function validar(destino: Destino, mapeo: Record<string, number>, filas: string[][]) {
+  const rechazos = new Map<string, number>()
+  const rechazar = (motivo: string) => rechazos.set(motivo, (rechazos.get(motivo) ?? 0) + 1)
+  const validas: Record<string, string | null>[] = []
+
+  for (const fila of filas) {
+    const r: Record<string, string | null> = {}
+    let valida = true
+
+    for (const c of destino.campos) {
+      const i = mapeo[c.clave]
+      const bruto = i === undefined ? '' : (fila[i] ?? '').trim()
+
+      if (!bruto) {
+        if (c.requerido) { rechazar(`Sin ${c.etiqueta}`); valida = false; break }
+        r[c.clave] = null
+        continue
+      }
+      if (c.tipo === 'curp') {
+        const v = bruto.toUpperCase()
+        if (!CURP.test(v)) { rechazar('CURP con estructura inválida'); valida = false; break }
+        r[c.clave] = v
+      } else if (c.tipo === 'numero') {
+        const n = Number(bruto.replace(/[^0-9.\-]/g, ''))
+        if (!Number.isFinite(n)) { rechazar(`${c.etiqueta} no es un número`); valida = false; break }
+        r[c.clave] = String(n)
+      } else if (c.tipo === 'fecha') {
+        const iso = /^\d{4}-\d{2}-\d{2}$/.test(bruto) ? bruto : null
+        const mx = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(bruto)
+        const v = iso ?? (mx ? `${mx[3]}-${mx[2]}-${mx[1]}` : null)
+        if (!v) { rechazar(`${c.etiqueta} no es una fecha`); valida = false; break }
+        r[c.clave] = v
+      } else r[c.clave] = bruto
+    }
+    if (valida) validas.push(r)
+  }
+  return { validas, rechazos }
 }
 
 type Tx = Parameters<Parameters<typeof conTenant>[1]>[0]
@@ -324,4 +332,155 @@ async function meter(
   }
 
   return 0
+}
+
+// ---------------------------------------------------------------------------
+// Carga por lotes, para archivos que no caben en una petición
+// ---------------------------------------------------------------------------
+
+export type InicioLote = { error?: string; id?: string }
+
+/**
+ * Abre una importación y devuelve su folio.
+ *
+ * El archivo no sube: lo lee el navegador y manda las filas por tandas,
+ * cada una contra este folio. Así el avance queda en la base y una
+ * carga interrumpida se distingue de una terminada.
+ */
+export async function abrirImportacion(datos: {
+  destino: string
+  archivo: string
+  bytes: number
+  filasEstimadas: number
+  fuente: string
+  baseLegal: string
+}): Promise<InicioLote> {
+  const tenant = await tenantDeLaPeticion()
+  const sesion = await leerSesion()
+  if (!tenant || !sesion) return { error: 'La sesión expiró.' }
+  if (!(await puede('configuracion.importacion_de_datos'))) {
+    return { error: 'Tu perfil no puede importar datos.' }
+  }
+
+  const destino = destinoPorClave(datos.destino)
+  if (!destino) return { error: 'Destino desconocido.' }
+  if (datos.fuente.trim().length < 3) return { error: 'Di de dónde salió este archivo.' }
+  if (destino.personal && datos.baseLegal.trim().length < 5) {
+    return {
+      error:
+        'Este archivo trae datos personales. Escribe con qué autorización se tratan ' +
+        '—convenio, acuerdo o la facultad legal que lo ampara— antes de cargarlo.',
+    }
+  }
+
+  const [fila] = await conTenant(tenant.id, (tx) =>
+    tx<{ id: string }[]>`
+      insert into importaciones
+        (tenant_id, destino, archivo, bytes, bytes_totales, fuente, base_legal,
+         filas_totales, estado, usuario_id)
+      values (${tenant.id}, ${destino.clave}, ${datos.archivo},
+              ${Math.min(datos.bytes, 2147483647)}, ${datos.bytes},
+              ${datos.fuente.trim()}, ${datos.baseLegal.trim() || null},
+              ${datos.filasEstimadas}, 'en_curso', ${sesion.usuarioId})
+      returning id`,
+  )
+  return { id: fila.id }
+}
+
+export type ResultadoLote = {
+  error?: string
+  cargadas?: number
+  rechazadas?: number
+  motivos?: Record<string, number>
+}
+
+/**
+ * Una tanda de filas ya leídas por el navegador.
+ *
+ * Llega como una cadena y no como arreglo de arreglos por dos razones.
+ * Next rechaza los arreglos anidados en una acción de servidor —«Maximum
+ * array nesting exceeded»— y además el navegador manda solo las columnas
+ * que de verdad se van a usar, en el orden de los campos del destino. En
+ * un padrón de doce columnas de las que sirven tres, eso es la cuarta
+ * parte del tráfico.
+ */
+export async function cargarLote(
+  importacionId: string,
+  destinoClave: string,
+  loteJson: string,
+): Promise<ResultadoLote> {
+  const tenant = await tenantDeLaPeticion()
+  const sesion = await leerSesion()
+  if (!tenant || !sesion) return { error: 'La sesión expiró.' }
+  if (!(await puede('configuracion.importacion_de_datos'))) {
+    return { error: 'Tu perfil no puede importar datos.' }
+  }
+
+  const destino = destinoPorClave(destinoClave)
+  if (!destino) return { error: 'Destino desconocido.' }
+
+  let filas: string[][]
+  try {
+    filas = JSON.parse(loteJson)
+    if (!Array.isArray(filas)) throw new Error('forma')
+  } catch {
+    return { error: 'El lote venía mal formado.' }
+  }
+
+  // El navegador ya proyectó las columnas al orden de los campos, así
+  // que aquí el mapeo es la identidad.
+  const mapeo = Object.fromEntries(destino.campos.map((c, i) => [c.clave, i]))
+  const { validas, rechazos } = validar(destino, mapeo, filas)
+
+  const cargadas = await conTenant(tenant.id, async (tx) => {
+    // El folio tiene que ser de este cliente y estar vivo. Sin esto,
+    // conocer un uuid bastaría para escribir en la carga de otro.
+    const [imp] = await tx<{ id: string; fuente: string; base_legal: string | null }[]>`
+      select id, fuente, base_legal from importaciones
+      where id = ${importacionId} and estado = 'en_curso'`
+    if (!imp) return -1
+
+    const marca = `${imp.fuente}${imp.base_legal ? ` · ${imp.base_legal}` : ''}`
+    let n = 0
+    for (let i = 0; i < validas.length; i += 300) {
+      n += await meter(
+        tx, destino, validas.slice(i, i + 300),
+        tenant.id, tenant.estado_id, marca, sesion.usuarioId,
+      )
+    }
+
+    await tx`
+      update importaciones set
+        filas_leidas = filas_leidas + ${filas.length},
+        filas_cargadas = filas_cargadas + ${n},
+        filas_rechazadas = filas_rechazadas + ${filas.length - validas.length},
+        lotes = lotes + 1
+      where id = ${importacionId}`
+
+    return n
+  })
+
+  if (cargadas < 0) return { error: 'Esa importación ya no está abierta.' }
+
+  return {
+    cargadas,
+    rechazadas: filas.length - validas.length,
+    motivos: Object.fromEntries(rechazos),
+  }
+}
+
+/** Cierra la importación, haya terminado o la hayan cortado. */
+export async function cerrarImportacion(
+  importacionId: string,
+  estado: 'completada' | 'cancelada' | 'fallida',
+): Promise<void> {
+  const tenant = await tenantDeLaPeticion()
+  if (!tenant) return
+
+  await conTenant(tenant.id, (tx) =>
+    tx`update importaciones
+       set estado = ${estado}, terminada_en = now()
+       where id = ${importacionId} and estado = 'en_curso'`,
+  )
+  revalidatePath('/configuracion/importar')
 }

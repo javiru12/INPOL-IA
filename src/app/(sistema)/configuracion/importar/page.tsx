@@ -38,11 +38,12 @@ export default async function Importar() {
       base_legal: string | null
       filas_cargadas: number
       filas_rechazadas: number
+      estado: string
       creado_en: string
       quien: string | null
     }[]>`
       select i.id, i.destino, i.archivo, i.fuente, i.base_legal,
-             i.filas_cargadas, i.filas_rechazadas,
+             i.filas_cargadas, i.filas_rechazadas, i.estado,
              i.creado_en::text as creado_en,
              nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as quien
       from importaciones i
@@ -86,6 +87,7 @@ export default async function Importar() {
                 <th>Quién</th>
                 <th className="num">Cargadas</th>
                 <th className="num">Fuera</th>
+                <th>Estado</th>
               </tr>
             </thead>
             <tbody>
@@ -124,6 +126,29 @@ export default async function Importar() {
                     style={h.filas_rechazadas > 0 ? { color: 'var(--color-aviso)' } : undefined}
                   >
                     {h.filas_rechazadas || '—'}
+                  </td>
+                  {/* Una carga a medias no se distingue de una terminada
+                      si no se dice: el total sería creíble y estaría
+                      incompleto. */}
+                  <td className="whitespace-nowrap">
+                    {h.estado === 'completada' ? (
+                      <span className="text-[var(--color-tinta-2)]">Completa</span>
+                    ) : (
+                      <span
+                        style={{
+                          color:
+                            h.estado === 'en_curso'
+                              ? 'var(--color-aviso)'
+                              : 'var(--color-alerta)',
+                        }}
+                      >
+                        {h.estado === 'en_curso'
+                          ? 'En curso'
+                          : h.estado === 'cancelada'
+                            ? 'Cancelada'
+                            : 'Falló'}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

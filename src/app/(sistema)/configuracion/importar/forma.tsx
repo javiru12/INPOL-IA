@@ -1,9 +1,15 @@
 'use client'
 
-import { useActionState, useRef, useState } from 'react'
-import { useFormStatus } from 'react-dom'
-import { analizarArchivo, importar, type Analisis, type Resultado } from './acciones'
-import { DESTINOS, destinoPorClave } from './destinos'
+import { useRef, useState } from 'react'
+import {
+  analizarArchivo,
+  abrirImportacion,
+  cargarLote,
+  cerrarImportacion,
+  type Analisis,
+} from './acciones'
+import { DESTINOS, destinoPorClave, proponerMapeo } from './destinos'
+import { leerCabecera, recorrer, formatoDe, type Cabecera } from '@/lib/leer-tabla-cliente'
 import { Tabla } from '@/components/tabla'
 
 /**
@@ -12,26 +18,279 @@ import { Tabla } from '@/components/tabla'
  * Son dos pasos a propósito. Cargar a ciegas y enterarse después de que
  * la columna «teléfono» era la del patrón y no la de la persona
  * significa deshacer a mano miles de filas. Primero se enseña qué
- * entendió el sistema y con qué se va a quedar; solo entonces se carga.
+ * entendió el sistema; solo entonces se carga.
  *
- * El archivo no se guarda entre un paso y otro: se manda otra vez al
- * confirmar. El navegador ya lo tiene y así no queda un archivo con
- * datos personales esperando en el servidor a que alguien decida.
+ * Para CSV y DBF el archivo NO sube. Lo lee este lado por rebanadas y
+ * manda lotes de filas, porque el cuerpo de una petición se corta en
+ * 4.5 MB y un padrón de dos gigas no cabe ni de lejos. El .xlsx sí
+ * viaja entero: es un zip que hay que descomprimir completo antes de
+ * leer una sola fila, y una hoja de Excel no pasa de un millón de
+ * renglones, así que nunca llega a ese tamaño.
  */
+
+const TOPE_XLSX = 8 * 1024 * 1024
+
+/**
+ * Cuántas filas van por petición.
+ *
+ * Se calcula del ancho real de las filas y no es un número fijo: un
+ * padrón de tres columnas y uno de veinticinco no pesan lo mismo por
+ * fila, y lo que limita al otro lado son los bytes de la petición, no
+ * los renglones. Se apunta a metro y medio de margen sobre los 4.5 MB
+ * que corta Vercel.
+ */
+function filasPorLote(muestra: string[][]) {
+  const bytes = muestra.length
+    ? JSON.stringify(muestra).length / muestra.length
+    : 200
+  return Math.max(200, Math.min(5000, Math.floor((1.5 * 1024 * 1024) / bytes)))
+}
+
+type Avance = {
+  filas: number
+  cargadas: number
+  rechazadas: number
+  porcentaje: number
+  motivos: Record<string, number>
+}
+
 export function FormaImportar() {
   const [destino, setDestino] = useState('')
-  const [analisis, analizar] = useActionState<Analisis, FormData>(analizarArchivo, {})
-  const [resultado, cargar] = useActionState<Resultado, FormData>(importar, {})
-  const archivo = useRef<HTMLInputElement>(null)
-  const [nombreArchivo, setNombreArchivo] = useState('')
+  const [archivo, setArchivo] = useState<File | null>(null)
+  const [cabecera, setCabecera] = useState<Cabecera | null>(null)
+  const [mapeo, setMapeo] = useState<Record<string, number>>({})
+  const [avisos, setAvisos] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [leyendo, setLeyendo] = useState(false)
+  const [avance, setAvance] = useState<Avance | null>(null)
+  const [terminado, setTerminado] = useState<Avance | null>(null)
+  const cancelar = useRef(false)
 
   const d = destinoPorClave(destino)
-  const listo = Boolean(analisis.encabezados && d)
 
+  async function revisar() {
+    setError(null)
+    setAvisos([])
+    setCabecera(null)
+    if (!d) return setError('Elige primero qué tipo de datos trae el archivo.')
+    if (!archivo) return setError('Falta el archivo.')
+
+    const formato = formatoDe(archivo.name)
+    if (!formato) return setError('Solo se aceptan archivos .csv, .dbf y .xlsx.')
+    if (formato === 'xlsx' && archivo.size > TOPE_XLSX) {
+      return setError(
+        `Este Excel pesa ${(archivo.size / 1024 ** 2).toFixed(1)} MB y por ser Excel tiene que ` +
+          `viajar entero, con tope de ${TOPE_XLSX / 1024 ** 2} MB. Guárdalo como CSV y súbelo así: ` +
+          'en CSV no hay tope porque se lee aquí mismo.',
+      )
+    }
+
+    setLeyendo(true)
+    try {
+      if (formato === 'xlsx') {
+        // El servidor ya sabe leer xlsx; se manda y devuelve lo mismo.
+        const datos = new FormData()
+        datos.set('destino', destino)
+        datos.set('archivo', archivo)
+        const r: Analisis = await analizarArchivo({}, datos)
+        if (r.error) return setError(r.error)
+        setCabecera({
+          formato,
+          encabezados: r.encabezados ?? [],
+          muestra: r.muestra ?? [],
+          filasEstimadas: r.totalFilas ?? 0,
+          exacto: true,
+        })
+        setMapeo(r.mapeo ?? {})
+        setAvisos(r.avisos ?? [])
+        return
+      }
+
+      const c = await leerCabecera(archivo)
+      const m = proponerMapeo(d, c.encabezados)
+      setCabecera(c)
+      setMapeo(m)
+
+      const faltan = d.campos
+        .filter((x) => x.requerido && m[x.clave] === undefined)
+        .map((x) => `«${x.etiqueta}»`)
+      const sinUsar = c.encabezados.filter((_, i) => !Object.values(m).includes(i))
+      setAvisos([
+        ...(faltan.length ? [`No encontré columna para ${faltan.join(', ')}, que es obligatoria.`] : []),
+        ...(sinUsar.length ? [`Estas columnas no se van a usar: ${sinUsar.join(', ')}.`] : []),
+      ])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No pude leer el archivo.')
+    } finally {
+      setLeyendo(false)
+    }
+  }
+
+  async function cargar(datos: FormData) {
+    setError(null)
+    if (!d || !archivo || !cabecera) return
+
+    const fuente = String(datos.get('fuente') ?? '')
+    const baseLegal = String(datos.get('baseLegal') ?? '')
+
+    for (const c of d.campos) {
+      if (c.requerido && mapeo[c.clave] === undefined) {
+        return setError(`Falta decir qué columna trae «${c.etiqueta}».`)
+      }
+    }
+
+    const abierta = await abrirImportacion({
+      destino,
+      archivo: archivo.name,
+      bytes: archivo.size,
+      filasEstimadas: cabecera.filasEstimadas,
+      fuente,
+      baseLegal,
+    })
+    if (abierta.error || !abierta.id) return setError(abierta.error ?? 'No se pudo abrir la carga.')
+
+    cancelar.current = false
+    const acumulado: Avance = { filas: 0, cargadas: 0, rechazadas: 0, porcentaje: 0, motivos: {} }
+    setAvance({ ...acumulado })
+
+    try {
+      if (cabecera.formato === 'xlsx') {
+        // Ya está en el servidor; se recorre allá en una sola pasada.
+        const f = new FormData()
+        f.set('destino', destino)
+        f.set('archivo', archivo)
+        f.set('fuente', fuente)
+        f.set('baseLegal', baseLegal)
+        for (const [k, v] of Object.entries(mapeo)) f.set(`col_${k}`, String(v))
+        const { importar } = await import('./acciones')
+        const r = await importar({}, f)
+        await cerrarImportacion(abierta.id, r.error ? 'fallida' : 'completada')
+        if (r.error) return setError(r.error)
+        setTerminado({
+          filas: (r.cargadas ?? 0) + (r.rechazadas ?? 0),
+          cargadas: r.cargadas ?? 0,
+          rechazadas: r.rechazadas ?? 0,
+          porcentaje: 100,
+          motivos: Object.fromEntries((r.motivos ?? []).map((m) => [m.motivo, m.cuantas])),
+        })
+        setAvance(null)
+        return
+      }
+
+      const porLote = filasPorLote(cabecera.muestra)
+      for await (const { filas, bytesLeidos } of recorrer(archivo, porLote)) {
+        if (cancelar.current) {
+          await cerrarImportacion(abierta.id, 'cancelada')
+          setAvance(null)
+          setError('Carga cancelada. Lo que ya entró se quedó.')
+          return
+        }
+
+        // Se mandan solo las columnas que se van a usar, en el orden
+        // de los campos del destino, y como una sola cadena.
+        const proyectadas = filas.map((f) =>
+          d.campos.map((c) => (mapeo[c.clave] === undefined ? '' : (f[mapeo[c.clave]] ?? ''))),
+        )
+        const r = await cargarLote(abierta.id, destino, JSON.stringify(proyectadas))
+        if (r.error) {
+          await cerrarImportacion(abierta.id, 'fallida')
+          setAvance(null)
+          return setError(r.error)
+        }
+
+        acumulado.filas += filas.length
+        acumulado.cargadas += r.cargadas ?? 0
+        acumulado.rechazadas += r.rechazadas ?? 0
+        acumulado.porcentaje = Math.min(99, Math.round((bytesLeidos / archivo.size) * 100))
+        for (const [m, n] of Object.entries(r.motivos ?? {})) {
+          acumulado.motivos[m] = (acumulado.motivos[m] ?? 0) + n
+        }
+        setAvance({ ...acumulado, motivos: { ...acumulado.motivos } })
+      }
+
+      await cerrarImportacion(abierta.id, 'completada')
+      setTerminado({ ...acumulado, porcentaje: 100 })
+      setAvance(null)
+    } catch (e) {
+      await cerrarImportacion(abierta.id, 'fallida')
+      setAvance(null)
+      setError(e instanceof Error ? e.message : 'Se cortó la carga.')
+    }
+  }
+
+  // ---- Cargando -----------------------------------------------------
+  if (avance) {
+    return (
+      <section className="panel space-y-3 px-4 py-4">
+        <h2 className="text-[var(--text-base)] font-semibold">Cargando…</h2>
+        <div
+          className="h-2 overflow-hidden rounded-full bg-[var(--color-borde)]"
+          role="progressbar"
+          aria-valuenow={avance.porcentaje}
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-300"
+            style={{ width: `${avance.porcentaje}%`, background: 'var(--color-acento)' }}
+          />
+        </div>
+        <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+          {avance.porcentaje}% · {avance.cargadas.toLocaleString('es-MX')} filas cargadas
+          {avance.rechazadas > 0 && ` · ${avance.rechazadas.toLocaleString('es-MX')} fuera`}
+        </p>
+        <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+          No cierres esta pestaña: el archivo se está leyendo desde aquí.
+        </p>
+        <button
+          type="button"
+          onClick={() => { cancelar.current = true }}
+          className="boton boton-neutro"
+        >
+          Cancelar
+        </button>
+      </section>
+    )
+  }
+
+  // ---- Terminado ----------------------------------------------------
+  if (terminado) {
+    return (
+      <section className="panel space-y-2 px-4 py-4" style={{ borderColor: 'var(--color-exito)' }}>
+        <h2 className="text-[var(--text-base)] font-semibold" style={{ color: 'var(--color-exito)' }}>
+          Se cargaron {terminado.cargadas.toLocaleString('es-MX')} filas
+        </h2>
+        {terminado.rechazadas > 0 ? (
+          <>
+            <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+              {terminado.rechazadas.toLocaleString('es-MX')} se quedaron fuera:
+            </p>
+            <ul className="space-y-0.5">
+              {Object.entries(terminado.motivos).map(([m, n]) => (
+                <li key={m} className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+                  · {m}: {n.toLocaleString('es-MX')}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+            Ninguna fila se rechazó.
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="boton boton-neutro"
+        >
+          Cargar otro archivo
+        </button>
+      </section>
+    )
+  }
+
+  // ---- Captura ------------------------------------------------------
   return (
     <div className="space-y-3">
-      {/* ---- Paso 1: qué es y qué archivo ---- */}
-      <form action={analizar} className="panel space-y-3 px-4 py-4">
+      <section className="panel space-y-3 px-4 py-4">
         <h2 className="text-[var(--text-base)] font-semibold">1 · Qué traes</h2>
 
         <label className="block">
@@ -41,23 +300,18 @@ export function FormaImportar() {
           <select
             name="destino"
             value={destino}
-            onChange={(e) => setDestino(e.target.value)}
+            onChange={(e) => { setDestino(e.target.value); setCabecera(null) }}
             className="campo"
-            required
           >
             <option value="">Elige qué trae el archivo…</option>
             {DESTINOS.map((x) => (
-              <option key={x.clave} value={x.clave}>
-                {x.etiqueta}
-              </option>
+              <option key={x.clave} value={x.clave}>{x.etiqueta}</option>
             ))}
           </select>
         </label>
 
         {d && (
-          <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-            {d.descripcion}
-          </p>
+          <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">{d.descripcion}</p>
         )}
 
         <label className="block">
@@ -65,42 +319,51 @@ export function FormaImportar() {
             Archivo
           </span>
           <input
-            ref={archivo}
             type="file"
             name="archivo"
-            accept=".xlsx,.csv,.txt"
-            required
-            onChange={(e) => setNombreArchivo(e.target.files?.[0]?.name ?? '')}
+            accept=".xlsx,.csv,.txt,.dbf"
+            onChange={(e) => { setArchivo(e.target.files?.[0] ?? null); setCabecera(null) }}
             className="campo !h-auto py-1.5 text-[var(--text-menuda)]"
           />
           <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-            Excel (.xlsx) o CSV, hasta 15 MB. La primera fila son los encabezados.
+            CSV o DBF sin límite de tamaño · Excel hasta {TOPE_XLSX / 1024 ** 2} MB
           </span>
         </label>
 
-        <Boton etiqueta="Revisar el archivo" pendiente="Leyendo…" />
-
-        {analisis.error && (
-          <p className="text-[var(--text-menuda)]" style={{ color: 'var(--color-alerta)' }}>
-            {analisis.error}
+        {archivo && (
+          <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+            {archivo.name} · {(archivo.size / 1024 ** 2).toFixed(1)} MB
           </p>
         )}
-      </form>
 
-      {/* ---- Paso 2: mapeo y confirmación ---- */}
-      {listo && !resultado.ok && (
+        <button
+          type="button"
+          onClick={revisar}
+          disabled={leyendo || !archivo || !destino}
+          className="boton boton-neutro"
+        >
+          {leyendo ? 'Leyendo…' : 'Revisar el archivo'}
+        </button>
+
+        {error && (
+          <p className="text-[var(--text-menuda)]" style={{ color: 'var(--color-alerta)' }}>
+            {error}
+          </p>
+        )}
+      </section>
+
+      {cabecera && d && (
         <form action={cargar} className="panel space-y-3 px-4 py-4">
-          <input type="hidden" name="destino" value={destino} />
-
           <div>
             <h2 className="text-[var(--text-base)] font-semibold">2 · Qué entendí</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-              {analisis.totalFilas?.toLocaleString('es-MX')} filas en {nombreArchivo}. Revisa que
-              cada campo tome la columna correcta.
+              {cabecera.exacto ? '' : 'Alrededor de '}
+              {cabecera.filasEstimadas.toLocaleString('es-MX')} filas. Revisa que cada campo tome
+              la columna correcta.
             </p>
           </div>
 
-          {analisis.avisos?.map((a) => (
+          {avisos.map((a) => (
             <p
               key={a}
               className="rounded-[var(--radius-sm)] px-3 py-2 text-[var(--text-menuda)]"
@@ -111,53 +374,58 @@ export function FormaImportar() {
           ))}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {d!.campos.map((c) => (
+            {d.campos.map((c) => (
               <label key={c.clave} className="block">
                 <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
                   {c.etiqueta}{' '}
                   {c.requerido && <span style={{ color: 'var(--color-alerta)' }}>*</span>}
                 </span>
                 <select
-                  name={`col_${c.clave}`}
-                  defaultValue={analisis.mapeo?.[c.clave] ?? ''}
+                  value={mapeo[c.clave] ?? ''}
+                  onChange={(e) =>
+                    setMapeo((m) => {
+                      const n = { ...m }
+                      if (e.target.value === '') delete n[c.clave]
+                      else n[c.clave] = Number(e.target.value)
+                      return n
+                    })
+                  }
                   className="campo"
                 >
                   <option value="">— no viene en el archivo —</option>
-                  {analisis.encabezados!.map((h, i) => (
-                    <option key={`${h}-${i}`} value={i}>
-                      {h}
-                    </option>
+                  {cabecera.encabezados.map((h, i) => (
+                    <option key={`${h}-${i}`} value={i}>{h}</option>
                   ))}
                 </select>
               </label>
             ))}
           </div>
 
-          <details className="rounded-[var(--radius-sm)] border border-[var(--color-borde)]">
-            <summary className="cursor-pointer px-3 py-2 text-[var(--text-menuda)] font-medium">
-              Ver las primeras filas del archivo
-            </summary>
-            <Tabla>
-              <thead>
-                <tr>
-                  {analisis.encabezados!.map((h, i) => (
-                    <th key={`${h}-${i}`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {analisis.muestra!.map((f, i) => (
-                  <tr key={i}>
-                    {analisis.encabezados!.map((_, j) => (
-                      <td key={j} className="whitespace-nowrap">
-                        {f[j] || <span className="text-[var(--color-tinta-3)]">—</span>}
-                      </td>
-                    ))}
+          {cabecera.muestra.length > 0 && (
+            <details className="rounded-[var(--radius-sm)] border border-[var(--color-borde)]">
+              <summary className="cursor-pointer px-3 py-2 text-[var(--text-menuda)] font-medium">
+                Ver las primeras filas del archivo
+              </summary>
+              <Tabla>
+                <thead>
+                  <tr>
+                    {cabecera.encabezados.map((h, i) => <th key={`${h}-${i}`}>{h}</th>)}
                   </tr>
-                ))}
-              </tbody>
-            </Tabla>
-          </details>
+                </thead>
+                <tbody>
+                  {cabecera.muestra.map((f, i) => (
+                    <tr key={i}>
+                      {cabecera.encabezados.map((_, j) => (
+                        <td key={j} className="whitespace-nowrap">
+                          {f[j] || <span className="text-[var(--color-tinta-3)]">—</span>}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </Tabla>
+            </details>
+          )}
 
           <h2 className="pt-1 text-[var(--text-base)] font-semibold">3 · De dónde salió</h2>
 
@@ -176,7 +444,7 @@ export function FormaImportar() {
             </span>
           </label>
 
-          {d!.personal && (
+          {d.personal && (
             <label className="block">
               <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
                 Con qué autorización <span style={{ color: 'var(--color-alerta)' }}>*</span>
@@ -194,87 +462,11 @@ export function FormaImportar() {
             </label>
           )}
 
-          {/* El archivo se manda otra vez porque entre un paso y el otro
-              no se guardó nada en el servidor. */}
-          <input
-            type="file"
-            name="archivo"
-            accept=".xlsx,.csv,.txt"
-            required
-            className="campo !h-auto py-1.5 text-[var(--text-menuda)]"
-            aria-label="Vuelve a elegir el mismo archivo para confirmar"
-          />
-          <span className="-mt-2 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-            Vuelve a elegir el mismo archivo para confirmar la carga.
-          </span>
-
-          <Boton etiqueta="Cargar los datos" pendiente="Cargando…" primario />
-
-          {resultado.error && (
-            <p className="text-[var(--text-menuda)]" style={{ color: 'var(--color-alerta)' }}>
-              {resultado.error}
-            </p>
-          )}
+          <button type="submit" className="boton boton-primario">
+            Cargar los datos
+          </button>
         </form>
       )}
-
-      {/* ---- Resultado ---- */}
-      {resultado.ok && (
-        <section
-          className="panel space-y-2 px-4 py-4"
-          style={{ borderColor: 'var(--color-exito)' }}
-        >
-          <h2 className="text-[var(--text-base)] font-semibold" style={{ color: 'var(--color-exito)' }}>
-            Se cargaron {resultado.cargadas?.toLocaleString('es-MX')} filas
-          </h2>
-          {resultado.rechazadas ? (
-            <>
-              <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-                {resultado.rechazadas.toLocaleString('es-MX')} se quedaron fuera:
-              </p>
-              <ul className="space-y-0.5">
-                {resultado.motivos?.map((m) => (
-                  <li key={m.motivo} className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-                    · {m.motivo}: {m.cuantas.toLocaleString('es-MX')}
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-              Ninguna fila se rechazó.
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="boton boton-neutro"
-          >
-            Cargar otro archivo
-          </button>
-        </section>
-      )}
     </div>
-  )
-}
-
-function Boton({
-  etiqueta,
-  pendiente,
-  primario,
-}: {
-  etiqueta: string
-  pendiente: string
-  primario?: boolean
-}) {
-  const { pending } = useFormStatus()
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={`boton ${primario ? 'boton-primario' : 'boton-neutro'}`}
-    >
-      {pending ? pendiente : etiqueta}
-    </button>
   )
 }
