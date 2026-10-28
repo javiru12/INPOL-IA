@@ -45,8 +45,27 @@ export function TextoRico({ texto }: { texto: string }) {
         filas.push(celdas(lineas[i]))
         i++
       }
+      // Qué columnas son de cifras se decide por lo que traen, no por
+      // su posición: antes todo lo que no fuera la primera columna se
+      // alineaba a la derecha, así que en una tabla «# · Colonia ·
+      // Peticiones» los nombres de colonia salían pegados a la derecha.
+      const esNumero = (v: string) =>
+        /^[-+]?[$]?\s*[0-9][0-9.,\s]*%?$/.test(v.replace(/\*/g, '').trim())
+      const columnaDeCifras = encabezados.map((_, j) => {
+        const valores = filas.map((f) => (f[j] ?? '').trim()).filter(Boolean)
+        return valores.length > 0 && valores.every(esNumero)
+      })
+
       bloques.push(
-        <div key={bloques.length} className="my-3">
+        // Una respuesta con cuarenta renglones empujaba todo lo demás
+        // fuera de la pantalla y había que recorrer la tabla entera para
+        // volver al texto. Contenida: alto máximo, encabezado pegado
+        // arriba y el conteo al pie para saber cuánto hay sin bajar.
+        <div
+          key={bloques.length}
+          className="tabla-contenida my-3 overflow-clip rounded-[var(--radius-md)] border border-[var(--color-borde)]"
+        >
+          <div className="max-h-[22rem] overflow-auto">
           <Tabla>
             <thead>
               <tr>
@@ -54,7 +73,7 @@ export function TextoRico({ texto }: { texto: string }) {
                   // Las columnas de cifras se alinean a la derecha: una
                   // columna de números alineada a la izquierda no deja
                   // comparar magnitudes de un vistazo.
-                  <th key={j} className={j === 0 ? undefined : 'num'}>
+                  <th key={j} className={columnaDeCifras[j] ? 'num' : undefined}>
                     {h}
                   </th>
                 ))}
@@ -64,7 +83,7 @@ export function TextoRico({ texto }: { texto: string }) {
               {filas.map((f, j) => (
                 <tr key={j}>
                   {f.map((c, k) => (
-                    <td key={k} className={k === 0 ? 'whitespace-nowrap' : 'num'}>
+                    <td key={k} className={columnaDeCifras[k] ? 'num' : 'whitespace-nowrap'}>
                       {conNegritas(c)}
                     </td>
                   ))}
@@ -72,6 +91,12 @@ export function TextoRico({ texto }: { texto: string }) {
               ))}
             </tbody>
           </Tabla>
+          </div>
+          {filas.length > 8 && (
+            <p className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-3 py-1.5 text-[length:var(--text-micro)] text-[var(--color-tinta-3)]">
+              {filas.length} renglones
+            </p>
+          )}
         </div>,
       )
       continue

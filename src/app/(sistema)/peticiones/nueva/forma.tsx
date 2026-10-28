@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
 import { crearPeticion, buscarCiudadanos, type EstadoAccion } from '../acciones'
 import { IconoBuscar, IconoMas } from '@/components/iconos'
@@ -28,10 +29,12 @@ export function FormaPeticion({
   const sub = subproblematicas.filter((s) => s.problematica_id === problematica)
 
   return (
-    <form action={accion} className="grid gap-3 lg:grid-cols-[1fr_1fr] lg:items-start">
-      <section className="panel px-4 py-4">
-        <h2 className="mb-1 text-[var(--text-base)] font-semibold">Ciudadano</h2>
-        <p className="mb-4 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+    <form action={accion} className="grid gap-4 lg:grid-cols-[1fr_1fr] lg:items-start">
+      <section className="panel px-5 py-5">
+        <Paso n={1} hecho={!!elegido || altaNueva}>
+          Ciudadano
+        </Paso>
+        <p className="mb-4 mt-1.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
           Búscalo primero: si ya está registrado, su historial queda ligado a esta petición.
         </p>
 
@@ -76,10 +79,12 @@ export function FormaPeticion({
         )}
       </section>
 
-      <section className="panel px-4 py-4">
-        <h2 className="mb-4 text-[var(--text-base)] font-semibold">La petición</h2>
+      <section className="panel px-5 py-5">
+        <Paso n={2} hecho={!!problematica && !!elegido}>
+          La petición
+        </Paso>
 
-        <div className="space-y-3">
+        <div className="mt-4 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <Selector
               nombre="problematicaId"
@@ -140,9 +145,45 @@ export function FormaPeticion({
           </p>
         )}
 
-        <Guardar />
       </section>
+
+      <div className="panel flex flex-wrap items-center justify-between gap-3 px-5 py-4 lg:col-span-2">
+        <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+          {elegido || altaNueva
+            ? 'Al registrarla queda abierta y con folio.'
+            : 'Empieza por el ciudadano: sin él la petición no se puede ligar a nadie.'}
+        </p>
+        <div className="flex items-center gap-2">
+          <Link href="/peticiones" className="boton boton-neutro">
+            Cancelar
+          </Link>
+          <Guardar />
+        </div>
+      </div>
     </form>
+  )
+}
+
+/**
+ * Encabezado numerado de cada paso.
+ *
+ * El formulario ya venía partido en ciudadano y solicitud, pero los dos
+ * títulos pesaban igual y no decían cuál va primero ni cuál ya quedó.
+ */
+function Paso({ n, hecho, children }: { n: number; hecho: boolean; children: React.ReactNode }) {
+  return (
+    <h2 className="flex items-center gap-2.5 text-[var(--text-base)] font-semibold">
+      <span
+        className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[length:var(--text-micro)] font-semibold ${
+          hecho
+            ? 'bg-[var(--color-exito-suave)] text-[var(--color-exito)]'
+            : 'bg-[var(--color-acento)] text-white'
+        }`}
+      >
+        {hecho ? '✓' : n}
+      </span>
+      {children}
+    </h2>
   )
 }
 
@@ -285,7 +326,7 @@ function Selector({
 function Guardar() {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" disabled={pending} className="boton boton-primario mt-4 w-full">
+    <button type="submit" disabled={pending} className="boton boton-primario">
       {pending ? 'Guardando…' : 'Registrar petición'}
     </button>
   )

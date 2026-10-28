@@ -419,6 +419,12 @@
   .tabla tbody tr:last-child td { border-bottom: none; }
   .tabla tbody tr:hover td { background: var(--color-superficie-2); }
   .tabla .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Las tablas que escribe la IA van dentro de una respuesta, no son la
+     pantalla: con el alto de fila de un listado, seis renglones ya no
+     caben junto al texto que los explica. */
+  .tabla-contenida .tabla tbody td { padding: 0.5rem 0.75rem; }
+  .tabla-contenida .tabla thead th { padding: 0.5rem 0.75rem; }
 }
 
 @layer utilities {

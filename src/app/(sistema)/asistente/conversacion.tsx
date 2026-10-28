@@ -235,19 +235,25 @@ export function Conversacion() {
               {EJEMPLOS.map((g) => (
                 <div key={g.grupo}>
                   <p className="rotulo mb-2">{g.grupo}</p>
-                  <ul className="space-y-px">
+                  {/* Con viñeta y sin borde parecían una lista de
+                      lectura y nadie las tocaba. Cada una es un botón
+                      con su propia superficie y una flecha que aparece:
+                      se ve que llevan a algún lado. */}
+                  <ul className="space-y-2">
                     {g.preguntas.map((q) => (
                       <li key={q}>
                         <button
                           type="button"
                           onClick={() => preguntar(q)}
-                          className="group flex w-full items-start gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-2)] transition-colors hover:bg-[var(--color-acento-suave)] hover:text-[var(--color-tinta)]"
+                          className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-borde)] bg-[var(--color-superficie)] px-3.5 py-2.5 text-left text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-2)] transition-colors hover:border-[var(--color-acento-borde)] hover:bg-[var(--color-acento-suave)] hover:text-[var(--color-tinta)]"
                         >
+                          <span className="min-w-0 flex-1">{q}</span>
                           <span
                             aria-hidden="true"
-                            className="mt-[0.3rem] h-1 w-1 shrink-0 rounded-full bg-[var(--color-borde-fuerte)] transition-colors group-hover:bg-[var(--color-acento)]"
-                          />
-                          {q}
+                            className="shrink-0 text-[var(--color-tinta-3)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--color-acento-fuerte)]"
+                          >
+                            →
+                          </span>
                         </button>
                       </li>
                     ))}

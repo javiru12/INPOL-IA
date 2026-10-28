@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { conTenant } from '@/lib/db'
 import { tenantDeLaPeticion } from '@/lib/sesion'
@@ -33,11 +32,6 @@ export default async function NuevaPeticion() {
     <Pagina
       titulo="Nueva petición"
       descripcion="Registra una solicitud ciudadana levantada en campo, evento, llamada u oficina"
-      acciones={
-        <Link href="/peticiones" className="boton boton-neutro">
-          Cancelar
-        </Link>
-      }
     >
       <FormaPeticion {...catalogos} />
     </Pagina>

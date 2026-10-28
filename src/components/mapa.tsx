@@ -123,6 +123,60 @@ export function Mapa({
 
   return (
     <div ref={contenedor} className="relative">
+      {/* La leyenda va arriba y no al pie del mapa: es la clave para
+          leer lo que está debajo, y al final hay que acordarse de que
+          existe y bajar la vista a buscarla. */}
+      {leyenda && escala.cortes.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-end gap-x-4 gap-y-2">
+          <div>
+            <span className="rotulo">{unidad}</span>
+            <div className="mt-1 flex items-start gap-px">
+              {RAMPA_SECUENCIAL.map((color, i) => (
+                <span key={color} className="flex flex-col items-start">
+                  <span
+                    className="h-2.5 w-10 first:rounded-l-[2px] last:rounded-r-[2px]"
+                    style={{ background: color }}
+                  />
+                  {/* El valor donde empieza cada escalón: sin eso, un
+                      color solo dice «más» o «menos», no cuánto. */}
+                  <span className="mt-1 text-[length:var(--text-micro)] tabular-nums text-[var(--color-tinta-3)]">
+                    {i === 0 ? 0 : formato(escala.cortes[i - 1])}
+                  </span>
+                </span>
+              ))}
+              <span className="ml-1.5 self-start text-[length:var(--text-micro)] tabular-nums text-[var(--color-tinta-3)]">
+                {formato(escala.maximo)}
+              </span>
+            </div>
+          </div>
+
+          <span className="flex items-center gap-1.5 pb-4 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+            <svg width="16" height="11" aria-hidden="true">
+              <defs>
+                <pattern
+                  id="sin-dato-muestra"
+                  width="6"
+                  height="6"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width="6" height="6" fill={SIN_DATO} />
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="#c9c4d0" strokeWidth="1.6" />
+                </pattern>
+              </defs>
+              <rect
+                width="16"
+                height="11"
+                rx="2"
+                fill="url(#sin-dato-muestra)"
+                stroke="var(--color-borde)"
+              />
+            </svg>
+            sin dato
+          </span>
+        </div>
+      )}
+
       <svg
         viewBox={`${marco.x} ${marco.y} ${marco.ancho} ${marco.alto}`}
         preserveAspectRatio="xMidYMid meet"
@@ -135,10 +189,27 @@ export function Mapa({
           setPuntero(null)
         }}
       >
+        <defs>
+          <pattern
+            id="sin-dato"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width="6" height="6" fill={SIN_DATO} />
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#c9c4d0" strokeWidth="1.6" />
+          </pattern>
+        </defs>
+
         <g>
           {rutas.map((r) => {
             const d = datos[r.clave]
-            const relleno = d?.color ?? escala.color(d?.valor ?? null)
+            const base = d?.color ?? escala.color(d?.valor ?? null)
+            const relleno =
+              !d?.color && (d?.valor === null || d?.valor === undefined)
+                ? 'url(#sin-dato)'
+                : base
             const seleccionada = activa === r.clave
             const sobre = encima === r.clave
             return (
@@ -211,37 +282,6 @@ export function Mapa({
         </button>
       )}
 
-      {leyenda && escala.cortes.length > 0 && (
-        <div className="mt-2 flex items-center gap-2.5">
-          <span className="rotulo">{unidad}</span>
-          <div className="flex items-center gap-px">
-            {RAMPA_SECUENCIAL.map((color, i) => (
-              <span
-                key={color}
-                className="h-2.5 w-7 first:rounded-l-[2px] last:rounded-r-[2px]"
-                style={{ background: color }}
-                title={
-                  i === 0
-                    ? `hasta ${formato(escala.cortes[0])}`
-                    : i === RAMPA_SECUENCIAL.length - 1
-                      ? `más de ${formato(escala.cortes[escala.cortes.length - 1])}`
-                      : `${formato(escala.cortes[i - 1])} – ${formato(escala.cortes[i])}`
-                }
-              />
-            ))}
-          </div>
-          <span className="text-[var(--text-micro)] tabular-nums text-[var(--color-tinta-3)]">
-            0 – {formato(escala.maximo)}
-          </span>
-          <span className="ml-2 flex items-center gap-1.5 text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-            <span
-              className="h-2.5 w-4 rounded-[2px] border border-[var(--color-borde)]"
-              style={{ background: SIN_DATO }}
-            />
-            sin dato
-          </span>
-        </div>
-      )}
     </div>
   )
 }

@@ -15,7 +15,7 @@ export const METRICAS: { valor: Metrica; etiqueta: string; unidad: string; ayuda
   { valor: 'ganador', etiqueta: 'Fuerza más votada 2015', unidad: 'votos', ayuda: 'Quién ganó la elección de gobernador en cada zona' },
   { valor: 'margen', etiqueta: 'Competitividad 2015', unidad: 'puntos de margen', ayuda: 'Distancia entre el primero y el segundo lugar' },
   { valor: 'participacion', etiqueta: 'Participación 2015', unidad: '% de participación', ayuda: 'Votos emitidos sobre lista nominal' },
-  { valor: 'lista_nominal', etiqueta: 'Lista nominal', unidad: 'electores', ayuda: 'Electores registrados según el INE' },
+  { valor: 'lista_nominal', etiqueta: 'Lista nominal 2015', unidad: 'electores', ayuda: 'Corte del INE de esa elección, no el padrón de hoy' },
 ]
 
 export type Ambito = 'municipio' | 'distrito'
