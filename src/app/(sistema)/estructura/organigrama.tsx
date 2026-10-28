@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
+import { IconoFlechaAbajo } from '@/components/iconos'
 import { asignarResponsable, type EstadoAccion } from './acciones'
 import type { NodoOrganigrama } from './consultas'
 
@@ -13,7 +14,22 @@ import type { NodoOrganigrama } from './consultas'
  * cajas se lee bonito con doce personas y deja de caber en la pantalla
  * con cincuenta. Con sangría se recorre igual de rápido y se puede buscar
  * dentro sin perder el sitio.
+ *
+ * Cada rama se pliega. Con cincuenta personas en una lista corrida hay
+ * que recorrerla entera para entender quién depende de quién; plegada,
+ * la cadena de mando se ve de un vistazo y se abre la parte que importa.
  */
+
+/** Iniciales para el disco de la izquierda. */
+function iniciales(nombre: string) {
+  return nombre
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
 export function Organigrama({
   nodos,
   responsables,
@@ -26,6 +42,20 @@ export function Organigrama({
 }) {
   const [editando, setEditando] = useState<string | null>(null)
   const [filtro, setFiltro] = useState('')
+  const [plegados, setPlegados] = useState<Set<string>>(new Set())
+  // Quién está seleccionado. Las acciones salen solo en esa fila: un
+  // «Cambiar responsable» repetido cincuenta veces es ruido, y encima
+  // invita a tocarlo por accidente.
+  const [elegido, setElegido] = useState<string | null>(null)
+
+  function plegar(id: string) {
+    setPlegados((antes) => {
+      const s = new Set(antes)
+      if (s.has(id)) s.delete(id)
+      else s.add(id)
+      return s
+    })
+  }
 
   const hijosDe = useMemo(() => {
     const m = new Map<string | null, NodoOrganigrama[]>()
@@ -59,6 +89,8 @@ export function Organigrama({
   }, [filtro, nodos])
 
   const raices = hijosDe.get(null) ?? []
+  const conGente = nodos.filter((n) => (hijosDe.get(n.id) ?? []).length > 0)
+  const todoPlegado = conGente.length > 0 && plegados.size >= conGente.length
 
   return (
     <section className="panel overflow-hidden">
@@ -71,13 +103,26 @@ export function Organigrama({
             Quién responde ante quién · {nodos.length} personas
           </p>
         </div>
-        <input
-          type="search"
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          placeholder="Buscar en el equipo…"
-          className="campo !h-8 w-56"
-        />
+        <div className="flex items-center gap-2">
+          {conGente.length > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                setPlegados(todoPlegado ? new Set() : new Set(conGente.map((n) => n.id)))
+              }
+              className="boton boton-llano !h-8 text-[var(--text-menuda)]"
+            >
+              {todoPlegado ? 'Desplegar todo' : 'Plegar todo'}
+            </button>
+          )}
+          <input
+            type="search"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            placeholder="Buscar en el equipo…"
+            className="campo !h-8 w-56"
+          />
+        </div>
       </div>
 
       {raices.length === 0 ? (
@@ -85,17 +130,22 @@ export function Organigrama({
           Nadie tiene responsable asignado todavía.
         </p>
       ) : (
-        <ul className="py-1.5">
+        <ul className="py-1.5 pl-2">
           {raices.map((r) => (
             <Rama
               key={r.id}
               nodo={r}
+              raiz
               hijosDe={hijosDe}
               visibles={visibles}
               editando={editando}
               setEditando={setEditando}
               responsables={responsables}
               filtro={filtro}
+              plegados={plegados}
+              plegar={plegar}
+              elegido={elegido}
+              setElegido={setElegido}
             />
           ))}
         </ul>
@@ -106,41 +156,91 @@ export function Organigrama({
 
 function Rama({
   nodo,
+  raiz,
   hijosDe,
   visibles,
   editando,
   setEditando,
   responsables,
   filtro,
+  plegados,
+  plegar,
+  elegido,
+  setElegido,
 }: {
   nodo: NodoOrganigrama
+  raiz?: boolean
   hijosDe: Map<string | null, NodoOrganigrama[]>
   visibles: Set<string> | null
   editando: string | null
   setEditando: (v: string | null) => void
   responsables: { id: string; nombre: string; perfil: string | null }[]
   filtro: string
+  plegados: Set<string>
+  plegar: (id: string) => void
+  elegido: string | null
+  setElegido: (v: string | null) => void
 }) {
   if (visibles && !visibles.has(nodo.id)) return null
 
   const hijos = hijosDe.get(nodo.id) ?? []
+  // Buscando no se pliega nada: esconder una coincidencia detrás de un
+  // triángulo es justo lo contrario de buscar.
+  const plegado = !visibles && plegados.has(nodo.id)
   const coincide =
     filtro.trim() !== '' &&
     `${nodo.nombre} ${nodo.perfil ?? ''} ${nodo.correo}`
       .toLowerCase()
       .includes(filtro.trim().toLowerCase())
+  const abierto = elegido === nodo.id || editando === nodo.id
+  const mando = hijos.length > 0
 
   return (
-    <li>
+    <li className="relative">
       <div
-        className="flex flex-wrap items-center gap-2 py-1.5 pr-4 hover:bg-[var(--color-superficie-2)]"
-        style={{ paddingLeft: `${16 + nodo.nivel * 22}px` }}
+        onClick={() => setElegido(elegido === nodo.id ? null : nodo.id)}
+        className={`group relative flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] py-1.5 pr-3 transition-colors ${
+          raiz ? 'pl-1' : 'pl-5'
+        } ${abierto ? 'bg-[var(--color-acento-suave)]' : 'hover:bg-[var(--color-superficie-2)]'}`}
       >
-        {nodo.nivel > 0 && (
-          <span aria-hidden="true" className="text-[var(--color-tinta-3)]">
-            └
-          </span>
+        {/* Codo que une esta persona con la línea de su jefe. */}
+        {!raiz && (
+          <span
+            aria-hidden="true"
+            className="absolute left-0 top-1/2 h-px w-3.5 bg-[var(--color-borde)]"
+          />
         )}
+
+        {mando ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              plegar(nodo.id)
+            }}
+            aria-label={plegado ? `Desplegar el equipo de ${nodo.nombre}` : `Plegar el equipo de ${nodo.nombre}`}
+            aria-expanded={!plegado}
+            className="grid h-5 w-5 shrink-0 place-items-center rounded-[var(--radius-xs)] text-[var(--color-tinta-3)] transition-colors hover:bg-[var(--color-borde)] hover:text-[var(--color-tinta)]"
+          >
+            <IconoFlechaAbajo
+              tamano={12}
+              className={`transition-transform duration-150 ${plegado ? '-rotate-90' : ''}`}
+            />
+          </button>
+        ) : (
+          <span className="h-5 w-5 shrink-0" aria-hidden="true" />
+        )}
+
+        <span
+          aria-hidden="true"
+          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[length:var(--text-micro)] font-semibold ${
+            mando
+              ? 'bg-[var(--color-acento)] text-white'
+              : 'bg-[var(--color-superficie-2)] text-[var(--color-tinta-2)] ring-1 ring-[var(--color-borde)]'
+          }`}
+        >
+          {iniciales(nodo.nombre)}
+        </span>
 
         <span
           className="font-medium"
@@ -168,7 +268,13 @@ function Rama({
           </span>
         )}
 
-        <span className="ml-auto shrink-0">
+        {plegado && hijos.length > 0 && (
+          <span className="clave text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+            +{hijos.length} plegad{hijos.length === 1 ? 'a' : 'as'}
+          </span>
+        )}
+
+        <span className="ml-auto shrink-0" onClick={(e) => e.stopPropagation()}>
           {editando === nodo.id ? (
             <FormaResponsable
               nodo={nodo}
@@ -179,7 +285,9 @@ function Rama({
             <button
               type="button"
               onClick={() => setEditando(nodo.id)}
-              className="boton boton-llano !h-6 !px-1.5 text-[var(--text-micro)]"
+              className={`boton boton-llano !h-6 !px-1.5 text-[var(--text-micro)] transition-opacity ${
+                abierto ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+              }`}
             >
               Cambiar responsable
             </button>
@@ -187,8 +295,8 @@ function Rama({
         </span>
       </div>
 
-      {hijos.length > 0 && (
-        <ul>
+      {hijos.length > 0 && !plegado && (
+        <ul className="ml-[22px] border-l border-[var(--color-borde)]">
           {hijos.map((h) => (
             <Rama
               key={h.id}
@@ -199,6 +307,10 @@ function Rama({
               setEditando={setEditando}
               responsables={responsables}
               filtro={filtro}
+              plegados={plegados}
+              plegar={plegar}
+              elegido={elegido}
+              setElegido={setElegido}
             />
           ))}
         </ul>

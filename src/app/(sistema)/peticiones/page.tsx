@@ -76,16 +76,16 @@ export default async function Peticiones({
 
   const recortes = [
     texto(sp.pendientes) === 'si'
-      ? { llave: 'pendientes', texto: 'sin resolver', sinEste: conSp('pendientes') }
+      ? { llave: 'pendientes', texto: 'Solo sin resolver', sinEste: conSp('pendientes') }
       : null,
     texto(sp.mes)
-      ? { llave: 'mes', texto: nombreDeMes(texto(sp.mes)!), sinEste: conSp('mes') }
+      ? { llave: 'mes', texto: `Mes: ${nombreDeMes(texto(sp.mes)!)}`, sinEste: conSp('mes') }
       : null,
     texto(sp.municipio)
-      ? { llave: 'municipio', texto: texto(sp.municipio)!, sinEste: conSp('municipio') }
+      ? { llave: 'municipio', texto: `Municipio: ${texto(sp.municipio)}`, sinEste: conSp('municipio') }
       : null,
     esRango(texto(sp.edad))
-      ? { llave: 'edad', texto: `${texto(sp.edad)} años`, sinEste: conSp('edad') }
+      ? { llave: 'edad', texto: `Edad: ${texto(sp.edad)} años`, sinEste: conSp('edad') }
       : null,
   ].filter((x): x is { llave: string; texto: string; sinEste: string } => x !== null)
 
@@ -125,29 +125,8 @@ export default async function Peticiones({
           { nombre: 'problematica', etiqueta: 'Problemática', opciones: r.problematicas },
           { nombre: 'prioridad', etiqueta: 'Prioridad', opciones: r.prioridades },
         ]}
+        recortes={recortes}
       />
-
-      {/* Los recortes que llegan desde otra pantalla —un mes de la
-          gráfica, un municipio del mapa, la alerta de urgentes— no están
-          en los selectores de arriba. Si no se dijeran aquí, el total
-          saldría distinto al de la pantalla anterior sin explicación. */}
-      {recortes.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="rotulo">Viendo solo</span>
-          {recortes.map((c) => (
-            <Link
-              key={c.llave}
-              href={c.sinEste}
-              className="distintivo gap-1.5 hover:opacity-80"
-              style={{ background: 'var(--color-acento-suave)', color: 'var(--color-acento-fuerte)' }}
-              title="Quitar este recorte"
-            >
-              {c.texto}
-              <span aria-hidden="true">×</span>
-            </Link>
-          ))}
-        </div>
-      )}
 
       <SeleccionEnLote estatus={r.estatusConId} />
 
