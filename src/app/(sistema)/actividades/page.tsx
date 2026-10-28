@@ -156,6 +156,7 @@ export default async function Actividades({
             actividades={actividades}
             mesAnterior={enlace(sp, { mes: desplazarMes(mes, -1), pagina: undefined })}
             mesSiguiente={enlace(sp, { mes: desplazarMes(mes, 1), pagina: undefined })}
+            mesDeHoy={enlace(sp, { mes: hoy.slice(0, 7), pagina: undefined })}
           />
         ) : (
           <>
