@@ -10,6 +10,7 @@ import { VERSION_RUTAS, filtrarNavegacion } from '@/lib/navegacion'
 const Entrada = z.object({
   correo: z.string().trim().toLowerCase().email('Correo no válido'),
   contrasena: z.string().min(1, 'Escribe tu contraseña'),
+  recordar: z.literal('si').optional(),
 })
 
 export type EstadoEntrada = { error?: string }
@@ -24,6 +25,7 @@ export async function entrar(
   const analisis = Entrada.safeParse({
     correo: datos.get('correo'),
     contrasena: datos.get('contrasena'),
+    recordar: datos.get('recordar') ?? undefined,
   })
   if (!analisis.success) {
     return { error: analisis.error.issues[0].message }
@@ -76,7 +78,7 @@ export async function entrar(
     nombre: [usuario.nombre, usuario.apellido_paterno].filter(Boolean).join(' '),
     rutas,
     v: VERSION_RUTAS,
-  })
+  }, analisis.data.recordar === 'si')
 
   redirect('/')
 }

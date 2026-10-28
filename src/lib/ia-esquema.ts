@@ -54,12 +54,29 @@ pregunta. Escribir el filtro no hace daño pero sobra.
 **secciones** (id, clave, municipio_id, distrito_local_id, estado_id,
   lista_nominal, latitud, longitud)
 **distritos** (id, clave, nombre, ambito 'local'|'federal', estado_id)
-**resultados_electorales** — votos por sección, elección y partido.
+**resultados_historicos** — una fila por sección, elección y partido.
+  (seccion_id, anio, eleccion, partido, votos)
+  · Hoy solo hay anio = 2015, con eleccion 'gobernador' y 'diputado_mr'.
+    Son 58,065 filas y solo de Nuevo León: los otros estados tienen
+    cartografía pero todavía no resultados.
   · El INE reporta una fila por emblema marcado, así que el voto de una
-    coalición viaja en claves propias ('PRI_PVEM'). Para hablar de un
-    partido hay que sumarlas al que encabeza.
-  · Los porcentajes van sobre votos VÁLIDOS, no sobre el total: el
-    total incluye los nulos.
+    coalición viaja en claves propias: 'PRI_PVEM', 'PAN_PRD',
+    'NVA_ALIANZA_...'. Para hablar de un partido hay que sumarlas al
+    que encabeza. Ojo con el orden al agrupar: la clave de Nueva
+    Alianza trae guion bajo propio, así que se prueba ANTES que las
+    demás o se reparte mal.
+  · Candidatos independientes: claves que empiezan con 'CAND_IND'.
+
+**resultados_seccion_totales** — los totales de cada sección.
+  (seccion_id, anio, eleccion, lista_nominal, votos_validos,
+   votos_nulos, total_votos)
+  · Para porcentajes usa \`votos_validos\`, NO \`total_votos\`: el total
+    incluye los nulos, que fueron 2.15% en 2015.
+  · La participación es \`total_votos / lista_nominal\`. Algunas
+    secciones dan más de 100% porque las casillas especiales reciben
+    votantes de fuera; conviene acotarlas al 100 para pintarlas.
+
+**casillas** — (clave, tipo, seccion_id, domicilio, latitud, longitud).
 
 ## Actividades
 

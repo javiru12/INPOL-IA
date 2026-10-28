@@ -39,6 +39,16 @@ export function Formulario() {
         />
       </div>
 
+      {/* Treinta días en vez de una jornada. Apagada por omisión: en una
+          computadora compartida de oficina la sesión corta es lo
+          correcto, y quien la necesita sabe por qué la marca. */}
+      <label className="flex cursor-pointer items-center gap-2 select-none">
+        <input type="checkbox" name="recordar" value="si" className="cursor-pointer" />
+        <span className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+          Recordarme en este dispositivo
+        </span>
+      </label>
+
       {estado.error && (
         <p
           role="alert"

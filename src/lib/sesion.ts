@@ -8,6 +8,17 @@ const COOKIE_SESION = 'inpol_sesion'
 const COOKIE_TENANT = 'inpol_tenant'
 const DURACION = 60 * 60 * 10 // 10 horas: una jornada de trabajo
 
+/**
+ * Con «recuérdame», treinta días.
+ *
+ * No es sólo comodidad: quien trabaja en campo entra desde su propio
+ * celular varias veces al día, y volver a teclear la contraseña en una
+ * pantalla chica con una mano empuja a poner contraseñas cortas. Es una
+ * casilla y no el comportamiento por omisión porque en una computadora
+ * compartida de oficina la sesión corta es lo correcto.
+ */
+const DURACION_RECORDADA = 60 * 60 * 24 * 30
+
 const llave = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? 'desarrollo_local_cambiar_en_produccion',
 )
@@ -35,11 +46,16 @@ export type Sesion = {
   v?: string
 }
 
-export async function abrirSesion(s: Sesion) {
+export async function abrirSesion(s: Sesion, recordar = false) {
+  const dura = recordar ? DURACION_RECORDADA : DURACION
+
+  // La caducidad va en el token y en la galleta: si solo fuera en la
+  // galleta, bastaría con editarla en el navegador para estirar una
+  // sesión caducada.
   const token = await new SignJWT({ ...s })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(`${DURACION}s`)
+    .setExpirationTime(`${dura}s`)
     .sign(llave)
 
   const tarro = await cookies()
@@ -48,7 +64,7 @@ export async function abrirSesion(s: Sesion) {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: DURACION,
+    maxAge: dura,
   })
 }
 

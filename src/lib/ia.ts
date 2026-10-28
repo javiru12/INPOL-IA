@@ -63,6 +63,167 @@ const DatosGrafica = z.object({
     .describe('Como mucho 40 puntos: una gráfica con cien barras no se lee'),
 })
 
+function sistemaDe(
+  tenant: { nombre: string; estado_nombre: string | null; estado_clave: string | null },
+  quien: { nombre: string; perfil: string },
+) {
+  return `Eres el asistente de datos de INPOL, un sistema de gestión social y
+análisis electoral que usan gobiernos y campañas en México.
+
+Estás contestando a ${quien.nombre} (${quien.perfil}), de ${tenant.nombre}${
+    tenant.estado_nombre ? `, que opera en ${tenant.estado_nombre}` : ''
+  }. La zona horaria para agrupar por día o por mes es ${zonaDeEstado(tenant.estado_clave)}.
+
+Trabajas consultando la base. Mira los datos antes de afirmar nada: si no
+sabes qué valores tiene una columna, consúltalos primero. Si una consulta
+falla, lee el error y corrígela.
+
+${ESQUEMA}
+
+Cómo contestar:
+
+- En español, directo, sin preámbulo. Nada de «claro, con gusto».
+- Da el número y lo que significa. «1,145 peticiones resueltas que el
+  ciudadano todavía no sabe» dice más que «1,145 registros».
+- Si un cero puede ser «no hay» o «la pregunta no aplica», averigua cuál
+  de los dos es antes de responder.
+- Si la pregunta es ambigua, elige la lectura más útil, respóndela y di
+  qué entendiste. No devuelvas la pregunta.
+- Es una conversación: «¿y de esas cuántas son de Cumbres?» se refiere a
+  lo que acabas de responder. Vuelve a consultar con el recorte nuevo;
+  no supongas que recuerdas las cifras exactas de antes.
+- No inventes nunca una cifra que no viste en una consulta.
+- Si los datos no alcanzan para responder, dilo y explica qué falta.`
+}
+
+/** Lo que va saliendo mientras el agente trabaja. */
+export type Evento =
+  | { t: 'consulta'; sql: string; porque: string }
+  | { t: 'filas'; n: number; error?: string }
+  | { t: 'grafica'; grafica: Grafica }
+  | { t: 'texto'; delta: string }
+  | { t: 'fin' }
+  | { t: 'error'; mensaje: string }
+
+/**
+ * Igual que `preguntar`, pero va contando lo que hace.
+ *
+ * Treinta segundos de pantalla en blanco y después un muro de texto se
+ * sienten rotos aunque la respuesta sea buena. Viendo «está consultando
+ * las peticiones por colonia» y después el texto apareciendo, la misma
+ * espera se siente trabajo y no cuelgue.
+ */
+export async function* preguntarEnVivo(
+  pregunta: string,
+  historial: Turno[],
+  tenant: { id: string; nombre: string; estado_nombre: string | null; estado_clave: string | null },
+  quien: { nombre: string; perfil: string },
+): AsyncGenerator<Evento> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    yield { t: 'error', mensaje: 'Falta la llave de Anthropic en el entorno.' }
+    return
+  }
+
+  const cliente = new Anthropic({ fetchOptions: { cache: 'no-store' } })
+
+  // Las herramientas empujan a esta cola y el bucle de abajo la vacía:
+  // un generador no puede recibir desde dentro de un callback.
+  const cola: Evento[] = []
+
+  const herramientas = [
+    betaZodTool({
+      name: 'consultar',
+      description:
+        'Ejecuta una consulta SQL de solo lectura sobre los datos de este cliente ' +
+        'y devuelve las filas. Úsala tantas veces como haga falta: está bien mirar ' +
+        'primero qué valores existen en una columna y después contar sobre ellos.',
+      inputSchema: z.object({
+        sql: z.string().describe('Una sola sentencia select o with'),
+        porque: z
+          .string()
+          .describe('Qué estás averiguando, en pocas palabras y en español llano'),
+      }),
+      run: async ({ sql, porque }) => {
+        cola.push({ t: 'consulta', sql, porque })
+        const r = await consultar(tenant.id, sql)
+        if (!r.ok) {
+          cola.push({ t: 'filas', n: 0, error: r.error })
+          return `Error: ${r.error}`
+        }
+        cola.push({ t: 'filas', n: r.filas.length })
+        if (r.filas.length === 0) return 'Sin resultados. (0 filas)'
+        return (
+          JSON.stringify(r.filas) +
+          (r.truncado ? '\n(Se recortó a las primeras 500 filas.)' : '')
+        )
+      },
+    }),
+    betaZodTool({
+      name: 'graficar',
+      description:
+        'Dibuja una gráfica con datos que ya consultaste. Úsala cuando la ' +
+        'respuesta se entienda mejor viéndola. No la uses para un solo número.',
+      inputSchema: DatosGrafica,
+      run: async (g) => {
+        cola.push({ t: 'grafica', grafica: g as Grafica })
+        return 'Gráfica lista. Menciónala sin repetir todos los números.'
+      },
+    }),
+  ]
+
+  try {
+    const corredor = cliente.beta.messages.toolRunner({
+      model: MODELO,
+      max_tokens: 8000,
+      thinking: { type: 'adaptive' },
+      system: sistemaDe(tenant, quien),
+      tools: herramientas,
+      messages: [
+        ...historial.flatMap((t) => [
+          { role: 'user' as const, content: t.pregunta },
+          { role: 'assistant' as const, content: t.respuesta },
+        ]),
+        { role: 'user' as const, content: pregunta },
+      ],
+      max_iterations: 12,
+      stream: true,
+    })
+
+    for await (const flujo of corredor) {
+      for await (const evento of flujo) {
+        while (cola.length) yield cola.shift()!
+        if (
+          evento.type === 'content_block_delta' &&
+          evento.delta.type === 'text_delta' &&
+          evento.delta.text
+        ) {
+          yield { t: 'texto', delta: evento.delta.text }
+        }
+      }
+      while (cola.length) yield cola.shift()!
+
+      const mensaje = await flujo.finalMessage()
+      if (mensaje.stop_reason === 'pause_turn') {
+        corredor.pushMessages({ role: 'assistant', content: mensaje.content })
+      }
+    }
+    while (cola.length) yield cola.shift()!
+    yield { t: 'fin' }
+  } catch (e) {
+    yield {
+      t: 'error',
+      mensaje:
+        e instanceof Anthropic.RateLimitError
+          ? 'El servicio de IA está saturado. Intenta en un momento.'
+          : e instanceof Anthropic.AuthenticationError
+            ? 'La llave de Anthropic no es válida.'
+            : e instanceof Error
+              ? e.message.slice(0, 300)
+              : 'No se pudo completar la consulta.',
+    }
+  }
+}
+
 export async function preguntar(
   pregunta: string,
   historial: Turno[],
@@ -130,33 +291,7 @@ export async function preguntar(
     },
   })
 
-  const sistema = `Eres el asistente de datos de INPOL, un sistema de gestión social y
-análisis electoral que usan gobiernos y campañas en México.
-
-Estás contestando a ${quien.nombre} (${quien.perfil}), de ${tenant.nombre}${
-    tenant.estado_nombre ? `, que opera en ${tenant.estado_nombre}` : ''
-  }. La zona horaria para agrupar por día o por mes es ${zonaDeEstado(tenant.estado_clave)}.
-
-Trabajas consultando la base. Mira los datos antes de afirmar nada: si no
-sabes qué valores tiene una columna, consúltalos primero. Si una consulta
-falla, lee el error y corrígela.
-
-${ESQUEMA}
-
-Cómo contestar:
-
-- En español, directo, sin preámbulo. Nada de «claro, con gusto».
-- Da el número y lo que significa. «1,145 peticiones resueltas que el
-  ciudadano todavía no sabe» dice más que «1,145 registros».
-- Si un cero puede ser «no hay» o «la pregunta no aplica», averigua cuál
-  de los dos es antes de responder.
-- Si la pregunta es ambigua, elige la lectura más útil, respóndela y di
-  qué entendiste. No devuelvas la pregunta.
-- Es una conversación: «¿y de esas cuántas son de Cumbres?» se refiere a
-  lo que acabas de responder. Vuelve a consultar con el recorte nuevo;
-  no supongas que recuerdas las cifras exactas de antes.
-- No inventes nunca una cifra que no viste en una consulta.
-- Si los datos no alcanzan para responder, dilo y explica qué falta.`
+  const sistema = sistemaDe(tenant, quien)
 
   try {
     const corredor = cliente.beta.messages.toolRunner({

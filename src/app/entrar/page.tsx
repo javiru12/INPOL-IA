@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { leerSesion, tenantDeLaPeticion } from '@/lib/sesion'
 import { Formulario } from './formulario'
 import { Marca } from '@/components/marca'
+import { Intro } from './intro'
 
 export const metadata: Metadata = { title: 'Entrar' }
 
@@ -13,6 +14,7 @@ export default async function Entrar() {
 
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
+      <Intro />
       {/* Panel de identidad. En el sistema anterior este espacio decía
           a qué campaña entrabas; se conserva la idea, mejor resuelta. */}
       <section className="relative hidden flex-col justify-between overflow-hidden bg-[var(--color-barra)] p-12 text-white lg:flex">

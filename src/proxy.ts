@@ -83,5 +83,8 @@ export async function proxy(peticion: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|geo/).*)'],
+  // El video de entrada se sirve ANTES de que exista sesión: sin
+  // excluirlo, el proxy lo trataba como ruta del sistema y respondía
+  // con un 307 al login, así que el intro nunca llegaba a cargar.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|geo/|intro.mp4).*)'],
 }

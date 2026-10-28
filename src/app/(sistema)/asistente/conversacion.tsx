@@ -1,184 +1,309 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
-import { useFormStatus } from 'react-dom'
-import { responder, type EstadoAsistente, type Vuelta } from './acciones'
+import { useEffect, useRef, useState } from 'react'
 import { BarrasHorizontales, BarrasTemporales } from '@/components/graficas'
 import { TextoRico } from '@/components/texto-rico'
-import type { Grafica } from '@/lib/ia'
+import type { Grafica, Evento } from '@/lib/ia'
 
 /**
- * Preguntarle al sistema.
+ * El asistente, como conversación.
  *
- * Se deja ver cómo llegó a la respuesta. Un número sin procedencia en
- * una pantalla de gobierno no se puede usar para decidir nada: quien lo
- * va a citar en una junta necesita poder abrir la consulta y ver de
- * dónde salió. Por eso los pasos están ahí, plegados, y no escondidos.
+ * Dos decisiones que cambian cómo se siente:
+ *
+ * La respuesta se escribe conforme llega. Treinta segundos de pantalla
+ * quieta y luego un muro de texto se sienten rotos aunque la respuesta
+ * sea buena; viendo el texto aparecer, la misma espera se lee como
+ * trabajo.
+ *
+ * Y mientras consulta, dice qué está consultando. «Viendo cuántas
+ * peticiones hay por colonia» no es decoración: es lo que convierte la
+ * espera en algo comprensible, y de paso deja claro que está mirando
+ * los datos de verdad y no inventando.
  */
 
-/**
- * Las preguntas de arranque.
- *
- * Están elegidas para enseñar lo que NINGUNA otra pantalla puede
- * contestar: cruces entre territorio, elección, estructura y demanda.
- * Un ejemplo que se responde mirando Estadísticas no demuestra nada,
- * solo enseña un camino más largo para llegar a lo mismo.
- */
 const EJEMPLOS: { grupo: string; preguntas: string[] }[] = [
   {
     grupo: 'Dónde actuar',
     preguntas: [
-      '¿Qué secciones tienen mucha demanda ciudadana y ningún movilizador asignado?',
+      '¿Qué secciones tienen mucha demanda y ningún movilizador?',
       '¿En qué distritos ganamos por menos de 5 puntos en 2015 y hoy tenemos peticiones sin resolver?',
-      'Dame las 10 colonias donde más conviene abrir una brigada y explica por qué cada una',
+      'Dame las 10 colonias donde más conviene abrir una brigada y explica por qué',
     ],
   },
   {
     grupo: 'Dónde duele',
     preguntas: [
-      '¿Qué problemática tarda más en resolverse y en qué municipios es peor que el promedio?',
-      '¿Hay peticiones urgentes que lleven más de 90 días sin un solo movimiento?',
-      '¿Qué colonias piden una cosa muy distinta al resto del municipio?',
+      '¿Qué problemática tarda más y en qué municipios es peor que el promedio?',
+      '¿Hay urgentes con más de 90 días sin un solo movimiento?',
+      '¿Qué colonias piden algo muy distinto al resto del municipio?',
     ],
   },
   {
     grupo: 'Quién responde',
     preguntas: [
-      '¿Quién del equipo tiene más carga y quién está desocupado?',
+      '¿Quién tiene más carga y quién está desocupado?',
       '¿Qué gestores cierran más rápido que el promedio, y en qué temas?',
-      '¿Hay peticiones que cambiaron de responsable más de dos veces?',
     ],
   },
   {
     grupo: 'A quién servimos',
     preguntas: [
-      '¿La demanda de los adultos mayores es distinta a la del resto?',
-      '¿A cuántos ciudadanos no podríamos avisarles nada porque no tienen teléfono?',
-      'Compara las peticiones que entraron por la app contra las capturadas en campo',
+      '¿La demanda de los adultos mayores es distinta?',
+      '¿A cuántos no podríamos avisarles nada por no tener teléfono?',
+      'Compara lo que entra por la app contra lo capturado en campo',
     ],
   },
 ]
 
+type Vuelta = {
+  pregunta: string
+  respuesta: string
+  graficas: Grafica[]
+  consultas: { sql: string; porque: string; filas?: number; error?: string }[]
+  enCurso?: boolean
+}
 
 export function Conversacion() {
-  const [estado, enviar] = useActionState<EstadoAsistente, FormData>(responder, {
-    hilo: [],
-  })
-  const campo = useRef<HTMLTextAreaElement>(null)
+  const [hilo, setHilo] = useState<Vuelta[]>([])
   const [texto, setTexto] = useState('')
+  const [trabajando, setTrabajando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const campo = useRef<HTMLTextAreaElement>(null)
   const fondo = useRef<HTMLDivElement>(null)
-  const hilo = estado.hilo
 
-  // Tras responder, el cursor vuelve al campo y la vista baja: la
-  // siguiente pregunta casi siempre sale de la respuesta anterior.
   useEffect(() => {
-    if (estado.hilo.length > 0 || estado.error) {
+    fondo.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [hilo, trabajando])
+
+  async function preguntar(q: string) {
+    const pregunta = q.trim()
+    if (pregunta.length < 4 || trabajando) return
+
+    setError(null)
+    setTexto('')
+    setTrabajando(true)
+
+    const historial = hilo
+      .slice(-6)
+      .map((v) => ({ pregunta: v.pregunta, respuesta: v.respuesta }))
+
+    setHilo((h) => [
+      ...h,
+      { pregunta, respuesta: '', graficas: [], consultas: [], enCurso: true },
+    ])
+
+    // Se actualiza siempre la última vuelta del hilo, que es la que se
+    // está escribiendo.
+    const actualizar = (cambio: (v: Vuelta) => Vuelta) =>
+      setHilo((h) => h.map((v, i) => (i === h.length - 1 ? cambio(v) : v)))
+
+    try {
+      const r = await fetch('/asistente/stream', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ pregunta, historial }),
+      })
+      if (!r.ok || !r.body) throw new Error(await r.text())
+
+      const lector = r.body.getReader()
+      const decodificador = new TextDecoder()
+      let resto = ''
+
+      for (;;) {
+        const { done, value } = await lector.read()
+        if (done) break
+        resto += decodificador.decode(value, { stream: true })
+
+        // Una lectura puede traer varias líneas o media: lo que queda a
+        // medias se arrastra a la siguiente.
+        const lineas = resto.split('\n')
+        resto = lineas.pop() ?? ''
+
+        for (const linea of lineas) {
+          if (!linea.trim()) continue
+          const e: Evento = JSON.parse(linea)
+
+          if (e.t === 'texto') {
+            actualizar((v) => ({ ...v, respuesta: v.respuesta + e.delta }))
+          } else if (e.t === 'consulta') {
+            actualizar((v) => ({
+              ...v,
+              consultas: [...v.consultas, { sql: e.sql, porque: e.porque }],
+            }))
+          } else if (e.t === 'filas') {
+            actualizar((v) => ({
+              ...v,
+              consultas: v.consultas.map((c, i) =>
+                i === v.consultas.length - 1 ? { ...c, filas: e.n, error: e.error } : c,
+              ),
+            }))
+          } else if (e.t === 'grafica') {
+            actualizar((v) => ({ ...v, graficas: [...v.graficas, e.grafica] }))
+          } else if (e.t === 'error') {
+            setError(e.mensaje)
+          }
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Se cortó la conexión.')
+    } finally {
+      actualizar((v) => ({ ...v, enCurso: false }))
+      setTrabajando(false)
       campo.current?.focus()
-      fondo.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
-  }, [estado])
+  }
 
   return (
-    <div className="space-y-3">
-      {hilo.map((v, i) => (
-        <section key={i} className="panel px-4 py-4">
-          <p className="mb-3 border-l-2 border-[var(--color-acento)] pl-3 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-            {v.pregunta}
-          </p>
-          <TextoRico texto={v.respuesta} />
-          {v.graficas.map((g, j) => (
-            <Pintada key={j} grafica={g} />
-          ))}
-          {v.pasos.length > 0 && <Pasos pasos={v.pasos} />}
-        </section>
-      ))}
-
-      <form
-        action={(d) => {
-          d.set('hilo', JSON.stringify(hilo))
-          setTexto('')
-          return enviar(d)
-        }}
-        className="panel px-4 py-4"
-      >
-        <label className="block">
-          <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
-            Pregúntale a tus datos
-          </span>
-          <textarea
-            ref={campo}
-            name="pregunta"
-            rows={2}
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            onKeyDown={(e) => {
-              // Enter envía; Shift+Enter hace salto de línea. En un
-              // campo de una o dos líneas, pedir que se use el ratón
-              // para enviar es fricción sin motivo.
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                e.currentTarget.form?.requestSubmit()
-              }
-            }}
-            placeholder={hilo.length ? "Sigue preguntando sobre lo de arriba…" : "Por ejemplo: ¿qué problemática tarda más en resolverse y en qué municipios?"}
-            className="campo !h-auto py-2"
-          />
-        </label>
-
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Enviar />
-          {hilo.length === 0 && !estado.error && (
-            <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-              Consulta los datos de {''}
-              <strong className="font-medium">este cliente</strong> y nada más.
-            </span>
-          )}
-        </div>
-
-        {hilo.length === 0 && (
-          <div className="mt-4 space-y-3">
-            {EJEMPLOS.map((g) => (
-              <div key={g.grupo}>
-                <p className="rotulo mb-1.5">{g.grupo}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {g.preguntas.map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      onClick={() => {
-                        setTexto(q)
-                        campo.current?.focus()
-                      }}
-                      className="boton boton-neutro !h-auto !py-1.5 text-left text-[var(--text-micro)]"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
+    <div className="flex h-[calc(100vh-7.5rem)] flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {hilo.length === 0 ? (
+          <Arranque alElegir={(q) => preguntar(q)} />
+        ) : (
+          <div className="space-y-6 pb-4">
+            {hilo.map((v, i) => (
+              <Intercambio key={i} vuelta={v} />
             ))}
           </div>
         )}
-      </form>
+        {error && (
+          <p
+            className="mt-3 rounded-[var(--radius-sm)] px-3 py-2 text-[var(--text-menuda)]"
+            style={{ background: 'var(--color-alerta-suave)', color: 'var(--color-alerta)' }}
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
+        <div ref={fondo} />
+      </div>
 
-      {estado.error && (
-        <p
-          className="rounded-[var(--radius-sm)] px-3 py-2 text-[var(--text-menuda)]"
-          style={{ background: 'var(--color-alerta-suave)', color: 'var(--color-alerta)' }}
-          role="alert"
+      <div className="shrink-0 border-t border-[var(--color-borde)] bg-[var(--color-fondo)] pt-3">
+        <div
+          className="flex items-end gap-2 rounded-[var(--radius-md)] border p-2 transition-colors"
+          style={{
+            borderColor: texto ? 'var(--color-acento-borde)' : 'var(--color-borde-fuerte)',
+            background: 'var(--color-superficie)',
+          }}
         >
-          {estado.error}
+          <textarea
+            ref={campo}
+            rows={1}
+            value={texto}
+            disabled={trabajando}
+            onChange={(e) => {
+              setTexto(e.target.value)
+              // Crece con el texto hasta un tope, como cualquier campo
+              // de chat; un textarea de alto fijo se siente de formulario.
+              e.target.style.height = 'auto'
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                preguntar(texto)
+              }
+            }}
+            placeholder={
+              hilo.length ? 'Sigue preguntando…' : 'Pregunta lo que quieras sobre tus datos…'
+            }
+            className="max-h-[200px] min-h-[2.25rem] flex-1 resize-none bg-transparent px-2 py-1.5 text-[var(--text-base)] outline-none placeholder:text-[var(--color-tinta-3)] disabled:opacity-50"
+          />
+          <button
+            type="button"
+            onClick={() => preguntar(texto)}
+            disabled={trabajando || texto.trim().length < 4}
+            aria-label="Preguntar"
+            className="boton boton-primario !h-9 !w-9 shrink-0 !p-0"
+          >
+            {trabajando ? (
+              <span className="block h-3 w-3 animate-pulse rounded-full bg-white/80" />
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M8 13V3M4 7l4-4 4 4" />
+              </svg>
+            )}
+          </button>
+        </div>
+        <p className="mt-1.5 text-center text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+          Consulta los datos de este cliente y nada más. Puede equivocarse: abre «cómo lo
+          averiguó» para ver de dónde salió cada cifra.
         </p>
-      )}
+      </div>
+    </div>
+  )
+}
 
-      <div ref={fondo} />
+function Arranque({ alElegir }: { alElegir: (q: string) => void }) {
+  return (
+    <div className="space-y-4 py-2">
+      <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+        Pregunta en español. Consulta los datos, los cruza y te contesta con cifras que
+        puedes revisar.
+      </p>
+      {EJEMPLOS.map((g) => (
+        <div key={g.grupo}>
+          <p className="rotulo mb-1.5">{g.grupo}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {g.preguntas.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => alElegir(q)}
+                className="boton boton-neutro !h-auto !py-1.5 text-left text-[var(--text-micro)] transition-transform hover:-translate-y-px"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function Intercambio({ vuelta }: { vuelta: Vuelta }) {
+  const ultima = vuelta.consultas.at(-1)
+  const consultando = vuelta.enCurso && !vuelta.respuesta
+
+  return (
+    <div>
+      <div className="flex justify-end">
+        <p
+          className="max-w-[80%] rounded-[var(--radius-md)] px-3.5 py-2 text-[var(--text-base)]"
+          style={{ background: 'var(--color-acento-suave)' }}
+        >
+          {vuelta.pregunta}
+        </p>
+      </div>
+
+      <div className="mt-3">
+        {consultando && (
+          <p className="flex items-center gap-2 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 animate-pulse rounded-full"
+              style={{ background: 'var(--color-acento)' }}
+            />
+            {ultima ? ultima.porque : 'Mirando los datos…'}
+          </p>
+        )}
+
+        {vuelta.respuesta && <TextoRico texto={vuelta.respuesta} />}
+
+        {vuelta.graficas.map((g, i) => (
+          <Pintada key={i} grafica={g} />
+        ))}
+
+        {!vuelta.enCurso && vuelta.consultas.length > 0 && (
+          <Consultas consultas={vuelta.consultas} />
+        )}
+      </div>
     </div>
   )
 }
 
 function Pintada({ grafica }: { grafica: Grafica }) {
   const datos = grafica.datos.map((d) => ({ etiqueta: d.etiqueta, valor: d.valor }))
-
   return (
     <figure className="mt-4">
       <figcaption className="mb-3">
@@ -195,8 +320,6 @@ function Pintada({ grafica }: { grafica: Grafica }) {
         <BarrasHorizontales
           datos={datos}
           colorUnico="var(--color-acento)"
-          // Un ranking de porcentajes no tiene «parte del total»: el
-          // 4% de una serie de tasas no significa nada.
           participacion={grafica.tipo === 'barras'}
         />
       )}
@@ -204,41 +327,28 @@ function Pintada({ grafica }: { grafica: Grafica }) {
   )
 }
 
-function Pasos({ pasos }: { pasos: Vuelta['pasos'] }) {
-  const consultas = pasos.filter((p) => p.tipo === 'consulta')
-  if (consultas.length === 0) return null
-
+function Consultas({ consultas }: { consultas: Vuelta['consultas'] }) {
   return (
     <details className="mt-4 rounded-[var(--radius-sm)] border border-[var(--color-borde)]">
       <summary className="cursor-pointer px-3 py-2 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-        Cómo llegó a esto · {consultas.length}{' '}
+        Cómo lo averiguó · {consultas.length}{' '}
         {consultas.length === 1 ? 'consulta' : 'consultas'}
       </summary>
-      <div className="space-y-2 border-t border-[var(--color-borde)] px-3 py-2.5">
-        {consultas.map((p, i) => (
+      <div className="space-y-2.5 border-t border-[var(--color-borde)] px-3 py-2.5">
+        {consultas.map((c, i) => (
           <div key={i}>
+            <p className="mb-1 text-[var(--text-micro)] text-[var(--color-tinta-2)]">
+              {c.porque}
+            </p>
             <pre className="overflow-x-auto rounded-[var(--radius-xs)] bg-[var(--color-superficie-2)] px-2.5 py-2 text-[length:var(--text-micro)] leading-relaxed">
-              <code>{p.tipo === 'consulta' ? p.sql : ''}</code>
+              <code>{c.sql}</code>
             </pre>
             <p className="mt-1 text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-              {p.tipo === 'consulta' && p.error
-                ? `Falló: ${p.error}`
-                : p.tipo === 'consulta'
-                  ? `${p.filas} ${p.filas === 1 ? 'fila' : 'filas'}`
-                  : ''}
+              {c.error ? `Falló: ${c.error}` : `${c.filas ?? 0} filas`}
             </p>
           </div>
         ))}
       </div>
     </details>
-  )
-}
-
-function Enviar() {
-  const { pending } = useFormStatus()
-  return (
-    <button type="submit" disabled={pending} className="boton boton-primario">
-      {pending ? 'Consultando los datos…' : 'Preguntar'}
-    </button>
   )
 }
