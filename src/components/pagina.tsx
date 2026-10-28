@@ -47,6 +47,52 @@ export function Pagina({
   )
 }
 
+/**
+ * Cuánto cambió contra el periodo anterior.
+ *
+ * Va pegado a la cifra, no debajo: quien mira un tablero lee el número
+ * y la dirección en el mismo golpe de vista, y si la flecha está a dos
+ * renglones ya no son el mismo dato.
+ */
+function Variacion({
+  porcentaje,
+  contra,
+  subirEsBueno = true,
+}: {
+  porcentaje: number
+  contra: string
+  subirEsBueno?: boolean
+}) {
+  // Un cambio por debajo de medio punto es ruido de redondeo, no una
+  // tendencia: decir «↗ 0%» es peor que no decir nada.
+  if (!Number.isFinite(porcentaje) || Math.abs(porcentaje) < 0.5) {
+    return (
+      <span className="text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+        igual que {contra}
+      </span>
+    )
+  }
+
+  const subio = porcentaje > 0
+  const bien = subio === subirEsBueno
+  return (
+    <span
+      className="distintivo"
+      style={{
+        background: bien ? 'var(--color-exito-suave)' : 'var(--color-alerta-suave)',
+        color: bien ? 'var(--color-exito)' : 'var(--color-alerta)',
+      }}
+      title={`Contra ${contra}`}
+    >
+      <span aria-hidden="true">{subio ? '↗' : '↘'}</span>
+      {Math.abs(Math.round(porcentaje))}%
+      <span className="sr-only">
+        {subio ? 'más' : 'menos'} que {contra}
+      </span>
+    </span>
+  )
+}
+
 /** Indicador numérico. La cifra manda; la etiqueta la acompaña. */
 export function Indicador({
   etiqueta,
@@ -54,6 +100,7 @@ export function Indicador({
   pie,
   tono = 'neutro',
   href,
+  variacion,
 }: {
   etiqueta: string
   valor: number | string
@@ -61,6 +108,15 @@ export function Indicador({
   tono?: 'neutro' | 'exito' | 'aviso' | 'alerta' | 'dato'
   /** A dónde lleva esta cifra, si lleva a algún lado. */
   href?: string
+  /**
+   * Contra qué se compara. Una cifra sola no dice si vamos bien: 209
+   * peticiones vivas puede ser un alivio o una alarma según cuántas
+   * había el mes pasado.
+   *
+   * `subirEsBueno` existe porque no siempre lo es: más resueltas sí,
+   * más días para resolver no, y pintar las dos de verde sería mentir.
+   */
+  variacion?: { porcentaje: number; contra: string; subirEsBueno?: boolean }
 }) {
   const colores = {
     neutro: 'var(--color-tinta)',
@@ -73,12 +129,15 @@ export function Indicador({
   const cuerpo = (
     <>
       <p className="rotulo">{etiqueta}</p>
-      <p
-        className="cifra mt-1.5 text-[length:var(--text-cifra)] leading-none"
-        style={{ color: colores[tono] }}
-      >
-        {typeof valor === 'number' ? valor.toLocaleString('es-MX') : valor}
-      </p>
+      <div className="mt-1.5 flex flex-wrap items-baseline gap-2">
+        <p
+          className="cifra text-[length:var(--text-cifra)] leading-none"
+          style={{ color: colores[tono] }}
+        >
+          {typeof valor === 'number' ? valor.toLocaleString('es-MX') : valor}
+        </p>
+        {variacion && <Variacion {...variacion} />}
+      </div>
       {pie && (
         <p className="mt-1.5 text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-3)]">
           {pie}

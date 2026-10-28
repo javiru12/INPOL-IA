@@ -83,6 +83,11 @@ export function Tablero({
         <Cifra
           rotulo="Días para resolver"
           valor={mediana !== null ? mediana.toFixed(1) : '—'}
+          variacion={
+            mediana !== null && previa !== null && previa > 0
+              ? { porcentaje: ((mediana - previa) / previa) * 100, subirEsBueno: false }
+              : undefined
+          }
           pie={
             mejora === null
               ? 'Mediana del trimestre'
@@ -209,12 +214,16 @@ function Cifra({
   pie,
   tono,
   alarma,
+  variacion,
 }: {
   rotulo: string
   valor: number | string
   pie: string
   tono: string
   alarma?: boolean
+  /** Cuánto cambió contra el periodo anterior. A tres metros, una
+      flecha se lee de un golpe y una frase hay que acercarse a leerla. */
+  variacion?: { porcentaje: number; subirEsBueno?: boolean }
 }) {
   return (
     <div
@@ -228,10 +237,24 @@ function Cifra({
         {rotulo}
       </p>
       <p
-        className="mt-2 text-[2.75rem] font-semibold leading-none tracking-tight tabular-nums"
+        className="mt-2 inline-flex items-baseline gap-3 text-[2.75rem] font-semibold leading-none tracking-tight tabular-nums"
         style={{ color: tono }}
       >
         {typeof valor === 'number' ? cifra(valor) : valor}
+        {variacion && Math.abs(variacion.porcentaje) >= 0.5 && (
+          <span
+            className="text-[1.125rem] font-semibold"
+            style={{
+              color:
+                variacion.porcentaje > 0 === (variacion.subirEsBueno ?? true)
+                  ? '#7fd0a0'
+                  : '#f0836f',
+            }}
+          >
+            {variacion.porcentaje > 0 ? '↗' : '↘'}{' '}
+            {Math.abs(Math.round(variacion.porcentaje))}%
+          </span>
+        )}
       </p>
       <p className="mt-2 text-[var(--text-menuda)] text-white/60">{pie}</p>
     </div>

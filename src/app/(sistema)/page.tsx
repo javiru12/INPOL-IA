@@ -6,7 +6,8 @@ import { agruparCola, ESTADO } from '@/lib/paleta'
 import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { BarrasHorizontales, BarrasTemporales } from '@/components/graficas'
 import { MapaDelPanel } from './mapa-panel'
-import { mesCorto, fechaCorta } from '@/lib/formato'
+import { Anillo } from '@/components/anillo'
+import { mesCorto, fechaCorta, cifra } from '@/lib/formato'
 import { Tabla } from '@/components/tabla'
 import { archivoDeMapa } from '@/lib/mapas'
 
@@ -36,6 +37,11 @@ export default async function Panel() {
     : 0
 
   return (
+    <>
+      {/* El vidrio necesita algo detrás que desenfocar: sin un fondo con
+          profundidad, una tarjeta translúcida se ve gris y no de vidrio.
+          Va fijo porque el contenido rueda por encima. */}
+      <div aria-hidden="true" className="lienzo-profundo pointer-events-none fixed inset-0 -z-10" />
     <Pagina
       titulo={`Buen día, ${sesion.nombre.split(' ')[0]}`}
       descripcion={`Panorama de ${tenant.nombre_corto ?? tenant.nombre} al día de hoy`}
@@ -56,15 +62,24 @@ export default async function Panel() {
           }
         />
       ) : (
-        <>
+        <div data-vidrio className="space-y-0">
           <div className="franja">
             {/* Cada cifra lleva a la lista que la produjo. Un número
                 que no se puede abrir obliga a reconstruir a mano el
                 filtro que lo generó, y casi siempre sale distinto. */}
+            {/* La única de las cuatro que admite comparación honesta:
+                las demás son acumuladas o una foto de hoy, y no hay
+                registro de cuántas estaban abiertas hace un mes. */}
             <Indicador
-              etiqueta="Peticiones totales"
-              valor={r.totales.total}
-              pie="Desde el inicio de la campaña"
+              etiqueta="Entraron en 30 días"
+              valor={r.entradas.recientes}
+              variacion={{
+                porcentaje: r.entradas.previas
+                  ? ((r.entradas.recientes - r.entradas.previas) / r.entradas.previas) * 100
+                  : 0,
+                contra: 'los 30 días anteriores',
+              }}
+              pie={`${cifra(r.totales.total)} desde el inicio de la campaña`}
               href="/peticiones"
             />
             <Indicador
@@ -124,18 +139,29 @@ export default async function Panel() {
                 ))}
               </ul>
 
-              <div className="mt-5 border-t border-[var(--color-borde)] pt-4">
-                <div className="mb-1.5 flex items-baseline justify-between">
-                  <span className="rotulo">Avance de atención</span>
-                  <span className="cifra text-[var(--text-base)] font-semibold" style={{ color: ESTADO.exito }}>
-                    {avance}%
+              {/* Una barra dice «cuánto llevas»; el anillo dice «cuánto
+                  falta para cerrar», que es la pregunta de verdad cuando
+                  hay una meta. */}
+              <div className="mt-5 flex items-center gap-5 border-t border-[var(--color-borde)] pt-5">
+                <Anillo porcentaje={avance} color={ESTADO.exito}>
+                  <span>
+                    <span
+                      className="cifra block text-[length:var(--text-cifra)] leading-none"
+                      style={{ color: ESTADO.exito }}
+                    >
+                      {avance}%
+                    </span>
                   </span>
-                </div>
-                <div className="h-[7px] w-full overflow-hidden rounded-full bg-[var(--color-superficie-2)]">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${avance}%`, background: ESTADO.exito }}
-                  />
+                </Anillo>
+                <div className="min-w-0">
+                  <p className="font-medium">Avance de atención</p>
+                  <p className="mt-1 text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-2)]">
+                    {cifra(r.totales.completadas)} de {cifra(r.totales.total)} peticiones ya
+                    tienen desenlace.
+                  </p>
+                  <p className="mt-1.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                    Faltan {cifra(r.totales.total - r.totales.completadas)} por cerrar.
+                  </p>
                 </div>
               </div>
             </section>
@@ -283,8 +309,9 @@ export default async function Panel() {
               </tbody>
             </Tabla>
           </section>
-        </>
+        </div>
       )}
     </Pagina>
+    </>
   )
 }

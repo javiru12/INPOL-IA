@@ -159,6 +159,49 @@
     border-radius: var(--radius-md);
   }
 
+  /* --- Vidrio ---
+     El efecto necesita dos cosas: una superficie translúcida y un fondo
+     con profundidad debajo. Sin lo segundo el desenfoque no tiene nada
+     que tomar y la tarjeta se ve gris, no de vidrio. Por eso van juntos
+     y por eso se aplica por pantalla, no a todo el sistema: una tabla
+     de trabajo de ocho horas quiere blanco opaco. */
+  .lienzo-profundo {
+    background:
+      radial-gradient(1100px 680px at 6% -10%, rgb(130 84 155 / 0.42), transparent 58%),
+      radial-gradient(980px 640px at 98% 2%, rgb(46 112 158 / 0.34), transparent 60%),
+      radial-gradient(900px 620px at 52% 108%, rgb(158 96 150 / 0.30), transparent 58%),
+      radial-gradient(760px 520px at 78% 56%, rgb(86 118 176 / 0.22), transparent 62%),
+      var(--color-lienzo);
+  }
+
+  /* Toda superficie de una pantalla de vidrio, sin tocar los componentes:
+     se marca el contenedor y las tarjetas de dentro cambian solas. */
+  [data-vidrio] .panel,
+  [data-vidrio] .franja {
+    /* Translúcido de verdad: a 0.68 sobre un fondo casi blanco el
+       resultado era blanco, y el desenfoque no tenía nada que tomar. */
+    background: rgb(255 255 255 / 0.5);
+    border-color: rgb(255 255 255 / 0.65);
+    border-radius: 1rem;
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    backdrop-filter: blur(26px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.75),
+      0 16px 40px -24px rgb(32 33 43 / 0.35);
+  }
+  [data-vidrio] .franja { gap: 1px; background: rgb(255 255 255 / 0.38); }
+  [data-vidrio] .franja > * { background: rgb(255 255 255 / 0.42); }
+
+  /* Levantarse al pasar encima es lo que hace que un tablero se sienta
+     vivo y no una imagen pegada. */
+  [data-vidrio] .panel-vivo {
+    transition: transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1), background-color 220ms;
+  }
+  [data-vidrio] .panel-vivo:hover {
+    transform: translateY(-3px);
+    background: rgb(255 255 255 / 0.85);
+  }
+
   /* --- Franja de indicadores ---
      Cuatro cifras no son cuatro objetos: son una lectura. En tarjetas
      sueltas cada una pide su propio turno y la pantalla empieza con

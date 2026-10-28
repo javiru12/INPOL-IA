@@ -20,6 +20,16 @@ export type ResumenPanel = {
     fecha: string
   }[]
   totales: { total: number; abiertas: number; completadas: number; urgentes: number }
+  /**
+   * Cuánta demanda entró en los últimos 30 días y en los 30 anteriores.
+   *
+   * Es la única comparación honesta que admite este panel: las otras
+   * cifras son acumuladas o son una foto de hoy, y no hay registro de
+   * cuántas estaban abiertas el mes pasado. Una ventana móvil siempre
+   * compara periodos completos, así que no hay el falso desplome del
+   * «mes en curso contra mes entero».
+   */
+  entradas: { recientes: number; previas: number }
 }
 
 export async function resumenDelPanel(
@@ -28,7 +38,7 @@ export async function resumenDelPanel(
 ): Promise<ResumenPanel> {
   const zona = zonaDeEstado(estadoClave)
   return conTenant(tenantId, async (tx) => {
-    const [porEstatus, porMes, porProblematica, porColonia, recientes, totales, porMunicipio] =
+    const [porEstatus, porMes, porProblematica, porColonia, recientes, totales, entradas, porMunicipio] =
       await Promise.all([
         tx<{ etiqueta: string; valor: number }[]>`
           select coalesce(e.descripcion, 'Sin estatus') as etiqueta, count(*)::int as valor
@@ -95,6 +105,17 @@ export async function resumenDelPanel(
           from peticiones p
           left join estatus_peticiones e on e.id = p.estatus_id
           left join prioridades pri on pri.id = p.prioridad_id`,
+        tx<ResumenPanel['entradas'][]>`
+          select
+            count(*) filter (
+              where p.fecha_apertura >= (now() at time zone ${zona})::date - 30
+            )::int as recientes,
+            count(*) filter (
+              where p.fecha_apertura >= (now() at time zone ${zona})::date - 60
+                and p.fecha_apertura <  (now() at time zone ${zona})::date - 30
+            )::int as previas
+          from peticiones p`,
+
         tx<ResumenPanel['porMunicipio']>`
           select m.clave, m.nombre, count(p.id)::int as peticiones
           from peticiones p
@@ -112,6 +133,7 @@ export async function resumenDelPanel(
       porColonia,
       recientes,
       totales: totales[0] ?? { total: 0, abiertas: 0, completadas: 0, urgentes: 0 },
+      entradas: entradas[0] ?? { recientes: 0, previas: 0 },
     }
   })
 }
