@@ -4,6 +4,7 @@ export function Pagina({
   titulo,
   descripcion,
   cuenta,
+  insignias,
   acciones,
   children,
 }: {
@@ -13,6 +14,10 @@ export function Pagina({
       «Peticiones 1,179» se lee de un golpe y responde la primera
       pregunta de quien llega a la pantalla. */
   cuenta?: number | string
+  /** Distintivos que van pegados al título —el estatus de una petición,
+      por ejemplo—. En qué estado está algo es lo primero que se
+      pregunta quien lo abre: no puede estar enterrado en un panel. */
+  insignias?: React.ReactNode
   acciones?: React.ReactNode
   children: React.ReactNode
 }) {
@@ -24,6 +29,7 @@ export function Pagina({
             <h1 className="text-[length:var(--text-pagina)] font-semibold leading-tight tracking-[-0.02em]">
               {titulo}
             </h1>
+            {insignias && <span className="flex items-center gap-2">{insignias}</span>}
             {cuenta !== undefined && (
               <span className="cifra text-[var(--text-media)] font-medium text-[var(--color-tinta-3)]">
                 {typeof cuenta === 'number' ? cuenta.toLocaleString('es-MX') : cuenta}

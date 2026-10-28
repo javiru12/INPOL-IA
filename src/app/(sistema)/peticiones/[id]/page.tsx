@@ -123,9 +123,15 @@ export default async function DetallePeticion({
   if (!datos) notFound()
   const { peticion: p, seguimientos, estatusPosibles, adjuntos } = datos
 
+  // La petición no guarda responsable: quien la está atendiendo es
+  // quien la movió por última vez. Es el dato que falta arriba —abrir
+  // una petición y no saber si alguien la tiene es lo peor que puede
+  // pasar en esta pantalla—, y sale del propio seguimiento.
+  const ultimoMovimiento = seguimientos.find((s) => s.autor)
+
+  // Problemática y prioridad ya van en el encabezado: repetirlas aquí
+  // hacía leer dos veces lo mismo antes de llegar a lo que no se sabe.
   const campos: [string, string | null][] = [
-    ['Problemática', [p.problematica, p.subproblematica].filter(Boolean).join(' · ') || null],
-    ['Prioridad', p.prioridad],
     ['Fuente', p.fuente],
     ['Dependencia responsable', p.dependencia],
     ['Levantada el', p.fecha_apertura ? fechaLarga(p.fecha_apertura) : null],
@@ -135,25 +141,33 @@ export default async function DetallePeticion({
   return (
     <Pagina
       titulo={`Petición ${p.folio}`}
-      descripcion={p.problematica ?? 'Sin clasificar'}
+      insignias={
+        <>
+          <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
+            {p.estatus ?? 'Sin estatus'}
+          </Distintivo>
+          {p.prioridad === 'Urgente' && <Distintivo tono="alerta">Urgente</Distintivo>}
+        </>
+      }
+      descripcion={
+        [
+          [p.problematica, p.subproblematica].filter(Boolean).join(' · ') || 'Sin clasificar',
+          ultimoMovimiento
+            ? `La movió ${ultimoMovimiento.autor} el ${fechaHora(ultimoMovimiento.cuando)}`
+            : 'Nadie la ha movido todavía',
+        ].join(' · ')
+      }
       acciones={
         <Link href="/peticiones" className="boton boton-neutro">
           Volver al listado
         </Link>
       }
     >
-      <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <div className="space-y-3">
-          <section className="panel px-4 py-4">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
-                {p.estatus ?? 'Sin estatus'}
-              </Distintivo>
-              {p.prioridad === 'Urgente' && <Distintivo tono="alerta">Urgente</Distintivo>}
-              <span className="clave ml-auto">{p.folio}</span>
-            </div>
-
-            <p className="text-[var(--text-media)] leading-relaxed">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+        <div className="space-y-4">
+          <section className="panel px-5 py-5">
+            <h2 className="rotulo mb-2">Lo que pidió</h2>
+            <p className="text-[length:var(--text-titulo)] leading-relaxed">
               {p.descripcion ?? 'Sin descripción capturada.'}
             </p>
 
@@ -186,45 +200,57 @@ export default async function DetallePeticion({
                 Todavía no hay movimientos registrados.
               </div>
             ) : (
-              <ol className="px-4 py-3">
-                {seguimientos.map((s, i) => (
-                  <li key={s.id} className="relative flex gap-3 pb-4 last:pb-0">
-                    <div className="flex flex-col items-center">
-                      <span
-                        aria-hidden="true"
-                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{
-                          background:
-                            s.tipo === 'cambio_estatus'
+              // Lo que pasó va en el cuerpo del texto, no en letra chica:
+              // era lo mismo de tamaño y color que el «quién y cuándo»,
+              // y había que leerlo dos veces para distinguirlos.
+              <ol className="px-5 py-4">
+                {seguimientos.map((s, i) => {
+                  const cambio = s.tipo === 'cambio_estatus'
+                  return (
+                    <li key={s.id} className="relative flex gap-4 pb-6 last:pb-0">
+                      <div className="flex flex-col items-center">
+                        <span
+                          aria-hidden="true"
+                          className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                            cambio ? '' : 'ring-1 ring-[var(--color-borde-fuerte)]'
+                          }`}
+                          style={{
+                            background: cambio
                               ? 'var(--color-acento)'
-                              : 'var(--color-borde-fuerte)',
-                        }}
-                      />
-                      {i < seguimientos.length - 1 && (
-                        <span aria-hidden="true" className="mt-1 w-px flex-1 bg-[var(--color-borde)]" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="flex flex-wrap items-baseline gap-x-2">
-                        <span className="text-[var(--text-menuda)] font-medium">
-                          {ETIQUETA_TIPO[s.tipo] ?? s.tipo}
-                        </span>
-                        <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                          {s.autor ?? 'Sistema'} · {fechaHora(s.cuando)}
-                        </span>
-                      </p>
-                      <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-                        {s.detalle}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+                              : 'var(--color-superficie)',
+                          }}
+                        />
+                        {i < seguimientos.length - 1 && (
+                          <span aria-hidden="true" className="mt-1 w-px flex-1 bg-[var(--color-borde)]" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-center gap-2">
+                          <span
+                            className="distintivo"
+                            style={
+                              cambio
+                                ? { background: 'var(--color-acento-suave)', color: 'var(--color-acento-fuerte)' }
+                                : { background: 'var(--color-superficie-2)', color: 'var(--color-tinta-2)', border: '1px solid var(--color-borde)' }
+                            }
+                          >
+                            {ETIQUETA_TIPO[s.tipo] ?? s.tipo}
+                          </span>
+                          <span className="text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                            {s.autor ?? 'Sistema'} · {fechaHora(s.cuando)}
+                          </span>
+                        </p>
+                        <p className="mt-1.5 leading-relaxed">{s.detalle}</p>
+                      </div>
+                    </li>
+                  )
+                })}
               </ol>
             )}
           </section>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <section className="panel px-4 py-4">
             <h2 className="mb-3 text-[var(--text-base)] font-semibold">Ciudadano</h2>
             {p.ciudadano ? (

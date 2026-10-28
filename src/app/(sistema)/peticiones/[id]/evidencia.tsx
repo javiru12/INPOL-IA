@@ -243,7 +243,9 @@ function Visor({
 function FormaSubida({ peticionId }: { peticionId: string }) {
   const [estado, accion] = useActionState<EstadoAccion, FormData>(subirAdjunto, {})
   const forma = useRef<HTMLFormElement>(null)
+  const archivo = useRef<HTMLInputElement>(null)
   const [elegido, setElegido] = useState<string | null>(null)
+  const [arrastrando, setArrastrando] = useState(false)
 
   useEffect(() => {
     if (estado.ok) {
@@ -256,31 +258,55 @@ function FormaSubida({ peticionId }: { peticionId: string }) {
     <form ref={forma} action={accion} className="space-y-2.5">
       <input type="hidden" name="peticionId" value={peticionId} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="boton boton-neutro !h-8 cursor-pointer text-[var(--text-menuda)]">
-          {elegido ? 'Cambiar archivo' : 'Elegir archivo'}
-          <input
-            type="file"
-            name="archivo"
-            required
-            accept="image/jpeg,image/png,image/webp,image/heic,audio/mpeg,audio/mp4,audio/webm,video/mp4,video/quicktime,application/pdf"
-            className="sr-only"
-            onChange={(e) => setElegido(e.currentTarget.files?.[0]?.name ?? null)}
-          />
-        </label>
+      {/* La evidencia de campo llega arrastrada desde el escritorio o
+          del teléfono. Un botón de 8px de alto no es sitio para soltar
+          una foto. */}
+      <label
+        onDragOver={(e) => { e.preventDefault(); setArrastrando(true) }}
+        onDragLeave={() => setArrastrando(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setArrastrando(false)
+          const f = e.dataTransfer.files
+          if (f?.length && archivo.current) {
+            archivo.current.files = f
+            setElegido(f[0].name)
+          }
+        }}
+        className={`block cursor-pointer rounded-[var(--radius-md)] border border-dashed px-4 py-5 text-center transition-colors ${
+          arrastrando
+            ? 'border-[var(--color-acento)] bg-[var(--color-acento-suave)]'
+            : 'border-[var(--color-borde-fuerte)] hover:border-[var(--color-acento-borde)] hover:bg-[var(--color-superficie-2)]'
+        }`}
+      >
+        <input
+          ref={archivo}
+          type="file"
+          name="archivo"
+          required
+          accept="image/jpeg,image/png,image/webp,image/heic,audio/mpeg,audio/mp4,audio/webm,video/mp4,video/quicktime,application/pdf"
+          className="sr-only"
+          onChange={(e) => setElegido(e.currentTarget.files?.[0]?.name ?? null)}
+        />
+        {elegido ? (
+          <p className="truncate font-medium">{elegido}</p>
+        ) : (
+          <>
+            <p className="font-medium">Arrastra una foto, audio o video aquí</p>
+            <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+              o haz clic para buscarlo · JPG, PNG, MP3, MP4 o PDF
+            </p>
+          </>
+        )}
+      </label>
 
+      {elegido && (
         <select name="momento" defaultValue="evidencia" className="campo !h-8 !w-auto pr-7">
           <option value="reporte">Así llegó</option>
           <option value="evidencia">Durante la gestión</option>
           <option value="resultado">Así quedó</option>
         </select>
-
-        {elegido && (
-          <span className="min-w-0 flex-1 truncate text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-            {elegido}
-          </span>
-        )}
-      </div>
+      )}
 
       {elegido && (
         <input
