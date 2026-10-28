@@ -36,6 +36,9 @@ export const NAVEGACION: Grupo[] = [
   {
     titulo: 'Análisis',
     entradas: [
+      // El asistente abre el grupo porque responde lo que las demás
+      // pantallas contestan sólo si alguien previó la pregunta.
+      { etiqueta: 'Asistente', ruta: '/asistente', icono: 'estadisticas', permisos: ['asistente.consultar'] },
       { etiqueta: 'Estadísticas', ruta: '/estadisticas', icono: 'estadisticas', permisos: ['estadisticas'] },
       { etiqueta: 'Mapa', ruta: '/mapa', icono: 'mapa', permisos: ['estadisticas.problematicas'] },
       { etiqueta: 'Territorio', ruta: '/territorio', icono: 'estructura', permisos: ['estadisticas.problematicas'] },

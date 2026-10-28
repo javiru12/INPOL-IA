@@ -27,6 +27,7 @@
     "probar:mensajes": "tsx --env-file=.env.local herramientas/pruebas/mensajes.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "bcryptjs": "^3.0.3",
     "d3-geo": "^3.1.1",
     "jose": "^6.2.12",
