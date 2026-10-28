@@ -7,6 +7,7 @@ import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { BarrasTemporales } from '@/components/graficas'
 import { fechaLarga } from '@/lib/formato'
 import { jornadaActiva, tableroDeJornada, ETIQUETA_TIPO } from './consultas'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Día D' }
 
@@ -117,68 +118,66 @@ export default async function DiaD() {
               Toda la gente comprometida ya acudió.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Movilizador</th>
-                    <th>Zona</th>
-                    <th className="num">Falta</th>
-                    <th className="num">Avance</th>
-                    <th>Teléfono</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {t.rezagados.map((m) => {
-                    const faltanSuyos = m.comprometidos - m.acudieron
-                    const pct = Math.round((m.avance ?? 0) * 100)
-                    return (
-                      <tr key={m.id}>
-                        <td className="font-medium">{m.nombre}</td>
-                        <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                          {m.municipio ?? '—'}
-                          {m.seccion && <span className="clave ml-1.5">{m.seccion}</span>}
-                        </td>
-                        <td className="num font-semibold" style={{ color: 'var(--color-aviso)' }}>
-                          {faltanSuyos}
-                        </td>
-                        <td className="num">
-                          <span className="inline-flex items-center gap-2">
-                            {pct}%
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Movilizador</th>
+                  <th>Zona</th>
+                  <th className="num">Falta</th>
+                  <th className="num">Avance</th>
+                  <th>Teléfono</th>
+                </tr>
+              </thead>
+              <tbody>
+                {t.rezagados.map((m) => {
+                  const faltanSuyos = m.comprometidos - m.acudieron
+                  const pct = Math.round((m.avance ?? 0) * 100)
+                  return (
+                    <tr key={m.id}>
+                      <td className="font-medium">{m.nombre}</td>
+                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                        {m.municipio ?? '—'}
+                        {m.seccion && <span className="clave ml-1.5">{m.seccion}</span>}
+                      </td>
+                      <td className="num font-semibold" style={{ color: 'var(--color-aviso)' }}>
+                        {faltanSuyos}
+                      </td>
+                      <td className="num">
+                        <span className="inline-flex items-center gap-2">
+                          {pct}%
+                          <span
+                            className="h-[6px] w-12 overflow-hidden rounded-full bg-[var(--color-borde)]"
+                            aria-hidden="true"
+                          >
                             <span
-                              className="h-[6px] w-12 overflow-hidden rounded-full bg-[var(--color-borde)]"
-                              aria-hidden="true"
-                            >
-                              <span
-                                className="block h-full rounded-full"
-                                style={{
-                                  width: `${Math.max(pct, 3)}%`,
-                                  background:
-                                    pct >= 70
-                                      ? 'var(--color-exito)'
-                                      : pct >= 40
-                                        ? 'var(--color-aviso)'
-                                        : 'var(--color-alerta)',
-                                }}
-                              />
-                            </span>
+                              className="block h-full rounded-full"
+                              style={{
+                                width: `${Math.max(pct, 3)}%`,
+                                background:
+                                  pct >= 70
+                                    ? 'var(--color-exito)'
+                                    : pct >= 40
+                                      ? 'var(--color-aviso)'
+                                      : 'var(--color-alerta)',
+                              }}
+                            />
                           </span>
-                        </td>
-                        <td className="clave whitespace-nowrap">
-                          {m.telefono ? (
-                            <a href={`tel:${m.telefono}`} className="hover:text-[var(--color-acento-fuerte)]">
-                              {m.telefono}
-                            </a>
-                          ) : (
-                            <span className="text-[var(--color-tinta-3)]">sin teléfono</span>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </span>
+                      </td>
+                      <td className="clave whitespace-nowrap">
+                        {m.telefono ? (
+                          <a href={`tel:${m.telefono}`} className="hover:text-[var(--color-acento-fuerte)]">
+                            {m.telefono}
+                          </a>
+                        ) : (
+                          <span className="text-[var(--color-tinta-3)]">sin teléfono</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Tabla>
           )}
         </section>
 

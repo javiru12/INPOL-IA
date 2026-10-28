@@ -16,6 +16,7 @@ import {
   resumenComunicacion,
 } from './consultas'
 import { RegistrarAviso } from './avisos'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Comunicación' }
 
@@ -128,84 +129,82 @@ export default async function Comunicacion({
           />
         ) : (
           <div className="panel overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Ciudadano</th>
-                    <th>Contacto</th>
-                    <th>Qué pidió</th>
-                    <th>Desenlace</th>
-                    <th className="num">Se resolvió</th>
-                    <th className="num">Sin avisar</th>
-                    <th aria-label="Registrar aviso" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {avisos.filas.map((a) => (
-                    <FilaAbrible key={a.id} href={`/peticiones/${a.id}`}>
-                      {/* El folio se pinta como enlace de verdad: antes
-                          solo se subrayaba al pasar encima y nadie veía
-                          que desde ahí se abre el expediente. */}
-                      <td className="clave">
-                        <Link
-                          href={`/peticiones/${a.id}`}
-                          className="font-medium underline decoration-dotted underline-offset-2 hover:decoration-solid"
-                          style={{ color: 'var(--color-acento-fuerte)' }}
-                        >
-                          {a.folio}
-                        </Link>
-                      </td>
-                      <td className="whitespace-nowrap font-medium">
-                        <Link
-                          href={`/ciudadanos/${a.ciudadano_id}`}
-                          className="hover:text-[var(--color-acento-fuerte)] hover:underline"
-                        >
-                          {a.ciudadano ?? '—'}
-                        </Link>
-                        <span className="block text-[var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
-                          {a.colonia ?? 'Sin colonia'}
-                        </span>
-                      </td>
-                      <td className="clave whitespace-nowrap">
-                        {a.telefono ?? (
-                          <span className="text-[var(--color-alerta)]">Sin teléfono</span>
-                        )}
-                      </td>
-                      <td className="max-w-[24rem]">
-                        <span className="block truncate" title={a.descripcion ?? undefined}>
-                          {a.descripcion ?? '—'}
-                        </span>
-                        <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                          {a.problematica ?? 'Sin clasificar'}
-                        </span>
-                      </td>
-                      <td>
-                        <Distintivo tono={a.estatus === 'Completada' ? 'exito' : 'neutro'}>
-                          {a.estatus}
-                        </Distintivo>
-                      </td>
-                      <td className="num clave whitespace-nowrap">
-                        {fechaCorta(a.resuelto_en)}
-                      </td>
-                      <td className="num whitespace-nowrap">
-                        <Distintivo tono={tonoDemora(a.dias)}>
-                          {cifra(a.dias)} {a.dias === 1 ? 'día' : 'días'}
-                        </Distintivo>
-                      </td>
-                      <td className="w-[15rem]">
-                        <RegistrarAviso
-                          peticionId={a.id}
-                          tieneTelefono={!!a.telefono}
-                          tieneCorreo={!!a.correo}
-                        />
-                      </td>
-                    </FilaAbrible>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Ciudadano</th>
+                  <th>Contacto</th>
+                  <th>Qué pidió</th>
+                  <th>Desenlace</th>
+                  <th className="num hidden xl:table-cell">Se resolvió</th>
+                  <th className="num">Sin avisar</th>
+                  <th aria-label="Registrar aviso" />
+                </tr>
+              </thead>
+              <tbody>
+                {avisos.filas.map((a) => (
+                  <FilaAbrible key={a.id} href={`/peticiones/${a.id}`}>
+                    {/* El folio se pinta como enlace de verdad: antes
+                        solo se subrayaba al pasar encima y nadie veía
+                        que desde ahí se abre el expediente. */}
+                    <td className="clave">
+                      <Link
+                        href={`/peticiones/${a.id}`}
+                        className="font-medium underline decoration-dotted underline-offset-2 hover:decoration-solid"
+                        style={{ color: 'var(--color-acento-fuerte)' }}
+                      >
+                        {a.folio}
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap font-medium">
+                      <Link
+                        href={`/ciudadanos/${a.ciudadano_id}`}
+                        className="hover:text-[var(--color-acento-fuerte)] hover:underline"
+                      >
+                        {a.ciudadano ?? '—'}
+                      </Link>
+                      <span className="block text-[var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
+                        {a.colonia ?? 'Sin colonia'}
+                      </span>
+                    </td>
+                    <td className="clave whitespace-nowrap">
+                      {a.telefono ?? (
+                        <span className="text-[var(--color-alerta)]">Sin teléfono</span>
+                      )}
+                    </td>
+                    <td className="w-full max-w-0">
+                      <span className="block truncate" title={a.descripcion ?? undefined}>
+                        {a.descripcion ?? '—'}
+                      </span>
+                      <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                        {a.problematica ?? 'Sin clasificar'}
+                      </span>
+                    </td>
+                    <td>
+                      <Distintivo tono={a.estatus === 'Completada' ? 'exito' : 'neutro'}>
+                        {a.estatus}
+                      </Distintivo>
+                    </td>
+                    <td className="num clave hidden xl:table-cell whitespace-nowrap">
+                      {fechaCorta(a.resuelto_en)}
+                    </td>
+                    <td className="num whitespace-nowrap">
+                      <Distintivo tono={tonoDemora(a.dias)}>
+                        {cifra(a.dias)} {a.dias === 1 ? 'día' : 'días'}
+                      </Distintivo>
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <RegistrarAviso
+                        peticionId={a.id}
+                        tieneTelefono={!!a.telefono}
+                        tieneCorreo={!!a.correo}
+                      />
+                    </td>
+                  </FilaAbrible>
+                ))}
+              </tbody>
+            </Tabla>
             <Paginador pagina={avisos.pagina} porPagina={POR_PAGINA} total={avisos.total} />
           </div>
         )}
@@ -241,80 +240,78 @@ export default async function Comunicacion({
           />
         ) : (
           <div className="panel overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Campaña</th>
-                    <th>Canal</th>
-                    <th>Segmento</th>
-                    <th className="num">Destinatarios</th>
-                    <th>Estado</th>
-                    <th>Preparó</th>
-                    <th className="num">Fecha</th>
-                    <th aria-label="Acciones" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {campanias.map((c) => {
-                    const criterios = describirSegmento(c.segmento)
-                    return (
-                      <tr key={c.id}>
-                        <td className="max-w-[18rem] font-medium">
-                          <span className="block truncate">{c.nombre}</span>
-                          {c.asunto && (
-                            <span className="block truncate text-[var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
-                              {c.asunto}
-                            </span>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                          {ETIQUETA_CANAL[c.canal] ?? c.canal}
-                        </td>
-                        <td className="max-w-[20rem]">
-                          {criterios.length === 0 ? (
-                            <span className="text-[var(--color-tinta-2)]">
-                              Todo el padrón
-                            </span>
-                          ) : (
-                            <span className="flex flex-wrap gap-1">
-                              {criterios.map((t) => (
-                                <Distintivo key={t} tono="acento">
-                                  {t}
-                                </Distintivo>
-                              ))}
-                            </span>
-                          )}
-                        </td>
-                        <td className="num font-medium tabular-nums">
-                          {cifra(c.destinatarios)}
-                        </td>
-                        <td>
-                          <Distintivo tono={c.estado === 'enviada' ? 'exito' : 'aviso'}>
-                            {c.estado === 'preparada' ? 'Preparada · sin enviar' : c.estado}
-                          </Distintivo>
-                        </td>
-                        <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                          {c.autor ?? '—'}
-                        </td>
-                        <td className="num clave whitespace-nowrap">
-                          {fechaCorta(c.creado_en)}
-                        </td>
-                        <td className="w-10">
-                          <Link
-                            href={`/marketing/${c.id}`}
-                            className="boton boton-llano !h-7 !w-7 !p-0"
-                            aria-label={`Ver campaña ${c.nombre}`}
-                          >
-                            <IconoVer />
-                          </Link>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Campaña</th>
+                  <th>Canal</th>
+                  <th>Segmento</th>
+                  <th className="num">Destinatarios</th>
+                  <th>Estado</th>
+                  <th>Preparó</th>
+                  <th className="num">Fecha</th>
+                  <th aria-label="Acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {campanias.map((c) => {
+                  const criterios = describirSegmento(c.segmento)
+                  return (
+                    <tr key={c.id}>
+                      <td className="max-w-[18rem] font-medium">
+                        <span className="block truncate">{c.nombre}</span>
+                        {c.asunto && (
+                          <span className="block truncate text-[var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
+                            {c.asunto}
+                          </span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                        {ETIQUETA_CANAL[c.canal] ?? c.canal}
+                      </td>
+                      <td className="max-w-[20rem]">
+                        {criterios.length === 0 ? (
+                          <span className="text-[var(--color-tinta-2)]">
+                            Todo el padrón
+                          </span>
+                        ) : (
+                          <span className="flex flex-wrap gap-1">
+                            {criterios.map((t) => (
+                              <Distintivo key={t} tono="acento">
+                                {t}
+                              </Distintivo>
+                            ))}
+                          </span>
+                        )}
+                      </td>
+                      <td className="num font-medium tabular-nums">
+                        {cifra(c.destinatarios)}
+                      </td>
+                      <td>
+                        <Distintivo tono={c.estado === 'enviada' ? 'exito' : 'aviso'}>
+                          {c.estado === 'preparada' ? 'Preparada · sin enviar' : c.estado}
+                        </Distintivo>
+                      </td>
+                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                        {c.autor ?? '—'}
+                      </td>
+                      <td className="num clave whitespace-nowrap">
+                        {fechaCorta(c.creado_en)}
+                      </td>
+                      <td className="w-10">
+                        <Link
+                          href={`/marketing/${c.id}`}
+                          className="boton boton-llano !h-7 !w-7 !p-0"
+                          aria-label={`Ver campaña ${c.nombre}`}
+                        >
+                          <IconoVer />
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Tabla>
           </div>
         )}
       </section>

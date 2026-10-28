@@ -15,6 +15,7 @@ import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { cifra, porcentaje, fechaCorta, fechaLarga } from '@/lib/formato'
 import { ESTADO } from '@/lib/paleta'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Ficha del movilizador' }
 
@@ -235,7 +236,7 @@ export default async function FichaMovilizador({ params }: { params: Promise<{ i
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="tabla">
+              <Tabla>
                 <thead>
                   <tr>
                     <th>Persona</th>
@@ -290,7 +291,7 @@ export default async function FichaMovilizador({ params }: { params: Promise<{ i
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Tabla>
               <p className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-2 text-[var(--text-micro)] text-[var(--color-tinta-3)]">
                 {porcentaje(resumen.confirmados, resumen.promovidos)} de los que lleva ya confirmó
                 su voto. Por debajo del {Math.round(UMBRAL_REZAGO * 100)}% de su meta, la campaña

@@ -14,6 +14,7 @@ import {
   esEleccion,
   type Eleccion,
 } from '../consultas'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Distrito' }
 
@@ -186,54 +187,52 @@ export default async function Distrito({
               Primero las que tienen más peticiones sin resolver
             </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th>Sección</th>
-                  <th>Municipio</th>
-                  <th className="num">Padrón</th>
-                  <th className="num">Participación</th>
-                  <th>Ganó</th>
-                  <th className="num">Peticiones</th>
-                  <th className="num">Sin resolver</th>
+          <Tabla>
+            <thead>
+              <tr>
+                <th>Sección</th>
+                <th>Municipio</th>
+                <th className="num">Padrón</th>
+                <th className="num">Participación</th>
+                <th>Ganó</th>
+                <th className="num">Peticiones</th>
+                <th className="num">Sin resolver</th>
+              </tr>
+            </thead>
+            <tbody>
+              {secciones.map((s) => (
+                <tr key={s.id}>
+                  <td className="clave font-medium">{s.clave}</td>
+                  <td className="whitespace-nowrap text-[var(--color-tinta-2)]">{s.municipio}</td>
+                  <td className="num">{s.lista_nominal?.toLocaleString('es-MX') ?? '—'}</td>
+                  <td className="num">
+                    {s.participacion === null ? '—' : `${s.participacion.toFixed(1)}%`}
+                  </td>
+                  <td className="whitespace-nowrap">
+                    {s.ganador ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          aria-hidden="true"
+                          className="h-2 w-2 shrink-0 rounded-[2px]"
+                          style={{ background: colorDeFuerza(s.ganador) }}
+                        />
+                        {nombreDeFuerza(s.ganador)}
+                      </span>
+                    ) : (
+                      <span className="text-[var(--color-tinta-3)]">—</span>
+                    )}
+                  </td>
+                  <td className="num">{s.peticiones.toLocaleString('es-MX')}</td>
+                  <td
+                    className="num font-medium"
+                    style={s.sin_resolver > 0 ? { color: 'var(--color-aviso)' } : undefined}
+                  >
+                    {s.sin_resolver.toLocaleString('es-MX')}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {secciones.map((s) => (
-                  <tr key={s.id}>
-                    <td className="clave font-medium">{s.clave}</td>
-                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">{s.municipio}</td>
-                    <td className="num">{s.lista_nominal?.toLocaleString('es-MX') ?? '—'}</td>
-                    <td className="num">
-                      {s.participacion === null ? '—' : `${s.participacion.toFixed(1)}%`}
-                    </td>
-                    <td className="whitespace-nowrap">
-                      {s.ganador ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span
-                            aria-hidden="true"
-                            className="h-2 w-2 shrink-0 rounded-[2px]"
-                            style={{ background: colorDeFuerza(s.ganador) }}
-                          />
-                          {nombreDeFuerza(s.ganador)}
-                        </span>
-                      ) : (
-                        <span className="text-[var(--color-tinta-3)]">—</span>
-                      )}
-                    </td>
-                    <td className="num">{s.peticiones.toLocaleString('es-MX')}</td>
-                    <td
-                      className="num font-medium"
-                      style={s.sin_resolver > 0 ? { color: 'var(--color-aviso)' } : undefined}
-                    >
-                      {s.sin_resolver.toLocaleString('es-MX')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </Tabla>
         </section>
       )}
     </Pagina>

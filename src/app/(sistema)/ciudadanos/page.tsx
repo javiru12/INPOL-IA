@@ -8,6 +8,7 @@ import { Filtros, Paginador } from '@/components/filtros'
 import { IconoVer } from '@/components/iconos'
 import { cifra, porcentaje } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Ciudadanos' }
 
@@ -102,56 +103,54 @@ export default async function Ciudadanos({
           </div>
 
           <div className="panel overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th className="num">Edad</th>
-                    <th>Sexo</th>
-                    <th>Colonia</th>
-                    <th>Sección</th>
-                    <th>Móvil</th>
-                    <th className="num">Peticiones</th>
-                    <th aria-label="Acciones" />
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th className="num">Edad</th>
+                  <th>Sexo</th>
+                  <th>Colonia</th>
+                  <th>Sección</th>
+                  <th>Móvil</th>
+                  <th className="num">Peticiones</th>
+                  <th aria-label="Acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {r.filas.map((c) => (
+                  <tr key={c.id}>
+                    <td className="whitespace-nowrap font-medium">{c.nombre ?? '—'}</td>
+                    <td className="num">
+                      {cifra(c.edad)}
+                    </td>
+                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                      {etiquetaSexo(c.sexo)}
+                    </td>
+                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                      {c.colonia ?? '—'}
+                    </td>
+                    <td className="clave">{c.seccion ?? '—'}</td>
+                    <td className="clave whitespace-nowrap">{c.telefono_movil ?? '—'}</td>
+                    <td className="num">
+                      {c.peticiones > 0 ? (
+                        cifra(c.peticiones)
+                      ) : (
+                        <span className="text-[var(--color-tinta-3)]">—</span>
+                      )}
+                    </td>
+                    <td className="w-10">
+                      <Link
+                        href={`/ciudadanos/${c.id}`}
+                        className="boton boton-llano !h-7 !w-7 !p-0"
+                        aria-label={`Ver ficha de ${c.nombre ?? 'la persona'}`}
+                      >
+                        <IconoVer />
+                      </Link>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {r.filas.map((c) => (
-                    <tr key={c.id}>
-                      <td className="whitespace-nowrap font-medium">{c.nombre ?? '—'}</td>
-                      <td className="num">
-                        {cifra(c.edad)}
-                      </td>
-                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                        {etiquetaSexo(c.sexo)}
-                      </td>
-                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                        {c.colonia ?? '—'}
-                      </td>
-                      <td className="clave">{c.seccion ?? '—'}</td>
-                      <td className="clave whitespace-nowrap">{c.telefono_movil ?? '—'}</td>
-                      <td className="num">
-                        {c.peticiones > 0 ? (
-                          cifra(c.peticiones)
-                        ) : (
-                          <span className="text-[var(--color-tinta-3)]">—</span>
-                        )}
-                      </td>
-                      <td className="w-10">
-                        <Link
-                          href={`/ciudadanos/${c.id}`}
-                          className="boton boton-llano !h-7 !w-7 !p-0"
-                          aria-label={`Ver ficha de ${c.nombre ?? 'la persona'}`}
-                        >
-                          <IconoVer />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </Tabla>
             <Paginador pagina={r.pagina} porPagina={POR_PAGINA} total={r.total} />
           </div>
         </>

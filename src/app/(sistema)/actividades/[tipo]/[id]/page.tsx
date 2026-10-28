@@ -7,6 +7,7 @@ import { delDia } from '../../fechas'
 import { cifra, fechaLarga } from '@/lib/formato'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { BajaActividad } from './baja'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Detalle de actividad' }
 
@@ -161,41 +162,39 @@ export default async function DetalleActividad({
           />
         ) : (
           <div className="panel overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Ciudadano</th>
-                    <th>Problemática</th>
-                    <th>Estatus</th>
-                    <th aria-label="Acciones" />
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Ciudadano</th>
+                  <th>Problemática</th>
+                  <th>Estatus</th>
+                  <th aria-label="Acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {a.peticiones.map((p) => (
+                  <tr key={p.id}>
+                    <td className="clave">{p.folio}</td>
+                    <td className="whitespace-nowrap font-medium">{p.ciudadano ?? '—'}</td>
+                    <td className="text-[var(--color-tinta-2)]">{p.problematica ?? '—'}</td>
+                    <td>
+                      <Distintivo tono={TONO_ESTATUS[p.estatus ?? ''] ?? 'neutro'}>
+                        {p.estatus ?? 'Sin estatus'}
+                      </Distintivo>
+                    </td>
+                    <td className="w-10">
+                      <Link
+                        href={`/peticiones/${p.id}`}
+                        className="boton boton-llano !h-7 text-[var(--text-menuda)]"
+                      >
+                        Abrir
+                      </Link>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {a.peticiones.map((p) => (
-                    <tr key={p.id}>
-                      <td className="clave">{p.folio}</td>
-                      <td className="whitespace-nowrap font-medium">{p.ciudadano ?? '—'}</td>
-                      <td className="text-[var(--color-tinta-2)]">{p.problematica ?? '—'}</td>
-                      <td>
-                        <Distintivo tono={TONO_ESTATUS[p.estatus ?? ''] ?? 'neutro'}>
-                          {p.estatus ?? 'Sin estatus'}
-                        </Distintivo>
-                      </td>
-                      <td className="w-10">
-                        <Link
-                          href={`/peticiones/${p.id}`}
-                          className="boton boton-llano !h-7 text-[var(--text-menuda)]"
-                        >
-                          Abrir
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </Tabla>
           </div>
         )}
       </section>

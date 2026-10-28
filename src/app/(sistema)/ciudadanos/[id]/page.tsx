@@ -6,6 +6,7 @@ import { obtenerCiudadano, etiquetaSexo } from '../consultas'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { BotonBaja } from './baja'
 import { fechaLarga, fechaCorta, cifra } from '@/lib/formato'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Ficha ciudadana' }
 
@@ -143,40 +144,38 @@ export default async function FichaCiudadano({
                 De la más reciente a la más antigua
               </span>
             </div>
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Folio</th>
-                    <th>Problemática</th>
-                    <th>Descripción</th>
-                    <th>Estatus</th>
-                    <th className="num">Fecha</th>
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Problemática</th>
+                  <th>Descripción</th>
+                  <th>Estatus</th>
+                  <th className="num">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {peticiones.map((p) => (
+                  <tr key={p.id}>
+                    <td className="clave">{p.folio}</td>
+                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                      {p.problematica ?? '—'}
+                    </td>
+                    <td className="max-w-[34rem]">
+                      <span className="block truncate" title={p.descripcion ?? undefined}>
+                        {p.descripcion ?? '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
+                        {p.estatus ?? 'Sin estatus'}
+                      </Distintivo>
+                    </td>
+                    <td className="num clave whitespace-nowrap">{fechaCorta(p.fecha)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {peticiones.map((p) => (
-                    <tr key={p.id}>
-                      <td className="clave">{p.folio}</td>
-                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                        {p.problematica ?? '—'}
-                      </td>
-                      <td className="max-w-[34rem]">
-                        <span className="block truncate" title={p.descripcion ?? undefined}>
-                          {p.descripcion ?? '—'}
-                        </span>
-                      </td>
-                      <td>
-                        <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
-                          {p.estatus ?? 'Sin estatus'}
-                        </Distintivo>
-                      </td>
-                      <td className="num clave whitespace-nowrap">{fechaCorta(p.fecha)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </Tabla>
           </section>
         )}
       </div>

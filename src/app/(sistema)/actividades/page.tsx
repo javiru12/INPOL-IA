@@ -24,6 +24,7 @@ import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { Filtros, Paginador } from '@/components/filtros'
 import { IconoVer } from '@/components/iconos'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Actividades' }
 
@@ -178,58 +179,56 @@ export default async function Actividades({
 
             {lista && lista.total > 0 ? (
               <div className="panel overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="tabla">
-                    <thead>
-                      <tr>
-                        <th>Tipo</th>
-                        <th>Título</th>
-                        <th className="num">Fecha</th>
-                        <th>Colonia</th>
-                        <th className="num">Programados</th>
-                        <th className="num">Reales</th>
-                        <th>Responsable</th>
-                        <th aria-label="Acciones" />
+                <Tabla>
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Título</th>
+                      <th className="num">Fecha</th>
+                      <th>Colonia</th>
+                      <th className="num">Programados</th>
+                      <th className="num">Reales</th>
+                      <th>Responsable</th>
+                      <th aria-label="Acciones" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lista.filas.map((a) => (
+                      <tr key={`${a.tipo}-${a.id}`}>
+                        <td>
+                          <Distintivo tono={a.tipo === 'recorrido' ? 'acento' : 'dato'}>
+                            {a.tipo === 'recorrido' ? 'Recorrido' : 'Evento'}
+                          </Distintivo>
+                        </td>
+                        <td className="max-w-[24rem]">
+                          <span className="block truncate font-medium" title={a.titulo}>
+                            {a.titulo}
+                          </span>
+                        </td>
+                        <td className="num clave whitespace-nowrap">
+                          {fechaCorta(delDia(a.fecha))}
+                        </td>
+                        <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                          {a.colonia ?? '—'}
+                        </td>
+                        <td className="num">{cifra(a.programados)}</td>
+                        <td className="num">{cifra(a.reales)}</td>
+                        <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                          {a.responsable ?? '—'}
+                        </td>
+                        <td className="w-10">
+                          <Link
+                            href={`/actividades/${a.tipo}/${a.id}`}
+                            className="boton boton-llano !h-7 !w-7 !p-0"
+                            aria-label={`Ver ${a.titulo}`}
+                          >
+                            <IconoVer />
+                          </Link>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {lista.filas.map((a) => (
-                        <tr key={`${a.tipo}-${a.id}`}>
-                          <td>
-                            <Distintivo tono={a.tipo === 'recorrido' ? 'acento' : 'dato'}>
-                              {a.tipo === 'recorrido' ? 'Recorrido' : 'Evento'}
-                            </Distintivo>
-                          </td>
-                          <td className="max-w-[24rem]">
-                            <span className="block truncate font-medium" title={a.titulo}>
-                              {a.titulo}
-                            </span>
-                          </td>
-                          <td className="num clave whitespace-nowrap">
-                            {fechaCorta(delDia(a.fecha))}
-                          </td>
-                          <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                            {a.colonia ?? '—'}
-                          </td>
-                          <td className="num">{cifra(a.programados)}</td>
-                          <td className="num">{cifra(a.reales)}</td>
-                          <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                            {a.responsable ?? '—'}
-                          </td>
-                          <td className="w-10">
-                            <Link
-                              href={`/actividades/${a.tipo}/${a.id}`}
-                              className="boton boton-llano !h-7 !w-7 !p-0"
-                              aria-label={`Ver ${a.titulo}`}
-                            >
-                              <IconoVer />
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </Tabla>
                 <Paginador
                   pagina={lista.pagina}
                   porPagina={POR_PAGINA}

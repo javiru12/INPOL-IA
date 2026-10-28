@@ -6,6 +6,7 @@ import { exigirAcceso } from '@/lib/acceso'
 import { Pagina, Indicador, Vacio } from '@/components/pagina'
 import { nombreDeFuerza, colorDeFuerza } from '@/lib/partidos'
 import { listarDistritos, ELECCIONES, esEleccion, type Eleccion, type FilaDistrito } from './consultas'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Distritos' }
 
@@ -152,28 +153,26 @@ export default async function Distritos({
         />
       ) : (
         <section className="panel mt-3 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th>Distrito</th>
-                  <th className="num">Secciones</th>
-                  <th className="num">Padrón</th>
-                  <th className="num">Participación</th>
-                  <th>Ganó</th>
-                  <th className="num">Margen</th>
-                  <th className="num">Peticiones</th>
-                  <th className="num">Sin resolver</th>
-                  <th className="num">Estructura</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ordenados.map((d) => (
-                  <FilaDeDistrito key={d.clave} d={d} eleccion={eleccion} maximo={maximo} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Tabla>
+            <thead>
+              <tr>
+                <th>Distrito</th>
+                <th className="num">Secciones</th>
+                <th className="num">Padrón</th>
+                <th className="num">Participación</th>
+                <th>Ganó</th>
+                <th className="num">Margen</th>
+                <th className="num">Peticiones</th>
+                <th className="num">Sin resolver</th>
+                <th className="num">Estructura</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ordenados.map((d) => (
+                <FilaDeDistrito key={d.clave} d={d} eleccion={eleccion} maximo={maximo} />
+              ))}
+            </tbody>
+          </Tabla>
           <p className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-2 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
             Los porcentajes se calculan sobre votos válidos y las coaliciones se suman al
             partido que las encabeza.

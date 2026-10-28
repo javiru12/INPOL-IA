@@ -21,6 +21,7 @@ import {
   type Factor,
   type SeccionPriorizada,
 } from './indice'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Dónde actuar' }
 
@@ -213,42 +214,40 @@ export default async function Prioridad({
         {top.length === 0 ? (
           <Vacio titulo="No hay secciones para priorizar" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th className="w-10 num">#</th>
-                  <th>Sección</th>
-                  <th>Municipio</th>
-                  <th className="num">Distrito</th>
-                  <th className="w-56">Composición del índice</th>
-                  <th className="num">Índice</th>
-                  <th>Por qué</th>
+          <Tabla>
+            <thead>
+              <tr>
+                <th className="w-10 num">#</th>
+                <th>Sección</th>
+                <th>Municipio</th>
+                <th className="num">Distrito</th>
+                <th className="w-56">Composición del índice</th>
+                <th className="num">Índice</th>
+                <th>Por qué</th>
+              </tr>
+            </thead>
+            <tbody>
+              {top.map((s, i) => (
+                <tr key={s.id}>
+                  <td className="num text-[var(--color-tinta-3)]">{i + 1}</td>
+                  <td className="clave font-medium">{s.clave}</td>
+                  <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                    {s.municipio}
+                  </td>
+                  <td className="num clave">{s.distrito ?? '—'}</td>
+                  <td>
+                    <Composicion s={s} />
+                  </td>
+                  <td className="num text-[length:var(--text-media)] font-semibold">
+                    {s.indice.toFixed(1)}
+                  </td>
+                  <td className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+                    {razonesDe(s).join(' · ')}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {top.map((s, i) => (
-                  <tr key={s.id}>
-                    <td className="num text-[var(--color-tinta-3)]">{i + 1}</td>
-                    <td className="clave font-medium">{s.clave}</td>
-                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                      {s.municipio}
-                    </td>
-                    <td className="num clave">{s.distrito ?? '—'}</td>
-                    <td>
-                      <Composicion s={s} />
-                    </td>
-                    <td className="num text-[length:var(--text-media)] font-semibold">
-                      {s.indice.toFixed(1)}
-                    </td>
-                    <td className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-                      {razonesDe(s).join(' · ')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </Tabla>
         )}
 
         <div className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-3">

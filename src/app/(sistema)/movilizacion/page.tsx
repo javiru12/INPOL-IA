@@ -23,16 +23,37 @@ import { cifra, porcentaje, fechaCorta } from '@/lib/formato'
 import { ESTADO } from '@/lib/paleta'
 import { RAMPA_SECUENCIAL } from '@/lib/escalas'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
+import { archivoDeMapa } from '@/lib/mapas'
 
 export const metadata: Metadata = { title: 'Movilización' }
 
-const COLUMNAS: { clave: Orden; titulo: string; num: boolean; ayuda?: string }[] = [
+const COLUMNAS: {
+  clave: Orden
+  titulo: string
+  num: boolean
+  ayuda?: string
+  /** Se esconde en pantallas estrechas en vez de desbordar la tabla. */
+  secundaria?: boolean
+}[] = [
   { clave: 'nombre', titulo: 'Movilizador', num: false },
-  { clave: 'zona', titulo: 'Zona', num: false, ayuda: 'Municipio y sección de su ficha ciudadana' },
+  {
+    clave: 'zona',
+    titulo: 'Zona',
+    num: false,
+    ayuda: 'Municipio y sección de su ficha ciudadana',
+    secundaria: true,
+  },
   { clave: 'meta', titulo: 'Meta', num: true, ayuda: 'Personas que se comprometió a llevar a votar' },
   { clave: 'promovidos', titulo: 'Promovidos', num: true, ayuda: 'Ciudadanos que lleva registrados' },
   { clave: 'avance', titulo: '% de avance', num: true, ayuda: 'Promovidos entre meta' },
-  { clave: 'confirmados', titulo: 'Confirmados', num: true, ayuda: 'Promovidos que ya confirmaron su voto' },
+  {
+    clave: 'confirmados',
+    titulo: 'Confirmados',
+    num: true,
+    ayuda: 'Promovidos que ya confirmaron su voto',
+    secundaria: true,
+  },
 ]
 
 const PINTAS: { valor: Pinta; etiqueta: string }[] = [
@@ -240,43 +261,44 @@ export default async function Movilizacion({
                   : 'Nadie por debajo del umbral de rezago'}
               </p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    {COLUMNAS.map((c) => {
-                      const activa = orden === c.clave
-                      return (
-                        <th
-                          key={c.clave}
-                          className={c.num ? 'num' : undefined}
-                          title={c.ayuda}
-                          aria-sort={activa ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+            <Tabla>
+              <thead>
+                <tr>
+                  {COLUMNAS.map((c) => {
+                    const activa = orden === c.clave
+                    return (
+                      <th
+                        key={c.clave}
+                        className={
+                          `${c.num ? 'num' : ''}${c.secundaria ? ' hidden 2xl:table-cell' : ''}`.trim() ||
+                          undefined
+                        }
+                        title={c.ayuda}
+                        aria-sort={activa ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      >
+                        <Link
+                          href={enlaceOrden(c.clave)}
+                          className="inline-flex items-center gap-1 hover:text-[var(--color-tinta)]"
+                          style={activa ? { color: 'var(--color-acento-fuerte)' } : undefined}
                         >
-                          <Link
-                            href={enlaceOrden(c.clave)}
-                            className="inline-flex items-center gap-1 hover:text-[var(--color-tinta)]"
-                            style={activa ? { color: 'var(--color-acento-fuerte)' } : undefined}
-                          >
-                            {c.titulo}
-                            <span aria-hidden="true" style={{ opacity: activa ? 1 : 0.3 }}>
-                              {activa && dir === 'asc' ? '↑' : '↓'}
-                            </span>
-                          </Link>
-                        </th>
-                      )
-                    })}
-                    <th>Marcha</th>
-                    <th aria-label="Acciones" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.movilizadores.map((m) => (
-                    <FilaMovilizador key={m.id} m={m} maximo={maximoPromovidos} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          {c.titulo}
+                          <span aria-hidden="true" style={{ opacity: activa ? 1 : 0.3 }}>
+                            {activa && dir === 'asc' ? '↑' : '↓'}
+                          </span>
+                        </Link>
+                      </th>
+                    )
+                  })}
+                  <th>Marcha</th>
+                  <th aria-label="Acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {r.movilizadores.map((m) => (
+                  <FilaMovilizador key={m.id} m={m} maximo={maximoPromovidos} />
+                ))}
+              </tbody>
+            </Tabla>
           </section>
 
           {/* 3 · El territorio --------------------------------------- */}
@@ -312,7 +334,11 @@ export default async function Movilizacion({
                 )}
               </div>
               {hayTerritorio ? (
-                <LienzoMovilizacion municipios={r.municipios} pinta={pinta} />
+                <LienzoMovilizacion
+                  municipios={r.municipios}
+                  pinta={pinta}
+                  archivo={archivoDeMapa(tenant.estado_clave)}
+                />
               ) : (
                 <Vacio
                   titulo="Sin territorio que pintar"
@@ -330,7 +356,7 @@ export default async function Movilizacion({
               </div>
               {hayTerritorio ? (
                 <div className="max-h-[26rem] overflow-y-auto">
-                  <table className="tabla">
+                  <Tabla>
                     <thead>
                       <tr>
                         <th>Municipio</th>
@@ -365,7 +391,7 @@ export default async function Movilizacion({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </Tabla>
                 </div>
               ) : (
                 <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -389,16 +415,19 @@ export default async function Movilizacion({
             </p>
           </div>
           {r.prospectos.length ? (
-            <div className="max-h-[26rem] overflow-x-auto overflow-y-auto">
-              <table className="tabla">
+            <div className="max-h-[26rem] overflow-y-auto">
+              <Tabla>
                 <thead>
                   <tr>
                     <th>Persona</th>
                     <th>Estado</th>
-                    <th className="num" title="Llamadas registradas en su seguimiento">
+                    <th
+                      className="num hidden 2xl:table-cell"
+                      title="Llamadas registradas en su seguimiento"
+                    >
                       Llamadas
                     </th>
-                    <th className="num">Meta propuesta</th>
+                    <th className="num hidden 2xl:table-cell">Meta propuesta</th>
                     <th>Responsable</th>
                     <th className="num">Próximo contacto</th>
                   </tr>
@@ -417,8 +446,8 @@ export default async function Movilizacion({
                           {ETIQUETA_PROSPECTO[p.estado] ?? p.estado}
                         </Distintivo>
                       </td>
-                      <td className="num">{p.llamadas || '—'}</td>
-                      <td className="num text-[var(--color-tinta-2)]">
+                      <td className="num hidden 2xl:table-cell">{p.llamadas || '—'}</td>
+                      <td className="num hidden 2xl:table-cell text-[var(--color-tinta-2)]">
                         {p.meta_propuesta === null ? '—' : cifra(p.meta_propuesta)}
                       </td>
                       <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
@@ -430,7 +459,7 @@ export default async function Movilizacion({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Tabla>
             </div>
           ) : (
             <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -484,7 +513,7 @@ function FilaMovilizador({ m, maximo }: { m: Movilizador; maximo: number }) {
           </span>
         )}
       </td>
-      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+      <td className="hidden 2xl:table-cell whitespace-nowrap text-[var(--color-tinta-2)]">
         {zona ?? <span className="text-[var(--color-tinta-3)]">Sin zona</span>}
       </td>
       <td className="num">{cifra(m.meta)}</td>
@@ -523,7 +552,9 @@ function FilaMovilizador({ m, maximo }: { m: Movilizador; maximo: number }) {
       >
         {pct}%
       </td>
-      <td className="num text-[var(--color-tinta-2)]">{m.confirmados || '—'}</td>
+      <td className="num hidden 2xl:table-cell text-[var(--color-tinta-2)]">
+        {m.confirmados || '—'}
+      </td>
       <td>
         {m.marcha === 'cumplida' ? (
           <Distintivo tono="exito">Meta cumplida</Distintivo>

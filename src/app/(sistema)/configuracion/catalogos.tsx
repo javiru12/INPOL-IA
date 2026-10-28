@@ -12,6 +12,7 @@ import {
 import { Area, Campo, CampoColor, Aviso, Enviar, EnviarChico, Selector } from './piezas'
 import { Distintivo, Vacio } from '@/components/pagina'
 import { cifra } from '@/lib/formato'
+import { Tabla } from '@/components/tabla'
 
 export type FilaCatalogo = {
   id: string
@@ -76,55 +77,53 @@ export function PanelCatalogo({
             <Aviso estado={ultimo} />
           </div>
         )}
-        <div className="overflow-x-auto">
-          <table className="tabla">
-            <thead>
-              <tr>
-                {def.campos.map((c) => (
-                  <th key={c.nombre} className={c.ancho}>
-                    {c.tipo === 'problematica' ? 'Pertenece a' : c.etiqueta}
-                  </th>
-                ))}
-                <th className="num">Peticiones</th>
-                <th>Estado</th>
-                {puedeEditar && <th aria-label="Acciones" />}
-              </tr>
-            </thead>
-            <tbody>
-              {filas.map((f) => (
-                <tr key={f.id} style={{ opacity: f.activo ? 1 : 0.55 }}>
-                  {def.campos.map((c) => (
-                    <td key={c.nombre} className={c.ancho}>
-                      <Celda campo={c} fila={f} />
-                    </td>
-                  ))}
-                  <td className="num text-[var(--color-tinta-2)]">
-                    {f.usos > 0 ? cifra(f.usos) : '—'}
-                  </td>
-                  <td>
-                    <Distintivo tono={f.activo ? 'exito' : 'neutro'}>
-                      {f.activo ? 'Activa' : 'Inactiva'}
-                    </Distintivo>
-                  </td>
-                  {puedeEditar && (
-                    <td className="w-44">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setEdicion(f)}
-                          className="boton boton-llano !h-7 text-[var(--text-menuda)]"
-                        >
-                          Editar
-                        </button>
-                        <CambiarEstado catalogo={catalogo} fila={f} onResultado={setUltimo} />
-                      </div>
-                    </td>
-                  )}
-                </tr>
+        <Tabla>
+          <thead>
+            <tr>
+              {def.campos.map((c) => (
+                <th key={c.nombre} className={c.ancho}>
+                  {c.tipo === 'problematica' ? 'Pertenece a' : c.etiqueta}
+                </th>
               ))}
-            </tbody>
-          </table>
-        </div>
+              <th className="num">Peticiones</th>
+              <th>Estado</th>
+              {puedeEditar && <th aria-label="Acciones" />}
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map((f) => (
+              <tr key={f.id} style={{ opacity: f.activo ? 1 : 0.55 }}>
+                {def.campos.map((c) => (
+                  <td key={c.nombre} className={c.ancho}>
+                    <Celda campo={c} fila={f} />
+                  </td>
+                ))}
+                <td className="num text-[var(--color-tinta-2)]">
+                  {f.usos > 0 ? cifra(f.usos) : '—'}
+                </td>
+                <td>
+                  <Distintivo tono={f.activo ? 'exito' : 'neutro'}>
+                    {f.activo ? 'Activa' : 'Inactiva'}
+                  </Distintivo>
+                </td>
+                {puedeEditar && (
+                  <td className="w-44">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setEdicion(f)}
+                        className="boton boton-llano !h-7 text-[var(--text-menuda)]"
+                      >
+                        Editar
+                      </button>
+                      <CambiarEstado catalogo={catalogo} fila={f} onResultado={setUltimo} />
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </Tabla>
 
         {filas.length === 0 && (
           <Vacio

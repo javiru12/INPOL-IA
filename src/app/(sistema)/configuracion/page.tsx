@@ -30,6 +30,7 @@ import {
 } from './consultas'
 import { PanelCatalogo, type FilaCatalogo } from './catalogos'
 import { FormaCliente } from './cliente'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Configuración' }
 
@@ -182,48 +183,46 @@ async function SeccionUsuarios({
 
   return (
     <section className="panel overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="tabla">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Perfil</th>
-              <th>Puesto</th>
-              <th>Último acceso</th>
-              <th>Estado</th>
-              <th aria-label="Acciones" />
+      <Tabla>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Perfil</th>
+            <th>Puesto</th>
+            <th>Último acceso</th>
+            <th>Estado</th>
+            <th aria-label="Acciones" />
+          </tr>
+        </thead>
+        <tbody>
+          {usuarios.map((u) => (
+            <tr key={u.id} style={{ opacity: u.activo ? 1 : 0.55 }}>
+              <td className="font-medium">{u.nombre ?? '—'}</td>
+              <td className="clave">{u.correo}</td>
+              <td>{nombrePerfil.get(u.perfil_clave) ?? u.perfil_clave}</td>
+              <td className="text-[var(--color-tinta-2)]">{u.puesto ?? '—'}</td>
+              <td className="text-[var(--color-tinta-2)]">
+                {u.ultimo_acceso ? fechaHora(u.ultimo_acceso) : 'Nunca'}
+              </td>
+              <td>
+                <Distintivo tono={u.activo ? 'exito' : 'neutro'}>
+                  {u.activo ? 'Activo' : 'Inactivo'}
+                </Distintivo>
+              </td>
+              <td className="w-10">
+                <Link
+                  href={`/configuracion/usuarios/${u.id}`}
+                  className="boton boton-llano !h-7 !w-7 !p-0"
+                  aria-label={`${puedeVerDetalle ? 'Editar' : 'Ver'} a ${u.nombre ?? u.correo}`}
+                >
+                  <IconoVer />
+                </Link>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {usuarios.map((u) => (
-              <tr key={u.id} style={{ opacity: u.activo ? 1 : 0.55 }}>
-                <td className="font-medium">{u.nombre ?? '—'}</td>
-                <td className="clave">{u.correo}</td>
-                <td>{nombrePerfil.get(u.perfil_clave) ?? u.perfil_clave}</td>
-                <td className="text-[var(--color-tinta-2)]">{u.puesto ?? '—'}</td>
-                <td className="text-[var(--color-tinta-2)]">
-                  {u.ultimo_acceso ? fechaHora(u.ultimo_acceso) : 'Nunca'}
-                </td>
-                <td>
-                  <Distintivo tono={u.activo ? 'exito' : 'neutro'}>
-                    {u.activo ? 'Activo' : 'Inactivo'}
-                  </Distintivo>
-                </td>
-                <td className="w-10">
-                  <Link
-                    href={`/configuracion/usuarios/${u.id}`}
-                    className="boton boton-llano !h-7 !w-7 !p-0"
-                    aria-label={`${puedeVerDetalle ? 'Editar' : 'Ver'} a ${u.nombre ?? u.correo}`}
-                  >
-                    <IconoVer />
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Tabla>
     </section>
   )
 }
@@ -249,48 +248,46 @@ async function SeccionCampanias({ tenantId }: { tenantId: string }) {
 
   return (
     <section className="panel overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="tabla">
-          <thead>
-            <tr>
-              <th>Campaña</th>
-              <th>Tipo</th>
-              <th>Responsable</th>
-              <th className="num">Candidatos</th>
-              <th className="num">Jornada</th>
-              <th>Estado</th>
-              <th aria-label="Acciones" />
+      <Tabla>
+        <thead>
+          <tr>
+            <th>Campaña</th>
+            <th>Tipo</th>
+            <th>Responsable</th>
+            <th className="num">Candidatos</th>
+            <th className="num">Jornada</th>
+            <th>Estado</th>
+            <th aria-label="Acciones" />
+          </tr>
+        </thead>
+        <tbody>
+          {campanias.map((c) => (
+            <tr key={c.id} style={{ opacity: c.activo ? 1 : 0.55 }}>
+              <td className="font-medium">{c.nombre}</td>
+              <td className="text-[var(--color-tinta-2)]">{c.tipo ?? '—'}</td>
+              <td className="text-[var(--color-tinta-2)]">{c.responsable ?? '—'}</td>
+              <td className="num">{c.candidatos > 0 ? cifra(c.candidatos) : '—'}</td>
+              <td className="num clave whitespace-nowrap">
+                {c.fecha_jornada ? fechaLarga(c.fecha_jornada) : '—'}
+              </td>
+              <td>
+                <Distintivo tono={c.activo ? 'exito' : 'neutro'}>
+                  {c.activo ? 'En curso' : 'Archivada'}
+                </Distintivo>
+              </td>
+              <td className="w-10">
+                <Link
+                  href={`/configuracion/campanias/${c.id}`}
+                  className="boton boton-llano !h-7 !w-7 !p-0"
+                  aria-label={`Abrir ${c.nombre}`}
+                >
+                  <IconoVer />
+                </Link>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {campanias.map((c) => (
-              <tr key={c.id} style={{ opacity: c.activo ? 1 : 0.55 }}>
-                <td className="font-medium">{c.nombre}</td>
-                <td className="text-[var(--color-tinta-2)]">{c.tipo ?? '—'}</td>
-                <td className="text-[var(--color-tinta-2)]">{c.responsable ?? '—'}</td>
-                <td className="num">{c.candidatos > 0 ? cifra(c.candidatos) : '—'}</td>
-                <td className="num clave whitespace-nowrap">
-                  {c.fecha_jornada ? fechaLarga(c.fecha_jornada) : '—'}
-                </td>
-                <td>
-                  <Distintivo tono={c.activo ? 'exito' : 'neutro'}>
-                    {c.activo ? 'En curso' : 'Archivada'}
-                  </Distintivo>
-                </td>
-                <td className="w-10">
-                  <Link
-                    href={`/configuracion/campanias/${c.id}`}
-                    className="boton boton-llano !h-7 !w-7 !p-0"
-                    aria-label={`Abrir ${c.nombre}`}
-                  >
-                    <IconoVer />
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Tabla>
     </section>
   )
 }

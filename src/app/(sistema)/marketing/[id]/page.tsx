@@ -7,6 +7,7 @@ import { Pagina, Distintivo } from '@/components/pagina'
 import { fechaHora, cifra } from '@/lib/formato'
 import { CANALES, describirSegmento } from '../catalogo'
 import { detalleCampania } from '../consultas'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Campaña' }
 
@@ -84,7 +85,7 @@ export default async function DetalleCampania({
             </span>
           </div>
           <div className="max-h-[32rem] overflow-auto border-t border-[var(--color-borde)]">
-            <table className="tabla">
+            <Tabla>
               <thead>
                 <tr>
                   <th>Ciudadano</th>
@@ -118,7 +119,7 @@ export default async function DetalleCampania({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Tabla>
           </div>
         </section>
       </div>

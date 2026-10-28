@@ -10,6 +10,7 @@ import {
 } from '../acciones'
 import { Area, Campo, Selector, Aviso, Enviar, EnviarChico } from '../piezas'
 import { Distintivo } from '@/components/pagina'
+import { Tabla } from '@/components/tabla'
 
 export type DatosCampania = {
   id: string
@@ -173,47 +174,45 @@ export function Candidatos({
       </h2>
 
       {candidatos.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="tabla">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Cargo</th>
-                <th>Partido</th>
-                <th>Estado</th>
-                {puedeEditar && <th aria-label="Acciones" />}
-              </tr>
-            </thead>
-            <tbody>
-              {candidatos.map((k) => (
-                <tr key={k.id} style={{ opacity: k.activo ? 1 : 0.55 }}>
-                  <td className="font-medium">{k.nombre}</td>
-                  <td className="text-[var(--color-tinta-2)]">{k.cargo ?? '—'}</td>
-                  <td className="text-[var(--color-tinta-2)]">{k.partido ?? '—'}</td>
-                  <td>
-                    <Distintivo tono={k.activo ? 'exito' : 'neutro'}>
-                      {k.activo ? 'Activo' : 'Retirado'}
-                    </Distintivo>
+        <Tabla>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Cargo</th>
+              <th>Partido</th>
+              <th>Estado</th>
+              {puedeEditar && <th aria-label="Acciones" />}
+            </tr>
+          </thead>
+          <tbody>
+            {candidatos.map((k) => (
+              <tr key={k.id} style={{ opacity: k.activo ? 1 : 0.55 }}>
+                <td className="font-medium">{k.nombre}</td>
+                <td className="text-[var(--color-tinta-2)]">{k.cargo ?? '—'}</td>
+                <td className="text-[var(--color-tinta-2)]">{k.partido ?? '—'}</td>
+                <td>
+                  <Distintivo tono={k.activo ? 'exito' : 'neutro'}>
+                    {k.activo ? 'Activo' : 'Retirado'}
+                  </Distintivo>
+                </td>
+                {puedeEditar && (
+                  <td className="w-40">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setEdicion(k)}
+                        className="boton boton-llano !h-7 text-[var(--text-menuda)]"
+                      >
+                        Editar
+                      </button>
+                      <EstadoCandidato campaniaId={campaniaId} candidato={k} />
+                    </div>
                   </td>
-                  {puedeEditar && (
-                    <td className="w-40">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setEdicion(k)}
-                          className="boton boton-llano !h-7 text-[var(--text-menuda)]"
-                        >
-                          Editar
-                        </button>
-                        <EstadoCandidato campaniaId={campaniaId} candidato={k} />
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </Tabla>
       )}
 
       {puedeEditar && (

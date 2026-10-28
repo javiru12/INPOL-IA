@@ -15,6 +15,7 @@ import { Filtros, Paginador } from '@/components/filtros'
 import { ParticipacionPorDistrito } from './grafica'
 import { COLOR_OTRAS, ESTADO } from '@/lib/paleta'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Territorio' }
 
@@ -201,97 +202,95 @@ export default async function Territorio({
               resultados de 2015 ya sirven para decidir por dónde empezar.
             </p>
           )}
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th>Sección</th>
-                  <th>Municipio</th>
-                  <th className="num">Distrito</th>
-                  <Ordenable columna="lista" actual={orden} consulta={consulta}>
-                    Lista nominal
-                  </Ordenable>
-                  <Ordenable columna="peticiones" actual={orden} consulta={consulta}>
-                    Peticiones
-                  </Ordenable>
-                  <th className="num">Ciudadanos</th>
-                  <Ordenable columna="participacion" actual={orden} consulta={consulta}>
-                    Participación 2015
-                  </Ordenable>
-                  <th>Más votado 2015</th>
-                  <th className="w-20">Carga</th>
-                </tr>
-              </thead>
-              <tbody>
-                {r.filas.map((s) => {
-                  const excede = s.participacion !== null && s.participacion > 100
-                  const ancho = ind.maximo_peticiones
-                    ? (s.peticiones / ind.maximo_peticiones) * 100
-                    : 0
-                  return (
-                    <tr key={s.id}>
-                      <td className="clave font-medium">{s.clave}</td>
-                      <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
-                        {s.municipio}
-                      </td>
-                      <td className="num clave">{s.distrito ?? '—'}</td>
-                      <td className="num">
-                        {s.lista_nominal?.toLocaleString('es-MX') ?? '—'}
-                      </td>
-                      <td className="num font-medium">
-                        {s.peticiones.toLocaleString('es-MX')}
-                      </td>
-                      <td className="num text-[var(--color-tinta-2)]">
-                        {s.ciudadanos.toLocaleString('es-MX')}
-                      </td>
-                      <td
-                        className="num font-medium"
-                        style={excede ? { color: ESTADO.aviso } : undefined}
-                        title={
-                          excede
-                            ? 'El INE reporta más votos emitidos que lista nominal en esta sección'
-                            : undefined
-                        }
-                      >
-                        {s.participacion === null ? '—' : `${s.participacion.toFixed(1)}%`}
-                      </td>
-                      <td className="whitespace-nowrap">
-                        {s.partido ? (
-                          <span className="inline-flex items-center gap-1.5">
-                            <span
-                              aria-hidden="true"
-                              className="h-2 w-2 shrink-0 rounded-[2px]"
-                              style={{ background: colorPartido(s.partido) }}
-                            />
-                            <span className="font-medium">{nombrePartido(s.partido)}</span>
-                            <span className="clave">
-                              {s.partido_votos?.toLocaleString('es-MX') ?? ''}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-[var(--color-tinta-3)]">Sin resultados</span>
-                        )}
-                      </td>
-                      <td>
-                        <div
-                          className="h-[6px] w-16 overflow-hidden rounded-full bg-[var(--color-borde)]"
-                          title={`${s.peticiones} de ${ind.maximo_peticiones} peticiones en la sección más cargada`}
-                        >
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${s.peticiones > 0 ? Math.max(ancho, 10) : 0}%`,
-                              background: 'var(--color-acento)',
-                            }}
+          <Tabla>
+            <thead>
+              <tr>
+                <th>Sección</th>
+                <th>Municipio</th>
+                <th className="num">Distrito</th>
+                <Ordenable columna="lista" actual={orden} consulta={consulta}>
+                  Lista nominal
+                </Ordenable>
+                <Ordenable columna="peticiones" actual={orden} consulta={consulta}>
+                  Peticiones
+                </Ordenable>
+                <th className="num hidden xl:table-cell">Ciudadanos</th>
+                <Ordenable columna="participacion" actual={orden} consulta={consulta}>
+                  Participación 2015
+                </Ordenable>
+                <th className="hidden 2xl:table-cell">Más votado 2015</th>
+                <th className="w-20">Carga</th>
+              </tr>
+            </thead>
+            <tbody>
+              {r.filas.map((s) => {
+                const excede = s.participacion !== null && s.participacion > 100
+                const ancho = ind.maximo_peticiones
+                  ? (s.peticiones / ind.maximo_peticiones) * 100
+                  : 0
+                return (
+                  <tr key={s.id}>
+                    <td className="clave font-medium">{s.clave}</td>
+                    <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                      {s.municipio}
+                    </td>
+                    <td className="num clave">{s.distrito ?? '—'}</td>
+                    <td className="num">
+                      {s.lista_nominal?.toLocaleString('es-MX') ?? '—'}
+                    </td>
+                    <td className="num font-medium">
+                      {s.peticiones.toLocaleString('es-MX')}
+                    </td>
+                    <td className="num hidden xl:table-cell text-[var(--color-tinta-2)]">
+                      {s.ciudadanos.toLocaleString('es-MX')}
+                    </td>
+                    <td
+                      className="num font-medium"
+                      style={excede ? { color: ESTADO.aviso } : undefined}
+                      title={
+                        excede
+                          ? 'El INE reporta más votos emitidos que lista nominal en esta sección'
+                          : undefined
+                      }
+                    >
+                      {s.participacion === null ? '—' : `${s.participacion.toFixed(1)}%`}
+                    </td>
+                    <td className="hidden 2xl:table-cell whitespace-nowrap">
+                      {s.partido ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            aria-hidden="true"
+                            className="h-2 w-2 shrink-0 rounded-[2px]"
+                            style={{ background: colorPartido(s.partido) }}
                           />
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                          <span className="font-medium">{nombrePartido(s.partido)}</span>
+                          <span className="clave">
+                            {s.partido_votos?.toLocaleString('es-MX') ?? ''}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-[var(--color-tinta-3)]">Sin resultados</span>
+                      )}
+                    </td>
+                    <td>
+                      <div
+                        className="h-[6px] w-16 overflow-hidden rounded-full bg-[var(--color-borde)]"
+                        title={`${s.peticiones} de ${ind.maximo_peticiones} peticiones en la sección más cargada`}
+                      >
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${s.peticiones > 0 ? Math.max(ancho, 10) : 0}%`,
+                            background: 'var(--color-acento)',
+                          }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </Tabla>
           <Paginador pagina={r.pagina} porPagina={POR_PAGINA} total={ind.secciones} />
         </section>
       )}
@@ -305,7 +304,7 @@ export default async function Territorio({
             </p>
           </div>
           {prioritarias.length ? (
-            <table className="tabla">
+            <Tabla>
               <thead>
                 <tr>
                   <th>Sección</th>
@@ -328,7 +327,7 @@ export default async function Territorio({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Tabla>
           ) : (
             <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
               Sin peticiones pendientes en el territorio filtrado.
