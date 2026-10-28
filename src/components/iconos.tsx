@@ -60,6 +60,9 @@ export const IconoCampana = (p: Props) => (
 export const IconoFlechaAbajo = (p: Props) => (
   <Base {...p}><path d="m4 6 4 4 4-4" /></Base>
 )
+export const IconoPuntos = (p: Props) => (
+  <Base {...p}><circle cx="3.5" cy="8" r="1.1" fill="currentColor" stroke="none" /><circle cx="8" cy="8" r="1.1" fill="currentColor" stroke="none" /><circle cx="12.5" cy="8" r="1.1" fill="currentColor" stroke="none" /></Base>
+)
 export const IconoMas = (p: Props) => (
   <Base {...p}><path d="M8 3.5v9M3.5 8h9" /></Base>
 )

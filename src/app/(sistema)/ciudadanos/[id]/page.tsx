@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import { obtenerCiudadano, etiquetaSexo } from '../consultas'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
+import { MenuAcciones } from '@/components/menu-acciones'
 import { BotonBaja } from './baja'
 import { fechaLarga, fechaCorta, cifra } from '@/lib/formato'
 import { Tabla } from '@/components/tabla'
@@ -51,15 +52,17 @@ function Bloque({ titulo, children }: { titulo: string; children: React.ReactNod
       <h3 className="mb-3 text-[var(--text-menuda)] font-semibold text-[var(--color-tinta-2)]">
         {titulo}
       </h3>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3.5">{children}</div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-3.5 lg:grid-cols-4">{children}</div>
     </div>
   )
 }
 
 export default async function FichaCiudadano({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const tenant = await tenantDeLaPeticion()
   if (!tenant) redirect('/entrar')
@@ -67,6 +70,11 @@ export default async function FichaCiudadano({
   const { id } = await params
   const datos = await obtenerCiudadano(tenant.id, id)
   if (!datos) notFound()
+
+  // La vista vive en la URL, como el resto de la navegación: así se
+  // puede mandar a alguien directo al historial de una persona.
+  const sp = await searchParams
+  const vista = sp.vista === 'historial' ? 'historial' : 'informacion'
 
   const { ciudadano: c, externos, peticiones } = datos
 
@@ -93,13 +101,21 @@ export default async function FichaCiudadano({
       descripcion={contexto.join(' · ')}
       acciones={
         <div className="flex flex-wrap items-center gap-2">
-          <BotonBaja id={c.id} activo={c.activo} />
-          <Link href={`/ciudadanos/${c.id}/editar`} className="boton boton-primario">
-            Editar
-          </Link>
           <Link href="/ciudadanos" className="boton boton-neutro">
             Volver al listado
           </Link>
+          <Link href={`/ciudadanos/${c.id}/editar`} className="boton boton-primario">
+            Editar
+          </Link>
+          {/* Dar de baja a una persona no puede pesar lo mismo que
+              editarla: vive un paso más adentro. */}
+          {c.activo ? (
+            <MenuAcciones>
+              <BotonBaja id={c.id} activo={c.activo} enMenu />
+            </MenuAcciones>
+          ) : (
+            <BotonBaja id={c.id} activo={c.activo} />
+          )}
         </div>
       }
     >
@@ -120,10 +136,32 @@ export default async function FichaCiudadano({
         </p>
       )}
 
-      <div className="grid items-start gap-3 lg:grid-cols-[21rem_1fr]">
-        <section className="panel px-4 py-3.5">
+      {/* Toda la ficha en una columna de 21rem obligaba a bajar seis
+          bloques, y el historial quedaba tan estrecho que había que
+          moverlo en horizontal. Separados, cada uno usa el ancho entero. */}
+      <nav className="mb-6 flex items-center gap-1 border-b border-[var(--color-borde)]">
+        {[
+          { llave: 'informacion', texto: 'Información' },
+          { llave: 'historial', texto: `Historial (${cifra(peticiones.length)})` },
+        ].map((t) => (
+          <Link
+            key={t.llave}
+            href={t.llave === 'informacion' ? `/ciudadanos/${c.id}` : `/ciudadanos/${c.id}?vista=historial`}
+            className={`-mb-px border-b-2 px-3 py-2 text-[var(--text-menuda)] font-medium transition-colors ${
+              vista === t.llave
+                ? 'border-[var(--color-acento)] text-[var(--color-acento-fuerte)]'
+                : 'border-transparent text-[var(--color-tinta-2)] hover:text-[var(--color-tinta)]'
+            }`}
+          >
+            {t.texto}
+          </Link>
+        ))}
+      </nav>
+
+      {vista === 'informacion' ? (
+        <section className="panel px-5 py-4">
           <h2 className="mb-3 text-[var(--text-base)] font-semibold">Datos personales</h2>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3.5">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3.5 lg:grid-cols-4">
             <Dato etiqueta="Nombre" valor={c.nombre} ancho />
             <Dato etiqueta="Edad" valor={c.edad === null ? null : `${cifra(c.edad)} años`} />
             <Dato etiqueta="Sexo" valor={etiquetaSexo(c.sexo)} />
@@ -211,14 +249,13 @@ export default async function FichaCiudadano({
             )}
           </Bloque>
         </section>
-
-        {peticiones.length === 0 ? (
-          <Vacio
-            titulo="Sin peticiones en el historial"
-            descripcion="Esta persona está en el padrón, pero todavía no ha levantado ninguna solicitud. En cuanto lo haga, aquí quedará el seguimiento completo."
-          />
-        ) : (
-          <section className="panel overflow-hidden">
+      ) : peticiones.length === 0 ? (
+        <Vacio
+          titulo="Sin peticiones en el historial"
+          descripcion="Esta persona está en el padrón, pero todavía no ha levantado ninguna solicitud. En cuanto lo haga, aquí quedará el seguimiento completo."
+        />
+      ) : (
+        <section className="panel overflow-hidden">
             <div className="flex items-center justify-between border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">Historial de peticiones</h2>
               <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
@@ -242,10 +279,14 @@ export default async function FichaCiudadano({
                     <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
                       {p.problematica ?? '—'}
                     </td>
-                    <td className="max-w-[34rem]">
-                      <span className="block truncate" title={p.descripcion ?? undefined}>
+                    <td className="w-full max-w-0">
+                      <Link
+                        href={`/peticiones/${p.id}`}
+                        className="line-clamp-2 hover:text-[var(--color-acento-fuerte)]"
+                        title={p.descripcion ?? undefined}
+                      >
                         {p.descripcion ?? '—'}
-                      </span>
+                      </Link>
                     </td>
                     <td>
                       <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
@@ -256,10 +297,9 @@ export default async function FichaCiudadano({
                   </tr>
                 ))}
               </tbody>
-            </Tabla>
-          </section>
-        )}
-      </div>
+          </Tabla>
+        </section>
+      )}
     </Pagina>
   )
 }

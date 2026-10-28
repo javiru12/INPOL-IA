@@ -9,7 +9,17 @@ import { cambiarBajaCiudadano, type EstadoAccion } from '../acciones'
  * historial debe seguir siendo consultable. Deja de aparecer en el padrón,
  * no deja de haber existido.
  */
-export function BotonBaja({ id, activo }: { id: string; activo: boolean }) {
+export function BotonBaja({
+  id,
+  activo,
+  /** Dentro del menú de acciones se dibuja como renglón, no como botón,
+      y la confirmación se apila en vertical porque ahí no hay ancho. */
+  enMenu,
+}: {
+  id: string
+  activo: boolean
+  enMenu?: boolean
+}) {
   const [estado, accion] = useActionState<EstadoAccion, FormData>(cambiarBajaCiudadano, {})
   const [confirmando, setConfirmando] = useState(false)
 
@@ -18,7 +28,11 @@ export function BotonBaja({ id, activo }: { id: string; activo: boolean }) {
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="boton boton-neutro"
+        className={
+          enMenu
+            ? 'block w-full rounded-[var(--radius-sm)] px-3 py-2 text-left text-[var(--text-menuda)] text-[var(--color-tinta-2)] transition-colors hover:bg-[var(--color-alerta-suave)] hover:text-[var(--color-alerta)]'
+            : 'boton boton-neutro'
+        }
       >
         Dar de baja
       </button>
@@ -26,7 +40,10 @@ export function BotonBaja({ id, activo }: { id: string; activo: boolean }) {
   }
 
   return (
-    <form action={accion} className="flex items-center gap-2">
+    <form
+      action={accion}
+      className={enMenu ? 'flex flex-col gap-2 p-2' : 'flex items-center gap-2'}
+    >
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="alta" value={activo ? 'no' : 'si'} />
       {activo && (
