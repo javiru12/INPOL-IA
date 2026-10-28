@@ -17,9 +17,12 @@ import type { NodoOrganigrama } from './consultas'
 export function Organigrama({
   nodos,
   responsables,
+  /** En su pantalla propia el título ya lo pone la página. */
+  sinTitulo,
 }: {
   nodos: NodoOrganigrama[]
   responsables: { id: string; nombre: string; perfil: string | null }[]
+  sinTitulo?: boolean
 }) {
   const [editando, setEditando] = useState<string | null>(null)
   const [filtro, setFiltro] = useState('')
@@ -61,8 +64,10 @@ export function Organigrama({
     <section className="panel overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-borde)] px-4 py-3">
         <div>
-          <h2 className="text-[var(--text-base)] font-semibold">Organigrama</h2>
-          <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+          {!sinTitulo && (
+            <h2 className="text-[var(--text-base)] font-semibold">Organigrama</h2>
+          )}
+          <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
             Quién responde ante quién · {nodos.length} personas
           </p>
         </div>

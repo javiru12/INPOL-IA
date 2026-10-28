@@ -3,8 +3,6 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import {
-  organigrama,
-  posiblesResponsables,
   panelDeEstructura,
   esOrden,
   esPinta,
@@ -18,12 +16,14 @@ import {
 import { LienzoEquipo } from './lienzo'
 import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { Filtros } from '@/components/filtros'
-import { Organigrama } from './organigrama'
 import { FiltrosEquipo } from './filtros-equipo'
 import { BarrasHorizontales } from '@/components/graficas'
 import { cifra } from '@/lib/formato'
 import { ESTADO } from '@/lib/paleta'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
+import { IconoEstructura } from '@/components/iconos'
+import { archivoDeMapa } from '@/lib/mapas'
 
 export const metadata: Metadata = { title: 'Estructura' }
 
@@ -115,16 +115,12 @@ export default async function Estructura({
   const crudoPinta = texto(sp.pinta)
   const pinta: Pinta = esPinta(crudoPinta) ? crudoPinta : 'carga'
 
-  const [r, arbol, responsables] = await Promise.all([
-    panelDeEstructura(tenant.id, {
-      municipio: texto(sp.municipio),
-      persona: texto(sp.persona),
-      orden,
-      dir,
-    }),
-    organigrama(tenant.id),
-    posiblesResponsables(tenant.id),
-  ])
+  const r = await panelDeEstructura(tenant.id, {
+    municipio: texto(sp.municipio),
+    persona: texto(sp.persona),
+    orden,
+    dir,
+  })
 
   const elegida = r.personas.find((p) => p.id === texto(sp.persona)) ?? null
 
@@ -168,6 +164,13 @@ export default async function Estructura({
               Ver a todo el equipo
             </Link>
           )}
+          {/* El organigrama tiene pantalla propia: con cincuenta
+              personas el árbol era lo más alto de aquí y empujaba el
+              resto fuera de la vista. */}
+          <Link href="/estructura/organigrama" className="boton boton-neutro">
+            <IconoEstructura />
+            Organigrama
+          </Link>
           {/* El alta de personal vive en Configuración, que es donde se
               define su perfil y su contraseña; aquí solo se enlaza para
               que nadie la busque en esta pantalla y no la encuentre. */}
@@ -237,14 +240,6 @@ export default async function Estructura({
             />
           </div>
 
-          {/* 0 · La estructura formal, tal como se capturó -----------
-              Va antes que la deducida del trabajo porque responde otra
-              pregunta: no «quién atiende esta zona» sino «de quién
-              depende cada quien». */}
-          <div className="mt-3">
-            <Organigrama nodos={arbol} responsables={responsables} />
-          </div>
-
           {/* 1 · ¿Quién compone el equipo y qué carga lleva? ---------- */}
           <section className="panel mt-3 overflow-hidden">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
@@ -271,49 +266,47 @@ export default async function Estructura({
                 />
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Perfil</th>
-                    {COLUMNAS.map((c) => {
-                      const activa = orden === c.clave
-                      return (
-                        <th
-                          key={c.clave}
-                          className={`${c.num ? 'num' : ''}${c.secundaria ? ' hidden 2xl:table-cell' : ''}`.trim() || undefined}
-                          title={c.ayuda}
-                          aria-sort={activa ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Perfil</th>
+                  {COLUMNAS.map((c) => {
+                    const activa = orden === c.clave
+                    return (
+                      <th
+                        key={c.clave}
+                        className={`${c.num ? 'num' : ''}${c.secundaria ? ' hidden 2xl:table-cell' : ''}`.trim() || undefined}
+                        title={c.ayuda}
+                        aria-sort={activa ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      >
+                        <Link
+                          href={enlaceOrden(c.clave)}
+                          className="inline-flex items-center gap-1 hover:text-[var(--color-tinta)]"
+                          style={activa ? { color: 'var(--color-acento-fuerte)' } : undefined}
                         >
-                          <Link
-                            href={enlaceOrden(c.clave)}
-                            className="inline-flex items-center gap-1 hover:text-[var(--color-tinta)]"
-                            style={activa ? { color: 'var(--color-acento-fuerte)' } : undefined}
-                          >
-                            {c.titulo}
-                            <span aria-hidden="true" style={{ opacity: activa ? 1 : 0.3 }}>
-                              {activa && dir === 'asc' ? '↑' : '↓'}
-                            </span>
-                          </Link>
-                        </th>
-                      )
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.personas.map((p) => (
-                    <FilaPersona
-                      key={p.id}
-                      persona={p}
-                      elegida={elegida?.id === p.id}
-                      href={enlace({ persona: elegida?.id === p.id ? null : p.id })}
-                      maximo={Math.max(...r.personas.map((x) => x.asignadas), 1)}
-                      filtrando={Boolean(municipio)}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          {c.titulo}
+                          <span aria-hidden="true" style={{ opacity: activa ? 1 : 0.3 }}>
+                            {activa && dir === 'asc' ? '↑' : '↓'}
+                          </span>
+                        </Link>
+                      </th>
+                    )
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {r.personas.map((p) => (
+                  <FilaPersona
+                    key={p.id}
+                    persona={p}
+                    elegida={elegida?.id === p.id}
+                    href={enlace({ persona: elegida?.id === p.id ? null : p.id })}
+                    maximo={Math.max(...r.personas.map((x) => x.asignadas), 1)}
+                    filtrando={Boolean(municipio)}
+                  />
+                ))}
+              </tbody>
+            </Tabla>
             <p className="border-t border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-2 text-[var(--text-micro)] text-[var(--color-tinta-3)]">
               {r.formal.vinculos > 0
                 ? `Hay ${cifra(r.formal.vinculos)} relaciones de jerarquía capturadas en ${cifra(r.formal.estructuras)} estructuras formales.`
@@ -370,7 +363,7 @@ export default async function Estructura({
                   </div>
                   <div>
                     <p className="rotulo mb-2">Sus secciones más cargadas</p>
-                    <table className="tabla">
+                    <Tabla>
                       <thead>
                         <tr>
                           <th>Sección</th>
@@ -394,7 +387,7 @@ export default async function Estructura({
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Tabla>
                   </div>
                 </div>
               )}
@@ -442,6 +435,7 @@ export default async function Estructura({
                   municipios={r.municipios}
                   pinta={pinta}
                   persona={elegida ? { id: elegida.id, nombre: elegida.nombre } : null}
+                  archivo={archivoDeMapa(tenant.estado_clave)}
                 />
               ) : (
                 <Vacio
@@ -460,14 +454,14 @@ export default async function Estructura({
               </div>
               {hayTerritorio ? (
                 <div className="max-h-[26rem] overflow-y-auto">
-                  <table className="tabla">
+                  <Tabla>
                     <thead>
                       <tr>
                         <th>Municipio</th>
                         <th className="num">Peticiones</th>
                         <th className="num">Abiertas</th>
-                        <th className="num">Personas</th>
-                        <th>Lleva más</th>
+                        <th className="num hidden 2xl:table-cell">Personas</th>
+                        <th className="hidden 2xl:table-cell">Lleva más</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -486,8 +480,8 @@ export default async function Estructura({
                           >
                             {cifra(m.abiertas)}
                           </td>
-                          <td className="num">{cifra(m.personas)}</td>
-                          <td className="whitespace-nowrap">
+                          <td className="num hidden 2xl:table-cell">{cifra(m.personas)}</td>
+                          <td className="hidden 2xl:table-cell whitespace-nowrap">
                             {m.principal ? (
                               <span className="flex items-baseline gap-1.5">
                                 <span>{m.principal}</span>
@@ -511,7 +505,7 @@ export default async function Estructura({
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </Tabla>
                 </div>
               ) : (
                 <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -533,60 +527,58 @@ export default async function Estructura({
                 </p>
               </div>
               {r.zonas.length ? (
-                <div className="overflow-x-auto">
-                  <table className="tabla">
-                    <thead>
-                      <tr>
-                        <th>Sección</th>
-                        <th className="num">Abiertas</th>
-                        <th className="num" title={`Abiertas con más de ${UMBRAL_REZAGO} días`}>
-                          En rezago
-                        </th>
-                        <th>Responsable</th>
-                        <th>Señal</th>
+                <Tabla>
+                  <thead>
+                    <tr>
+                      <th>Sección</th>
+                      <th className="num">Abiertas</th>
+                      <th className="num" title={`Abiertas con más de ${UMBRAL_REZAGO} días`}>
+                        En rezago
+                      </th>
+                      <th>Responsable</th>
+                      <th>Señal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {r.zonas.map((z) => (
+                      <tr key={z.id}>
+                        <td className="whitespace-nowrap">
+                          <span className="clave font-medium">{z.clave}</span>
+                          <span className="block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                            {z.municipio}
+                          </span>
+                        </td>
+                        <td className="num font-medium">{cifra(z.abiertas)}</td>
+                        <td
+                          className="num font-semibold"
+                          style={z.rezagadas > 0 ? { color: ESTADO.alerta } : undefined}
+                        >
+                          {z.rezagadas || '—'}
+                        </td>
+                        <td className="whitespace-nowrap">
+                          <span className="block">{z.principal ?? '—'}</span>
+                          <span className="block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                            {z.participacion !== null
+                              ? `${z.participacion}% de ${z.peticiones}`
+                              : `${z.peticiones} peticiones`}
+                            {` · ${z.personas === 1 ? '1 persona' : `${z.personas} personas`}`}
+                          </span>
+                        </td>
+                        <td>
+                          {z.riesgo ? (
+                            <span title={RIESGOS[z.riesgo].ayuda}>
+                              <Distintivo tono={RIESGOS[z.riesgo].tono}>
+                                {RIESGOS[z.riesgo].etiqueta}
+                              </Distintivo>
+                            </span>
+                          ) : (
+                            <span className="text-[var(--color-tinta-3)]">—</span>
+                          )}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {r.zonas.map((z) => (
-                        <tr key={z.id}>
-                          <td className="whitespace-nowrap">
-                            <span className="clave font-medium">{z.clave}</span>
-                            <span className="block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                              {z.municipio}
-                            </span>
-                          </td>
-                          <td className="num font-medium">{cifra(z.abiertas)}</td>
-                          <td
-                            className="num font-semibold"
-                            style={z.rezagadas > 0 ? { color: ESTADO.alerta } : undefined}
-                          >
-                            {z.rezagadas || '—'}
-                          </td>
-                          <td className="whitespace-nowrap">
-                            <span className="block">{z.principal ?? '—'}</span>
-                            <span className="block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                              {z.participacion !== null
-                                ? `${z.participacion}% de ${z.peticiones}`
-                                : `${z.peticiones} peticiones`}
-                              {` · ${z.personas === 1 ? '1 persona' : `${z.personas} personas`}`}
-                            </span>
-                          </td>
-                          <td>
-                            {z.riesgo ? (
-                              <span title={RIESGOS[z.riesgo].ayuda}>
-                                <Distintivo tono={RIESGOS[z.riesgo].tono}>
-                                  {RIESGOS[z.riesgo].etiqueta}
-                                </Distintivo>
-                              </span>
-                            ) : (
-                              <span className="text-[var(--color-tinta-3)]">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </Tabla>
               ) : (
                 <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
                   {hayTerritorio
@@ -603,7 +595,7 @@ export default async function Estructura({
                   Las ramas que hoy existen de verdad son los perfiles del equipo
                 </p>
               </div>
-              <table className="tabla">
+              <Tabla>
                 <thead>
                   <tr>
                     <th>Área</th>
@@ -629,7 +621,7 @@ export default async function Estructura({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Tabla>
             </section>
           </div>
         </>

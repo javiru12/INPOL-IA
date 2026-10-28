@@ -48,7 +48,7 @@ function Dia({
   return (
     <div
       className={[
-        'min-w-0 px-1.5 pb-1.5 pt-1 min-h-[6.5rem]',
+        'relative min-w-0 px-1.5 pb-1.5 pt-1 min-h-[6.5rem]',
         conBordeDerecho ? 'border-r border-[var(--color-borde)]' : '',
         conBordeInferior ? 'border-b border-[var(--color-borde)]' : '',
       ].join(' ')}
@@ -56,11 +56,22 @@ function Dia({
         background: celda.delMes ? undefined : 'var(--color-superficie-2)',
       }}
     >
-      {/* El día abre el alta con esa fecha ya puesta, y el signo aparece
-          al pasar por encima: un «+» fijo en cada casilla llenaría el mes
-          de ruido. Las actividades existentes ya se abren desde su
-          propia pastilla. */}
-      <div className="group/dia mb-1 flex h-[1.125rem] items-center justify-between">
+      {/* Toda la casilla abre el alta con esa fecha, no solo el número:
+          apuntarle a un número de un cuarto de centímetro es incómodo y
+          nadie adivina que ahí hay que dar clic.
+
+          Es un enlace extendido por debajo y no un contenedor pinchable
+          porque las pastillas de actividad son enlaces a su vez, y un
+          enlace dentro de otro no es HTML válido: las pastillas quedan
+          por encima y siguen abriendo lo suyo. */}
+      <Link
+        href={`/actividades/nueva?fecha=${celda.iso}`}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="absolute inset-0 z-0 rounded-[var(--radius-xs)] hover:bg-[var(--color-acento-suave)]"
+      />
+
+      <div className="group/dia relative z-10 mb-1 flex h-[1.125rem] items-center justify-between">
         <Link
           href={`/actividades/nueva?fecha=${celda.iso}`}
           title={`Nueva actividad el ${celda.dia}`}
@@ -82,7 +93,10 @@ function Dia({
         </Link>
       </div>
 
-      <div className="space-y-[3px]" style={{ opacity: celda.delMes ? 1 : 0.55 }}>
+      <div
+        className="relative z-10 space-y-[3px]"
+        style={{ opacity: celda.delMes ? 1 : 0.55 }}
+      >
         {visibles.map((a) => (
           <Pastilla key={`${a.tipo}-${a.id}`} actividad={a} />
         ))}

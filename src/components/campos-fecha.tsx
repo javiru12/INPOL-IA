@@ -53,6 +53,7 @@ export function CampoFecha({
   const [visible, setVisible] = useState(aVisible(valor))
   const [malo, setMalo] = useState(false)
   const calendario = useRef<HTMLInputElement>(null)
+  const campo = useRef<HTMLInputElement>(null)
 
   const abrirCalendario = () => {
     const el = calendario.current
@@ -80,6 +81,7 @@ export function CampoFecha({
       <span className="relative block">
         <input
           id={id}
+          ref={campo}
           type="text"
           inputMode="numeric"
           autoComplete="off"
@@ -132,6 +134,13 @@ export function CampoFecha({
             setIso(e.target.value)
             setVisible(aVisible(e.target.value))
             setMalo(false)
+            // El calendario del navegador se quedaba abierto encima del
+            // formulario después de elegir el día y no dejaba seguir
+            // capturando. Se cierra devolviendo el foco al campo de
+            // texto: mientras el input de fecha lo tenga, el selector
+            // sigue en pantalla.
+            e.target.blur()
+            campo.current?.focus()
           }}
           className="pointer-events-none absolute bottom-0 left-2 h-0 w-0 opacity-0"
         />
@@ -203,36 +212,81 @@ export function CampoHora({
 
   const normalizado = aHora(texto)
 
+  // El meridiano sale de la hora ya normalizada, no de una variable
+  // aparte: así los dos botones y lo que está escrito nunca se
+  // contradicen, se haya capturado «14:00» o «2 pm».
+  const hora24 = normalizado ? Number(normalizado.slice(0, 2)) : null
+  const meridiano = hora24 === null ? null : hora24 < 12 ? 'am' : 'pm'
+
+  const ponerMeridiano = (cual: 'am' | 'pm') => {
+    if (hora24 === null || meridiano === cual) return
+    const nueva = cual === 'pm' ? hora24 + 12 : hora24 - 12
+    setTexto(`${String(nueva).padStart(2, '0')}${normalizado!.slice(2)}`)
+    setMalo(false)
+  }
+
   return (
     <label className="block" htmlFor={id}>
       <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
         {etiqueta}
       </span>
-      <input
-        id={id}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder="09:30"
-        value={texto}
-        aria-invalid={malo || undefined}
-        onChange={(e) => {
-          setTexto(e.target.value)
-          setMalo(e.target.value.trim() !== '' && aHora(e.target.value) === null)
-        }}
-        onBlur={() => {
-          const h = aHora(texto)
-          if (h) {
-            setTexto(h)
-            setMalo(false)
-          } else if (texto.trim() === '') setMalo(false)
-        }}
-        className="campo"
-        style={malo ? { borderColor: 'var(--color-alerta)' } : undefined}
-      />
+      <span className="flex items-stretch gap-1.5">
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="09:30"
+          value={texto}
+          aria-invalid={malo || undefined}
+          onChange={(e) => {
+            setTexto(e.target.value)
+            setMalo(e.target.value.trim() !== '' && aHora(e.target.value) === null)
+          }}
+          onBlur={() => {
+            const h = aHora(texto)
+            if (h) {
+              setTexto(h)
+              setMalo(false)
+            } else if (texto.trim() === '') setMalo(false)
+          }}
+          className="campo min-w-0 flex-1"
+          style={malo ? { borderColor: 'var(--color-alerta)' } : undefined}
+        />
+
+        {/* Dos botones en vez de pedir que se teclee «am» o «pm»: quien
+            captura escribe el número y de un toque dice si es mañana o
+            tarde. Se quedan apagados mientras no haya una hora válida,
+            porque sin ella no tienen nada que cambiar. */}
+        <span
+          role="group"
+          aria-label={`Mañana o tarde en ${etiqueta.toLowerCase()}`}
+          className="flex shrink-0 gap-0.5 rounded-[var(--radius-sm)] border border-[var(--color-borde-fuerte)] p-0.5"
+        >
+          {(['am', 'pm'] as const).map((cual) => (
+            <button
+              key={cual}
+              type="button"
+              disabled={hora24 === null}
+              aria-pressed={meridiano === cual}
+              onClick={() => ponerMeridiano(cual)}
+              className={`boton !h-auto !px-2 text-[var(--text-menuda)] uppercase ${
+                meridiano === cual ? 'boton-primario' : 'boton-llano'
+              }`}
+              style={hora24 === null ? { opacity: 0.4 } : undefined}
+            >
+              {cual}
+            </button>
+          ))}
+        </span>
+      </span>
       <input type="hidden" name={nombre} value={normalizado ?? ''} />
       <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-        {malo ? 'No entendí esa hora' : 'Puedes escribir 9, 930, 9:30 o 9 pm'}
+        {malo
+          ? 'No entendí esa hora'
+          : normalizado
+            ? `Se guardará como ${normalizado}`
+            : 'Escribe 9, 930 o 9:30 y elige AM o PM'}
       </span>
     </label>
   )
