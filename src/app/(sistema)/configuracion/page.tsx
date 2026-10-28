@@ -161,6 +161,15 @@ function AccionDeSeccion({
       </Link>
     )
   }
+  // Importar sirve para varias de las secciones, no solo para una, así
+  // que su botón vive en las dos que reciben datos de fuera.
+  if (seccion === 'ciudadanos' || seccion === 'movilizadores') {
+    return (
+      <Link href="/configuracion/importar" className="boton boton-neutro">
+        Importar datos
+      </Link>
+    )
+  }
   if (seccion === 'campanias' && puede.campanias) {
     return (
       <Link href="/configuracion/campanias/nueva" className="boton boton-primario">
