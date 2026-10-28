@@ -6,6 +6,7 @@ export function Pagina({
   cuenta,
   insignias,
   acciones,
+  vidrio,
   children,
 }: {
   titulo: string
@@ -19,10 +20,23 @@ export function Pagina({
       pregunta quien lo abre: no puede estar enterrado en un panel. */
   insignias?: React.ReactNode
   acciones?: React.ReactNode
+  /**
+   * Pantalla de vidrio: fondo con profundidad y superficies
+   * translúcidas. Es para tableros —lo que se mira un minuto y hay que
+   * entender de un vistazo—, no para pantallas de trabajo: una tabla
+   * que se usa ocho horas quiere blanco opaco debajo del texto.
+   */
+  vidrio?: boolean
   children: React.ReactNode
 }) {
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-7">
+    <div
+      {...(vidrio ? { 'data-vidrio': '' } : {})}
+      className="mx-auto max-w-[1440px] px-6 py-7"
+    >
+      {/* El color lo pinta el body —ahí sí queda detrás de la barra y de
+          la cabecera—; esta capa solo añade el grano. */}
+      {vidrio && <div aria-hidden="true" className="fondo-padre" />}
       <div className="mb-6 flex items-start justify-between gap-6">
         <div>
           <div className="flex items-baseline gap-3">

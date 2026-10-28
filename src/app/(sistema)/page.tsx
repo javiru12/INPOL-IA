@@ -37,12 +37,8 @@ export default async function Panel() {
     : 0
 
   return (
-    <>
-      {/* El color lo pone el body —ahí sí queda detrás de la barra y de
-          la cabecera—; esta capa solo añade el grano, que es lo que
-          separa un degradado de CSS de una foto desenfocada. */}
-      <div aria-hidden="true" className="fondo-padre" />
     <Pagina
+      vidrio
       titulo={`Buen día, ${sesion.nombre.split(' ')[0]}`}
       descripcion={`Panorama de ${tenant.nombre_corto ?? tenant.nombre} al día de hoy`}
       acciones={
@@ -62,7 +58,7 @@ export default async function Panel() {
           }
         />
       ) : (
-        <div data-vidrio className="space-y-0">
+        <>
           <div className="franja">
             {/* Cada cifra lleva a la lista que la produjo. Un número
                 que no se puede abrir obliga a reconstruir a mano el
@@ -309,9 +305,8 @@ export default async function Panel() {
               </tbody>
             </Tabla>
           </section>
-        </div>
+        </>
       )}
     </Pagina>
-    </>
   )
 }

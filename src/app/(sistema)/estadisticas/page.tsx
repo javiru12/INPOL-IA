@@ -182,6 +182,7 @@ export default async function Estadisticas({
 
   return (
     <Pagina
+      vidrio
       titulo="Estadísticas"
       descripcion="Cómo se comporta la gestión: demanda, tiempos de respuesta y cumplimiento"
       acciones={

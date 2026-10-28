@@ -66,6 +66,7 @@ export default async function DiaD() {
 
   return (
     <Pagina
+      vidrio
       titulo="Día D"
       insignias={
         cuando === 'hoy' ? (

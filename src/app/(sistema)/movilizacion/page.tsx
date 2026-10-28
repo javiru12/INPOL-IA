@@ -148,6 +148,7 @@ export default async function Movilizacion({
 
   return (
     <Pagina
+      vidrio
       titulo="Movilización"
       descripcion="La red que lleva gente a votar: quién se comprometió a cuánto y cómo va"
     >
