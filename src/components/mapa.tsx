@@ -172,7 +172,7 @@ export function Mapa({
       {resaltada && puntero && (
         <div
           role="tooltip"
-          className="pointer-events-none absolute z-10 min-w-[11rem] rounded-[var(--radius-sm)] bg-[var(--color-barra)] px-2.5 py-2 text-white"
+          className="pointer-events-none absolute z-10 min-w-[11rem] rounded-[var(--radius-sm)] bg-[var(--color-marca-fondo)] px-2.5 py-2 text-white"
           style={{
             left: Math.min(puntero.x + 14, 760),
             top: Math.max(puntero.y - 12, 0),

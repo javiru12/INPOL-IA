@@ -1,5 +1,6 @@
 import 'server-only'
 import { conTenant } from '@/lib/db'
+import { ESTATUS_TERMINALES } from '@/lib/peticiones'
 
 export type Pulso = {
   totales: {
@@ -32,7 +33,8 @@ export async function pulsoDeLaOperacion(tenantId: string): Promise<Pulso> {
           select count(*)::int as total,
                  count(*) filter (where e.descripcion in ('Abierta','En proceso','En gestión'))::int as abiertas,
                  count(*) filter (where e.descripcion = 'Completada')::int as completadas,
-                 count(*) filter (where pri.descripcion = 'Urgente' and e.descripcion <> 'Completada')::int as urgentes,
+                 count(*) filter (where pri.descripcion = 'Urgente' and p.activo
+                                    and coalesce(e.descripcion, '') not in ${tx(ESTATUS_TERMINALES)})::int as urgentes,
                  count(*) filter (where p.fecha_apertura >= current_date)::int as hoy,
                  count(*) filter (where p.fecha_apertura >= current_date - interval '7 days')::int as semana
           from peticiones p
@@ -97,7 +99,8 @@ export async function pulsoDeLaOperacion(tenantId: string): Promise<Pulso> {
           left join problematicas pr on pr.id = p.problematica_id
           left join estatus_peticiones e on e.id = p.estatus_id
           left join prioridades pri on pri.id = p.prioridad_id
-          where pri.descripcion = 'Urgente' and e.descripcion <> 'Completada'
+          where pri.descripcion = 'Urgente' and p.activo
+            and coalesce(e.descripcion, '') not in ${tx(ESTATUS_TERMINALES)}
           order by p.fecha_apertura
           limit 7`,
       ])

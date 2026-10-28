@@ -62,7 +62,7 @@ export default async function DiaD() {
         ) : undefined
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Gente comprometida"
           valor={comprometidos}
@@ -105,7 +105,7 @@ export default async function DiaD() {
         )}
       </section>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.3fr_1fr]">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <section className="panel self-start overflow-hidden">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">A quién llamar ahora</h2>

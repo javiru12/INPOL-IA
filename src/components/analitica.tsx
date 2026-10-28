@@ -311,7 +311,7 @@ export function LineasTemporales({
       {encima !== null && (
         <div
           role="tooltip"
-          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--color-barra)] px-2 py-1.5 text-[length:var(--text-micro)] text-white"
+          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--color-marca-fondo)] px-2 py-1.5 text-[length:var(--text-micro)] text-white"
           style={{
             left: Math.min(Math.max(x(encima) - 60, 0), Math.max(ancho - 130, 0)),
             top: 0,

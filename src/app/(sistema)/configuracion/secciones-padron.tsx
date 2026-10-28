@@ -46,7 +46,7 @@ export async function SeccionCiudadanos({ tenantId }: { tenantId: string }) {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador etiqueta="En el padrón" valor={resumen.total} pie="Fichas activas" />
         <Indicador
           etiqueta="Sin ninguna petición"
@@ -130,25 +130,35 @@ export async function SeccionMovilizadores({ tenantId }: { tenantId: string }) {
       meta: number | null
       promovidos: number
       jefe: string | null
-      equipo: number
+      tipo: string | null
     }[]>`
+      -- El nombre y la zona salen del ciudadano, igual que en la ficha de
+      -- Movilización: movilizadores.nombre y municipio_id vienen vacíos
+      -- en toda la red, y esta pantalla los leía de ahí —por eso salían 40
+      -- filas de «Sin nombre / Sin zona» que al abrirlas sí tenían datos.
       select m.id,
-             nullif(trim(concat_ws(' ', m.nombre, m.apellido_paterno)), '') as nombre,
+             coalesce(
+               nullif(trim(c.nombre_completo), ''),
+               nullif(trim(concat_ws(' ', c.nombre, c.apellido_paterno, c.apellido_materno)), '')
+             ) as nombre,
              mu.nombre as zona,
              m.meta,
              (select count(*)::int from promovidos p
                where p.movilizador_id = m.id and p.activo) as promovidos,
-             nullif(trim(concat_ws(' ', j.nombre, j.apellido_paterno)), '') as jefe,
-             (select count(*)::int from movilizadores h
-               where h.responsable_id = m.id and h.activo) as equipo
+             nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as jefe,
+             tm.descripcion as tipo
       from movilizadores m
-      left join municipios mu on mu.id = m.municipio_id
-      left join movilizadores j on j.id = m.responsable_id
+      left join ciudadanos c on c.id = m.ciudadano_id
+      left join secciones s on s.id = c.seccion_id
+      left join municipios mu on mu.id = s.municipio_id
+      left join tipos_movilizador tm on tm.id = m.tipo_movilizador_id
+      -- responsable_id apunta a usuarios, no a movilizadores.
+      left join usuarios u on u.id = m.responsable_id
       where m.activo
-      order by 7 desc, 5 desc nulls last`,
+      order by 5 desc nulls last, 2`,
   )
 
-  const conEquipo = filas.filter((f) => f.equipo > 0).length
+  const conMeta = filas.filter((f) => (f.meta ?? 0) > 0).length
 
   return (
     <div className="space-y-3">
@@ -161,13 +171,13 @@ export async function SeccionMovilizadores({ tenantId }: { tenantId: string }) {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="franja franja-3">
         <Indicador etiqueta="Movilizadores activos" valor={filas.length} pie="En la red" />
         <Indicador
-          etiqueta="Con gente a su cargo"
-          valor={conEquipo}
+          etiqueta="Con meta asignada"
+          valor={conMeta}
           tono="dato"
-          pie="Tienen su propio equipo"
+          pie="El resto no tiene número que cumplir"
         />
         <Indicador
           etiqueta="Promovidos registrados"
@@ -188,8 +198,8 @@ export async function SeccionMovilizadores({ tenantId }: { tenantId: string }) {
               <tr>
                 <th>Movilizador</th>
                 <th>Zona</th>
+                <th>Tipo</th>
                 <th>Depende de</th>
-                <th className="num">A su cargo</th>
                 <th className="num">Meta</th>
                 <th className="num">Promovidos</th>
               </tr>
@@ -209,9 +219,11 @@ export async function SeccionMovilizadores({ tenantId }: { tenantId: string }) {
                     {m.zona ?? <span className="text-[var(--color-tinta-3)]">Sin zona</span>}
                   </td>
                   <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
+                    {m.tipo ?? <span className="text-[var(--color-tinta-3)]">Sin tipo</span>}
+                  </td>
+                  <td className="whitespace-nowrap text-[var(--color-tinta-2)]">
                     {m.jefe ?? <span className="text-[var(--color-tinta-3)]">Nadie</span>}
                   </td>
-                  <td className="num">{m.equipo || '—'}</td>
                   <td className="num">{cifra(m.meta)}</td>
                   <td className="num font-medium">{cifra(m.promovidos)}</td>
                 </tr>

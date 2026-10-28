@@ -14,11 +14,11 @@ export default async function Entrar() {
 
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      <Intro />
       {/* Panel de identidad. En el sistema anterior este espacio decía
           a qué campaña entrabas; se conserva la idea, mejor resuelta. */}
-      <section className="relative hidden flex-col justify-between overflow-hidden bg-[var(--color-barra)] p-12 text-white lg:flex">
+      <section className="relative hidden flex-col justify-between overflow-hidden bg-[var(--color-marca-fondo)] p-12 text-white lg:flex">
         <Reticula />
+        <Intro />
         <Marca className="relative" tono="claro" />
         <div className="relative">
           <p className="rotulo !text-white/45">Plataforma de gestión social</p>

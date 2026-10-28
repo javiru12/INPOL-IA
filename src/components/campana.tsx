@@ -55,7 +55,9 @@ export function Campana({ alertas }: { alertas: Alerta[] }) {
         type="button"
         onClick={() => setAbierto((v) => !v)}
         className="boton boton-llano !h-8 !w-8 !p-0 relative"
-        aria-label={porRevisar ? `Alertas: ${porRevisar} sin revisar` : 'Alertas: nada sin revisar'}
+        aria-label={
+          porRevisar ? `Alertas: ${porRevisar} avisos nuevos` : 'Alertas: sin avisos nuevos'
+        }
         aria-expanded={abierto}
         data-alertas={porRevisar}
       >
@@ -91,8 +93,9 @@ export function Campana({ alertas }: { alertas: Alerta[] }) {
               </button>
             ) : (
               total > 0 && (
-                <span className="cifra text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
-                  {total} pendiente{total === 1 ? '' : 's'} · todas revisadas
+                <span className="text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                  <span className="cifra">{total}</span> asunto{total === 1 ? '' : 's'} abierto
+                  {total === 1 ? '' : 's'} · sin avisos nuevos
                 </span>
               )
             )}

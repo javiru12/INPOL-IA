@@ -122,7 +122,7 @@ export default async function Actividades({
         </div>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Actividades del mes"
           valor={resumen.total}

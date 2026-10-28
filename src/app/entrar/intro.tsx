@@ -8,14 +8,16 @@ import { useEffect, useRef, useState } from 'react'
  * Tres reglas, y las tres existen porque un intro mal puesto es peor
  * que no tener ninguno:
  *
- * 1. **Nunca bloquea.** El archivo pesa diez megas y hay oficinas con
- *    conexiones malas. Si en un segundo y medio no empezó a reproducir,
- *    se descarta y aparece el formulario. Nadie espera por un adorno.
+ * 1. **Nunca bloquea.** Va detrás del panel de marca, no encima de la
+ *    pantalla: se puede teclear el correo desde el primer instante y
+ *    el video corre de fondo. Antes tapaba todo y había que saltarlo
+ *    para poder entrar, que es cobrarle al usuario por un adorno. Si
+ *    en un segundo y medio no arrancó, se descarta.
  * 2. **Una vez por sesión del navegador, no por intento de entrar.**
  *    Netflix lo pone al abrir la aplicación, no cada vez que te
  *    equivocas de contraseña. Verlo cuatro veces seguidas por fallar el
  *    password lo convierte en un castigo.
- * 3. **Se salta con un clic o con cualquier tecla**, y lo dice.
+ * 3. **Se desvanece solo** al terminar, dejando la retícula debajo.
  *
  * Quien tenga activado «reducir movimiento» en su sistema no lo ve: esa
  * preferencia suele venir de mareo o migraña, no de gusto.
@@ -60,20 +62,12 @@ export function Intro() {
     setTimeout(() => setVisible(false), 400)
   }
 
-  useEffect(() => {
-    if (!visible) return
-    const salir = () => cerrar()
-    window.addEventListener('keydown', salir)
-    return () => window.removeEventListener('keydown', salir)
-  }, [visible])
-
   if (!visible) return null
 
   return (
     <div
-      onClick={cerrar}
-      role="presentation"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black transition-opacity duration-[400ms]"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-[600ms]"
       style={{ opacity: saliendo ? 0 : 1 }}
     >
       <video
@@ -85,15 +79,17 @@ export function Intro() {
         preload="auto"
         onEnded={cerrar}
         onError={cerrar}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover opacity-70"
       />
-      <button
-        type="button"
-        onClick={cerrar}
-        className="absolute bottom-8 right-8 rounded-[var(--radius-sm)] px-3 py-1.5 text-[var(--text-menuda)] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-      >
-        Saltar
-      </button>
+      {/* Velo: sin él, el nombre de la campaña y el pie quedan encima
+          del mapa y no se leen. Un fondo de marca es fondo. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to right, rgb(30 25 38 / 0.72), rgb(30 25 38 / 0.55) 55%, rgb(30 25 38 / 0.78))',
+        }}
+      />
     </div>
   )
 }

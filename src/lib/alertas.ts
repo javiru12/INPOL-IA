@@ -1,6 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
 import { conTenant } from './db'
+import { ESTATUS_TERMINALES } from './peticiones'
 import { leerSesion, tenantDeLaPeticion } from './sesion'
 import { permisosDelUsuario } from './permisos'
 import { fuenteAvisos } from '@/app/(sistema)/marketing/consultas'
@@ -142,7 +143,7 @@ export const alertasDelUsuario = cache(async (): Promise<Alerta[]> => {
            join estatus_peticiones e on e.id = p.estatus_id
           where ${pide('peticiones_urgentes')}::boolean
             and p.activo and pri.descripcion = 'Urgente'
-            and e.descripcion not in ('Completada', 'Cancelada')) as peticiones_urgentes,
+            and coalesce(e.descripcion, '') not in ${tx(ESTATUS_TERMINALES)}) as peticiones_urgentes,
 
         -- «Asignada a mí» en este modelo es «yo la estoy trabajando»: la
         -- petición no guarda responsable, pero el seguimiento sí dice

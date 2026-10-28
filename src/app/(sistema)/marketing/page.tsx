@@ -63,7 +63,7 @@ export default async function Comunicacion({
         </Link>
       }
     >
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="franja mb-6">
         <Indicador
           etiqueta="Sin avisar"
           valor={resumen.pendientes}

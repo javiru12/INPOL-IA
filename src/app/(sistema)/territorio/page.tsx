@@ -159,7 +159,7 @@ export default async function Territorio({
         ]}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Secciones con peticiones"
           valor={ind.con_peticiones}
@@ -295,7 +295,7 @@ export default async function Territorio({
         </section>
       )}
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <section className="panel self-start overflow-hidden">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Secciones prioritarias</h2>

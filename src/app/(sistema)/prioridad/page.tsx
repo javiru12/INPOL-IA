@@ -109,7 +109,7 @@ export default async function Prioridad({
         </nav>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta={`Padrón de las ${CUANTAS} primeras`}
           valor={padronTop}
@@ -136,7 +136,7 @@ export default async function Prioridad({
         />
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
         <section className="panel overflow-hidden">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">El estado, por prioridad</h2>

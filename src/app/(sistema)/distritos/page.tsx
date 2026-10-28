@@ -93,7 +93,7 @@ export default async function Distritos({
         </nav>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Distritos locales"
           valor={distritos.length}

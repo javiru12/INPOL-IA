@@ -3,23 +3,35 @@ import Link from 'next/link'
 export function Pagina({
   titulo,
   descripcion,
+  cuenta,
   acciones,
   children,
 }: {
   titulo: string
   descripcion?: string
+  /** Cuántos registros hay detrás del título. Va pegado a él porque
+      «Peticiones 1,179» se lee de un golpe y responde la primera
+      pregunta de quien llega a la pantalla. */
+  cuenta?: number | string
   acciones?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
-    <div className="mx-auto max-w-[1440px] px-6 py-6">
-      <div className="mb-5 flex items-start justify-between gap-6">
+    <div className="mx-auto max-w-[1440px] px-6 py-7">
+      <div className="mb-6 flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-[var(--text-titulo)]">{titulo}</h1>
+          <div className="flex items-baseline gap-3">
+            <h1 className="text-[length:var(--text-pagina)] font-semibold leading-tight tracking-[-0.02em]">
+              {titulo}
+            </h1>
+            {cuenta !== undefined && (
+              <span className="cifra text-[var(--text-media)] font-medium text-[var(--color-tinta-3)]">
+                {typeof cuenta === 'number' ? cuenta.toLocaleString('es-MX') : cuenta}
+              </span>
+            )}
+          </div>
           {descripcion && (
-            <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-              {descripcion}
-            </p>
+            <p className="mt-1 text-[var(--color-tinta-2)]">{descripcion}</p>
           )}
         </div>
         {acciones && <div className="flex shrink-0 items-center gap-2">{acciones}</div>}
@@ -56,25 +68,25 @@ export function Indicador({
     <>
       <p className="rotulo">{etiqueta}</p>
       <p
-        className="cifra mt-2 text-[length:var(--text-cifra)] leading-none"
+        className="cifra mt-1.5 text-[length:var(--text-cifra)] leading-none"
         style={{ color: colores[tono] }}
       >
         {typeof valor === 'number' ? valor.toLocaleString('es-MX') : valor}
       </p>
       {pie && (
-        <p className="mt-2 text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-3)]">
+        <p className="mt-1.5 text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-3)]">
           {pie}
         </p>
       )}
     </>
   )
 
-  // Solo se levanta al pasar el cursor si de verdad lleva a algún lado.
-  // Una tarjeta que reacciona y no hace nada promete algo que no cumple.
-  if (!href) return <div className="panel px-4 py-3.5">{cuerpo}</div>
+  // El indicador ya no trae superficie propia: la pone la franja que lo
+  // contiene. Solo reacciona al cursor si de verdad lleva a algún lado.
+  if (!href) return <div>{cuerpo}</div>
 
   return (
-    <Link href={href} className="panel panel-vivo block px-4 py-3.5">
+    <Link href={href} className="panel-vivo block">
       {cuerpo}
     </Link>
   )

@@ -31,6 +31,11 @@ export function BuscadorGlobal() {
   const [hallazgos, setHallazgos] = useState<Hallazgo[]>([])
   const [elegido, setElegido] = useState(0)
   const [buscando, iniciar] = useTransition()
+  // Qué término produjo los resultados que tenemos en la mano. Durante
+  // los 160 ms de espera `buscando` todavía es falso y la lista sigue
+  // vacía, así que la pantalla alcanzaba a decir «nada coincide» antes
+  // de haber buscado nada.
+  const [resuelto, setResuelto] = useState('')
   const campo = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -58,18 +63,23 @@ export function BuscadorGlobal() {
   }, [abierto])
 
   useEffect(() => {
-    if (termino.trim().length < 2) {
+    const t = termino.trim()
+    if (t.length < 2) {
       setHallazgos([])
+      setResuelto(t)
       return
     }
     const id = setTimeout(() => {
       iniciar(async () => {
         setHallazgos(await buscarEnTodo(termino))
+        setResuelto(t)
         setElegido(0)
       })
     }, 160)
     return () => clearTimeout(id)
   }, [termino])
+
+  const enCurso = buscando || resuelto !== termino.trim()
 
   function ir(h: Hallazgo) {
     setAbierto(false)
@@ -146,7 +156,7 @@ export function BuscadorGlobal() {
                 placeholder="Nombre, teléfono, folio, colonia o número de sección…"
                 className="h-12 flex-1 bg-transparent text-[var(--text-media)] outline-none placeholder:text-[var(--color-tinta-3)]"
               />
-              {buscando && (
+              {enCurso && (
                 <span
                   aria-hidden="true"
                   className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-acento)]"
@@ -204,7 +214,7 @@ export function BuscadorGlobal() {
               <p className="px-4 py-8 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
                 {termino.trim().length < 2
                   ? 'Escribe al menos dos letras.'
-                  : buscando
+                  : enCurso
                     ? 'Buscando…'
                     : 'Nada coincide con esa búsqueda.'}
               </p>

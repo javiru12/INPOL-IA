@@ -169,7 +169,7 @@ export default async function Estadisticas({
     >
       {filtros}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Peticiones capturadas"
           valor={r.totales.capturadas}
@@ -231,7 +231,7 @@ export default async function Estadisticas({
         />
       </section>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.25fr_1fr]">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
         <section className="panel px-4 py-3.5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-[var(--text-base)] font-semibold">
@@ -312,7 +312,7 @@ export default async function Estadisticas({
       </div>
 
       {/* 2 · ¿Qué tan rápido resolvemos, y qué se nos atora? ---------- */}
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.45fr_1fr]">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[1.45fr_1fr]">
         <section className="panel px-4 py-3.5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-[var(--text-base)] font-semibold">
@@ -471,7 +471,7 @@ export default async function Estadisticas({
       </section>
 
       {/* 4 · ¿De dónde llega la demanda? ----------------------------- */}
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <section className="panel px-4 py-3.5">
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-[var(--text-base)] font-semibold">Por dónde llega la demanda</h2>

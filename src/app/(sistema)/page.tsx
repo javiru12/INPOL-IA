@@ -57,7 +57,7 @@ export default async function Panel() {
         />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="franja">
             {/* Cada cifra lleva a la lista que la produjo. Un número
                 que no se puede abrir obliga a reconstruir a mano el
                 filtro que lo generó, y casi siempre sale distinto. */}
@@ -90,7 +90,7 @@ export default async function Panel() {
             />
           </div>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-[1.35fr_1fr]">
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
             <section className="panel px-4 py-3.5">
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="text-[var(--text-base)] font-semibold">Peticiones por mes</h2>
@@ -141,7 +141,7 @@ export default async function Panel() {
             </section>
           </div>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
             <section className="panel px-4 py-3.5">
               <h2 className="mb-4 text-[var(--text-base)] font-semibold">
                 Problemáticas principales
@@ -163,7 +163,7 @@ export default async function Panel() {
             </section>
           </div>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.35fr]">
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1.35fr]">
             <section className="panel px-4 py-3.5">
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="text-[var(--text-base)] font-semibold">Territorio</h2>

@@ -58,6 +58,7 @@ export default async function Ciudadanos({
   return (
     <Pagina
       titulo="Ciudadanos"
+      cuenta={r.total}
       descripcion="Padrón de personas registradas por la estructura de campaña"
       acciones={
         <Link href="/ciudadanos/nuevo" className="boton boton-primario">
@@ -87,7 +88,7 @@ export default async function Ciudadanos({
         />
       ) : (
         <>
-          <div className="mb-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="franja mb-4">
             <Indicador
               etiqueta="Ciudadanos"
               valor={r.resumen.total}

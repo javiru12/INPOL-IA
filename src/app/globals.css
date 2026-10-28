@@ -9,16 +9,17 @@
    ============================================================ */
 
 @theme {
-  /* --- Neutros. Tinte violáceo frío para que el acento asiente --- */
-  --color-lienzo:        #f4f3f6;  /* fondo de la aplicación */
+  /* --- Neutros. Gris muy claro apenas teñido: el morado tiene que
+         ser lo único cromático de la pantalla. --- */
+  --color-lienzo:        #f7f8fa;  /* fondo de la aplicación */
   --color-superficie:    #ffffff;  /* tarjetas, tablas, formularios */
-  --color-superficie-2:  #faf9fb;  /* filas alternas, encabezados de tabla */
-  --color-borde:         #e3e1e8;  /* divisiones de 1px */
-  --color-borde-fuerte:  #cbc7d2;  /* bordes de campos e inputs */
+  --color-superficie-2:  #f7f8fa;  /* filas alternas, encabezados de tabla */
+  --color-borde:         #e8e9ef;  /* divisiones de 1px */
+  --color-borde-fuerte:  #d6d8e2;  /* bordes de campos e inputs */
 
-  --color-tinta:         #1c1824;  /* texto principal */
-  --color-tinta-2:       #55505f;  /* texto secundario */
-  --color-tinta-3:       #857f90;  /* texto terciario, marcas de agua */
+  --color-tinta:         #20212b;  /* texto principal */
+  --color-tinta-2:       #5b5e70;  /* texto secundario */
+  --color-tinta-3:       #8b8e9f;  /* texto terciario, marcas de agua */
 
   /* --- Acento: morado del logo INPOL --- */
   --color-acento:        #714a85;
@@ -26,11 +27,17 @@
   --color-acento-suave:  #f3eef6;
   --color-acento-borde:  #d9cce1;
 
-  /* --- Barra lateral --- */
-  --color-barra:         #1e1926;
-  --color-barra-2:       #2a2333;
-  --color-barra-texto:   #b5adbf;
-  --color-barra-activo:  #ffffff;
+  /* Fondo oscuro de marca: el panel del acceso y la sala de mando.
+     Era el color de la barra lateral; ahora que la barra es clara
+     necesita nombre propio o el acceso queda blanco sobre blanco. */
+  --color-marca-fondo:   #1e1926;
+
+  /* --- Barra lateral. Clara: un panel negro de 232px se lleva la
+         mirada antes que el contenido, que es lo que importa. --- */
+  --color-barra:         #ffffff;
+  --color-barra-2:       #f1edf5;  /* lavanda suave: lo seleccionado */
+  --color-barra-texto:   #5b5e70;
+  --color-barra-activo:  #5b3a6c;
 
   /* --- Semánticos. Desaturados a propósito: en un tablero
          operativo el color significa estado, no decoración --- */
@@ -47,22 +54,23 @@
   --font-sans: var(--fuente-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--fuente-mono), ui-monospace, monospace;
 
-  --text-micro:   0.6875rem; /* 11px · etiquetas de columna, metadatos */
-  --text-menuda:  0.75rem;   /* 12px · texto de apoyo */
-  --text-base:    0.875rem;  /* 14px · cuerpo. Densidad de sistema */
+  --text-micro:   0.75rem;   /* 12px · etiquetas de columna, metadatos */
+  --text-menuda:  0.8125rem; /* 13px · texto de apoyo */
+  --text-base:    0.9375rem; /* 15px · cuerpo */
   --text-media:   1rem;      /* 16px */
-  --text-titulo:  1.125rem;  /* 18px · título de pantalla */
+  --text-titulo:  1.1875rem; /* 19px · subtítulo de sección */
+  --text-pagina:  1.875rem;  /* 30px · título de pantalla. Manda. */
   --text-cifra:   1.75rem;   /* 28px · indicadores */
   /* Un sistema denso no tiene dónde poner un protagonista: todo pesa
      igual y el ojo no sabe dónde ver primero. Esto es para las pocas
      pantallas que sí tienen un centro. */
   --text-presente: 2.25rem;  /* 36px · el centro de una pantalla vacía */
 
-  /* --- Formas. Radios cortos: se lee como instrumento --- */
-  --radius-xs: 3px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 12px;  /* campos protagonistas: un chat no es un formulario */
+  /* --- Formas --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;  /* campos protagonistas: un chat no es un formulario */
   --radius-full: 999px;
 
   /* --- Elevación. Casi inexistente, solo para capas flotantes --- */
@@ -130,25 +138,48 @@
     letter-spacing: -0.02em;
   }
 
+  /* Versalitas espaciadas en cada etiqueta del sistema gritaban todas
+     a la vez. Una etiqueta ordena cuando se retira, no cuando compite:
+     caja normal, sin espaciado, y el peso lo pone el contenido. */
   .rotulo {
     font-size: var(--text-micro);
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    font-weight: 500;
     color: var(--color-tinta-3);
   }
 
   /* --- Superficie base ---
-     Un borde de 1px y nada más deja todo al mismo nivel: tarjetas,
-     tablas y formularios flotando sin relación entre sí. La sombra es
-     mínima a propósito —apenas dos píxeles— porque lo que hace que una
-     superficie se lea como superficie no es la sombra, es que la haya.
-     Mucha convierte un sistema de trabajo en una presentación. */
+     Borde tenue y nada más. Antes llevaba borde *y* sombra: con
+     veinte superficies por pantalla las dos cosas juntas ensucian y
+     ninguna de las dos acaba separando nada. La sombra queda
+     reservada para lo que de verdad flota —menús y ventanas—, que es
+     donde significa «esto está encima de aquello». */
   .panel {
     background: var(--color-superficie);
     border: 1px solid var(--color-borde);
     border-radius: var(--radius-md);
-    box-shadow: 0 1px 2px rgb(28 24 36 / 0.04);
+  }
+
+  /* --- Franja de indicadores ---
+     Cuatro cifras no son cuatro objetos: son una lectura. En tarjetas
+     sueltas cada una pide su propio turno y la pantalla empieza con
+     cuatro cosas compitiendo antes de llegar al contenido. Aquí van en
+     una sola superficie, separadas por un pelo de borde. */
+  .franja {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--color-borde);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .franja > * {
+    background: var(--color-superficie);
+    padding: 0.875rem 1.125rem;
+  }
+  @media (min-width: 1024px) {
+    .franja { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .franja-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
   /* Un panel sobre el que se puede actuar se levanta al pasar encima.
@@ -158,9 +189,8 @@
     transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
   }
   .panel-vivo:hover {
-    border-color: var(--color-borde-fuerte);
-    box-shadow: 0 4px 12px -4px rgb(28 24 36 / 0.12), 0 1px 2px rgb(28 24 36 / 0.04);
-    transform: translateY(-1px);
+    border-color: var(--color-acento-borde);
+    background: var(--color-acento-suave);
   }
 
   /* --- Distintivo de estado --- */
@@ -264,25 +294,26 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 1rem;
     text-align: left;
-    font-size: var(--text-micro);
+    font-size: var(--text-menuda);
     font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-tinta-3);
-    background: var(--color-superficie-2);
+    color: var(--color-tinta-2);
+    background: var(--color-superficie);
     border-bottom: 1px solid var(--color-borde);
     white-space: nowrap;
   }
+  /* Una fila de 34px es una hoja de cálculo. El nombre de una persona
+     y lo que vino a pedir necesitan sitio para respirar: 1rem arriba y
+     abajo deja la fila en unos 56px con una línea, 64 con dos. */
   .tabla tbody td {
-    padding: 0.5rem 0.75rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--color-borde);
     vertical-align: middle;
+    transition: background-color 120ms ease;
   }
   .tabla tbody tr:last-child td { border-bottom: none; }
-  .tabla tbody td { transition: background-color 120ms ease; }
-  .tabla tbody tr:hover td { background: var(--color-acento-suave); }
+  .tabla tbody tr:hover td { background: var(--color-superficie-2); }
   .tabla .num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 

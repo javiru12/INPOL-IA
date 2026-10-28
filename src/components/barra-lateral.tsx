@@ -42,15 +42,15 @@ export function BarraLateral({
   return (
     <nav
       aria-label="Navegación principal"
-      className="relative flex shrink-0 flex-col bg-[var(--color-barra)] text-[var(--color-barra-texto)] transition-[width] duration-200 ease-out"
+      className="relative flex shrink-0 flex-col border-r border-[var(--color-borde)] bg-[var(--color-barra)] text-[var(--color-barra-texto)] transition-[width] duration-200 ease-out"
       style={{ width: plegada ? 60 : 232 }}
     >
       <div
-        className={`flex h-[52px] items-center border-b border-white/[0.07] ${
+        className={`flex h-[52px] items-center border-b border-[var(--color-borde)] ${
           plegada ? 'justify-center px-0' : 'px-4'
         }`}
       >
-        <Marca tono="claro" compacto={plegada} />
+        <Marca compacto={plegada} />
       </div>
 
       {/* El tirador vive en el borde, a la altura del contenido y no
@@ -61,7 +61,7 @@ export function BarraLateral({
         onClick={alternar}
         aria-label={plegada ? 'Desplegar el menú' : 'Plegar el menú'}
         title={plegada ? 'Desplegar el menú' : 'Plegar el menú'}
-        className="absolute -right-3 top-[70px] z-20 grid h-6 w-6 place-items-center rounded-full border border-[var(--color-borde)] bg-[var(--color-superficie)] text-[var(--color-tinta-2)] shadow-sm transition-colors hover:border-[var(--color-acento-borde)] hover:text-[var(--color-acento-fuerte)]"
+        className="absolute -right-3 top-[70px] z-20 grid h-6 w-6 place-items-center rounded-full border border-[var(--color-acento-borde)] bg-[var(--color-acento-suave)] text-[var(--color-acento-fuerte)] transition-colors hover:border-[var(--color-acento)] hover:bg-[var(--color-acento)] hover:text-white"
       >
         <svg
           width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor"
@@ -72,9 +72,9 @@ export function BarraLateral({
         </svg>
       </button>
 
-      <div className={`border-b border-white/[0.07] py-3 ${plegada ? 'hidden' : 'px-4'}`}>
-        <p className="rotulo !text-white/35">Cliente</p>
-        <p className="mt-0.5 truncate text-[var(--text-base)] font-medium text-white/90">
+      <div className={`border-b border-[var(--color-borde)] py-3 ${plegada ? 'hidden' : 'px-4'}`}>
+        <p className="rotulo">Cliente</p>
+        <p className="mt-0.5 truncate text-[var(--text-base)] font-medium text-[var(--color-tinta)]">
           {tenant.nombre_corto ?? tenant.nombre}
         </p>
       </div>
@@ -87,9 +87,9 @@ export function BarraLateral({
                 // Plegada, el título del grupo se vuelve una línea: se
                 // pierde el nombre pero se conserva la agrupación, que
                 // es lo que hace que los iconos no sean una lista suelta.
-                <div className="mx-2 mb-1.5 h-px bg-white/[0.08]" aria-hidden="true" />
+                <div className="mx-2 mb-1.5 h-px bg-[var(--color-borde)]" aria-hidden="true" />
               ) : (
-                <p className="rotulo mb-1.5 px-2 !text-white/30">{grupo.titulo}</p>
+                <p className="rotulo mb-1.5 px-2">{grupo.titulo}</p>
               ))}
             <ul className="space-y-px">
               {grupo.entradas.map((entrada) => {
@@ -109,12 +109,12 @@ export function BarraLateral({
                         plegada ? 'justify-center px-0' : 'gap-2.5 px-2'
                       } ${
                         activo
-                          ? 'bg-white/[0.09] font-medium text-[var(--color-barra-activo)]'
-                          : 'hover:bg-white/[0.05] hover:text-white/90'
+                          ? 'bg-[var(--color-barra-2)] font-medium text-[var(--color-barra-activo)]'
+                          : 'hover:bg-[var(--color-superficie-2)] hover:text-[var(--color-tinta)]'
                       }`}
                     >
                       <Icono
-                        className={`shrink-0 ${activo ? 'text-white' : 'text-white/45 group-hover:text-white/70'}`}
+                        className={`shrink-0 ${activo ? 'text-[var(--color-acento)]' : 'text-[var(--color-tinta-3)] group-hover:text-[var(--color-tinta-2)]'}`}
                       />
                       {!plegada && entrada.etiqueta}
                     </Link>

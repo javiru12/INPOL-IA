@@ -3,6 +3,7 @@ import { conTenant } from '@/lib/db'
 import { zonaDeEstado } from '@/lib/zona'
 import { edadSql } from '@/lib/edades-sql'
 import { rango } from '@/lib/edades'
+import { ESTATUS_TERMINALES } from '@/lib/peticiones'
 
 export type FiltrosPeticiones = {
   q?: string
@@ -20,8 +21,7 @@ export type FiltrosPeticiones = {
   pagina?: number
 }
 
-/** Los estatus que cuentan como «ya no hay nada que hacer aquí». */
-export const ESTATUS_TERMINALES = ['Completada', 'Cancelada'] as const
+export { ESTATUS_TERMINALES }
 
 export const POR_PAGINA = 25
 

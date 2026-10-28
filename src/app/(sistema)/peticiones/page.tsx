@@ -92,6 +92,7 @@ export default async function Peticiones({
   return (
     <Pagina
       titulo="Peticiones"
+      cuenta={r.total}
       descripcion="Solicitudes ciudadanas levantadas en campo, eventos y oficina"
       acciones={
         <>
@@ -198,13 +199,23 @@ export default async function Peticiones({
                       {p.ciudadano ?? '—'}
                     </Link>
                   </td>
+                  {/* Lo que la persona vino a pedir es la columna que
+                      importa: se lleva el ancho sobrante y puede ocupar dos
+                      renglones. En uno solo, cortada, decía «Reporta calle
+                      oscura en la colonia San Bernabé, pide alum…» y había
+                      que abrir la petición para saber qué pedía. Es además
+                      el blanco grande para abrirla de un clic. */}
                   <td className="w-full max-w-0">
-                    <span className="block truncate" title={p.descripcion ?? undefined}>
-                      {p.descripcion ?? '—'}
-                    </span>
-                    <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                      {[p.problematica, p.subproblematica].filter(Boolean).join(' · ')}
-                    </span>
+                    <Link
+                      href={`/peticiones/${p.id}`}
+                      className="block hover:text-[var(--color-acento-fuerte)]"
+                      title={p.descripcion ?? undefined}
+                    >
+                      <span className="line-clamp-2">{p.descripcion ?? '—'}</span>
+                      <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                        {[p.problematica, p.subproblematica].filter(Boolean).join(' · ')}
+                      </span>
+                    </Link>
                   </td>
                   <td className="hidden whitespace-nowrap text-[var(--color-tinta-2)] 2xl:table-cell">
                     {p.colonia ?? '—'}

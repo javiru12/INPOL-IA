@@ -120,7 +120,7 @@ export function BarrasTemporales({
               {activo && (
                 <div
                   role="tooltip"
-                  className="pointer-events-none absolute bottom-full z-10 mb-1.5 whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--color-barra)] px-2 py-1 text-[length:var(--text-micro)] text-white"
+                  className="pointer-events-none absolute bottom-full z-10 mb-1.5 whitespace-nowrap rounded-[var(--radius-sm)] bg-[var(--color-marca-fondo)] px-2 py-1 text-[length:var(--text-micro)] text-white"
                   style={{ boxShadow: 'var(--shadow-menu)' }}
                 >
                   <span className="font-medium">{d.valor.toLocaleString('es-MX')}</span>

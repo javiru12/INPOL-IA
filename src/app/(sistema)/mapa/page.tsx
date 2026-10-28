@@ -100,7 +100,7 @@ export default async function MapaTerritorial({
         ))}
       </nav>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta={ambito === 'municipio' ? 'Municipios' : 'Distritos locales'}
           valor={regiones.length}
@@ -115,7 +115,7 @@ export default async function MapaTerritorial({
         />
       </div>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[1.6fr_1fr] xl:items-start">
+      <div className="mt-6 grid gap-4 xl:grid-cols-[1.6fr_1fr] xl:items-start">
         <LienzoMapa
           archivo={archivoDeMapa(tenant.estado_clave, capa.capa) ?? ''}
           regiones={regiones}

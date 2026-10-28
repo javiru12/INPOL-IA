@@ -78,7 +78,7 @@ export default async function Configuracion({
       descripcion={`Usuarios, campañas y catálogos de ${tenant.nombre}`}
       acciones={<AccionDeSeccion seccion={seccion} puede={puede} />}
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="franja">
         <Indicador
           etiqueta="Usuarios activos"
           valor={resumen.usuariosActivos}

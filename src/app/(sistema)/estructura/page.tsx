@@ -204,7 +204,7 @@ export default async function Estructura({
         />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="franja">
             <Indicador
               etiqueta="Personas con carga"
               valor={conCarga.length}
@@ -395,7 +395,7 @@ export default async function Estructura({
           )}
 
           {/* 3 · El mapa y la cobertura por municipio ----------------- */}
-          <div className="mt-3 grid gap-3 xl:grid-cols-[1.5fr_1fr] xl:items-start">
+          <div className="mt-6 grid gap-4 xl:grid-cols-[1.5fr_1fr] xl:items-start">
             <section>
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                 <div>
@@ -516,7 +516,7 @@ export default async function Estructura({
           </div>
 
           {/* 4 · Lo accionable: zonas y ramas ------------------------- */}
-          <div className="mt-3 grid gap-3 xl:grid-cols-[1.5fr_1fr] xl:items-start">
+          <div className="mt-6 grid gap-4 xl:grid-cols-[1.5fr_1fr] xl:items-start">
             <section className="panel overflow-hidden">
               <div className="border-b border-[var(--color-borde)] px-4 py-3">
                 <h2 className="text-[var(--text-base)] font-semibold">
