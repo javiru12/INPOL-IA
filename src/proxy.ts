@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
+import { VERSION_RUTAS } from '@/lib/navegacion'
 
 /**
  * Primer filtro de acceso por ruta. En Next 16 esto se llama «proxy».
@@ -38,10 +39,10 @@ export async function proxy(peticion: NextRequest) {
   const token = peticion.cookies.get('inpol_sesion')?.value
   if (!token) return NextResponse.redirect(new URL('/entrar', peticion.url))
 
-  let sesion: { rutas?: string[] }
+  let sesion: { rutas?: string[]; v?: string }
   try {
     const { payload } = await jwtVerify(token, llave)
-    sesion = payload as { rutas?: string[] }
+    sesion = payload as { rutas?: string[]; v?: string }
   } catch {
     return NextResponse.redirect(new URL('/entrar', peticion.url))
   }
@@ -62,7 +63,17 @@ export async function proxy(peticion: NextRequest) {
     (r) => r !== '/' && (pathname === r || pathname.startsWith(r + '/')),
   )
 
-  if (!permitida) {
+  // La lista de rutas de la galleta es una foto del menú del día en que
+  // alguien entró. Al publicar un módulo nuevo esa foto se queda vieja y
+  // la ruta nueva no aparece, así que este filtro dejaba fuera a todos
+  // los que ya estaban dentro —no por falta de permiso, sino por haber
+  // entrado antes—. Con la versión se distingue el caso: si la foto es
+  // de otro menú, no se bloquea nada y decide `exigirAcceso()`, que
+  // consulta los permisos de verdad. Este filtro nunca fue la
+  // autorización definitiva; es el corte rápido.
+  const fotoAlDia = sesion.v === VERSION_RUTAS
+
+  if (!permitida && fotoAlDia) {
     const destino = new URL('/sin-acceso', peticion.url)
     destino.searchParams.set('ruta', pathname)
     return NextResponse.redirect(destino)

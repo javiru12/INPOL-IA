@@ -28,6 +28,11 @@ export type Sesion = {
    * anteriores hasta que vuelva a entrar.
    */
   rutas: string[]
+  /**
+   * Huella del menú con el que se emitió esta sesión. Si no coincide
+   * con la de hoy, la lista de rutas de arriba es de un menú anterior.
+   */
+  v?: string
 }
 
 export async function abrirSesion(s: Sesion) {

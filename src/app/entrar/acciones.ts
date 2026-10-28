@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { conTenant, sinTenant } from '@/lib/db'
 import { abrirSesion, tenantDeLaPeticion } from '@/lib/sesion'
-import { filtrarNavegacion } from '@/lib/navegacion'
+import { VERSION_RUTAS, filtrarNavegacion } from '@/lib/navegacion'
 
 const Entrada = z.object({
   correo: z.string().trim().toLowerCase().email('Correo no válido'),
@@ -75,6 +75,7 @@ export async function entrar(
     perfil: usuario.perfil_clave,
     nombre: [usuario.nombre, usuario.apellido_paterno].filter(Boolean).join(' '),
     rutas,
+    v: VERSION_RUTAS,
   })
 
   redirect('/')

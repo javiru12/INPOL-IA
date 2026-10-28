@@ -38,7 +38,7 @@ export const NAVEGACION: Grupo[] = [
     entradas: [
       // El asistente abre el grupo porque responde lo que las demás
       // pantallas contestan sólo si alguien previó la pregunta.
-      { etiqueta: 'Asistente', ruta: '/asistente', icono: 'estadisticas', permisos: ['asistente.consultar'] },
+      { etiqueta: 'IA', ruta: '/asistente', icono: 'estadisticas', permisos: ['asistente.consultar'] },
       { etiqueta: 'Estadísticas', ruta: '/estadisticas', icono: 'estadisticas', permisos: ['estadisticas'] },
       { etiqueta: 'Mapa', ruta: '/mapa', icono: 'mapa', permisos: ['estadisticas.problematicas'] },
       { etiqueta: 'Territorio', ruta: '/territorio', icono: 'estructura', permisos: ['estadisticas.problematicas'] },
@@ -78,3 +78,17 @@ export function filtrarNavegacion(permisos: Set<string>): Grupo[] {
     .map((g) => ({ ...g, entradas: g.entradas.filter((e) => alcanza(e.permisos)) }))
     .filter((g) => g.entradas.length > 0)
 }
+
+/**
+ * Huella del menú.
+ *
+ * Cambia sola en cuanto se agrega, quita o renombra una ruta. La sesión
+ * la guarda al emitirse, y así el proxy sabe si la lista de rutas que
+ * lleva alguien en su galleta es del menú de hoy o de uno anterior.
+ */
+export const VERSION_RUTAS = NAVEGACION.flatMap((g) => g.entradas.map((e) => e.ruta))
+  .sort()
+  .join(',')
+  .split('')
+  .reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0)
+  .toString(36)

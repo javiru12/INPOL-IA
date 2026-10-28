@@ -16,11 +16,47 @@ import type { Grafica } from '@/lib/ia'
  * dónde salió. Por eso los pasos están ahí, plegados, y no escondidos.
  */
 
-const EJEMPLOS = [
-  '¿Qué colonias tienen más peticiones sin resolver?',
-  '¿Cuánto tardamos en cerrar una petición, por problemática?',
-  '¿En qué distritos tenemos gente pero pocas peticiones capturadas?',
-  '¿Cómo se reparte la demanda por edad y sexo?',
+/**
+ * Las preguntas de arranque.
+ *
+ * Están elegidas para enseñar lo que NINGUNA otra pantalla puede
+ * contestar: cruces entre territorio, elección, estructura y demanda.
+ * Un ejemplo que se responde mirando Estadísticas no demuestra nada,
+ * solo enseña un camino más largo para llegar a lo mismo.
+ */
+const EJEMPLOS: { grupo: string; preguntas: string[] }[] = [
+  {
+    grupo: 'Dónde actuar',
+    preguntas: [
+      '¿Qué secciones tienen mucha demanda ciudadana y ningún movilizador asignado?',
+      '¿En qué distritos ganamos por menos de 5 puntos en 2015 y hoy tenemos peticiones sin resolver?',
+      'Dame las 10 colonias donde más conviene abrir una brigada y explica por qué cada una',
+    ],
+  },
+  {
+    grupo: 'Dónde duele',
+    preguntas: [
+      '¿Qué problemática tarda más en resolverse y en qué municipios es peor que el promedio?',
+      '¿Hay peticiones urgentes que lleven más de 90 días sin un solo movimiento?',
+      '¿Qué colonias piden una cosa muy distinta al resto del municipio?',
+    ],
+  },
+  {
+    grupo: 'Quién responde',
+    preguntas: [
+      '¿Quién del equipo tiene más carga y quién está desocupado?',
+      '¿Qué gestores cierran más rápido que el promedio, y en qué temas?',
+      '¿Hay peticiones que cambiaron de responsable más de dos veces?',
+    ],
+  },
+  {
+    grupo: 'A quién servimos',
+    preguntas: [
+      '¿La demanda de los adultos mayores es distinta a la del resto?',
+      '¿A cuántos ciudadanos no podríamos avisarles nada porque no tienen teléfono?',
+      'Compara las peticiones que entraron por la app contra las capturadas en campo',
+    ],
+  },
 ]
 
 
@@ -100,19 +136,26 @@ export function Conversacion() {
         </div>
 
         {hilo.length === 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {EJEMPLOS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                onClick={() => {
-                  setTexto(e)
-                  campo.current?.focus()
-                }}
-                className="boton boton-neutro !h-7 text-[var(--text-micro)]"
-              >
-                {e}
-              </button>
+          <div className="mt-4 space-y-3">
+            {EJEMPLOS.map((g) => (
+              <div key={g.grupo}>
+                <p className="rotulo mb-1.5">{g.grupo}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {g.preguntas.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => {
+                        setTexto(q)
+                        campo.current?.focus()
+                      }}
+                      className="boton boton-neutro !h-auto !py-1.5 text-left text-[var(--text-micro)]"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}
