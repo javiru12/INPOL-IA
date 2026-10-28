@@ -18,9 +18,18 @@ export type Tabla = {
   totalFilas: number
 }
 
-/** Tope de lo que se acepta por la web. Más que esto va por el script. */
-export const MAXIMO_FILAS = 50_000
-export const MAXIMO_BYTES = 15 * 1024 * 1024
+/**
+ * Tope del camino que sube el archivo entero, que hoy es solo el .xlsx.
+ *
+ * No es un número elegido: Vercel corta el cuerpo de cualquier petición
+ * en 4.5 MB, así que por encima de eso manda el servidor y no esta
+ * línea. Se deja en 8 MB porque en una instalación propia sí aplica.
+ *
+ * El CSV y el DBF no pasan por aquí cuando vienen del navegador: los
+ * lee `leer-tabla-cliente.ts` por rebanadas y no tienen tope.
+ */
+export const MAXIMO_FILAS = 200_000
+export const MAXIMO_BYTES = 8 * 1024 * 1024
 
 // ---------- ZIP ----------------------------------------------------------
 
@@ -226,8 +235,9 @@ function leerCsv(texto: string): Tabla {
 export function leerTabla(nombre: string, buf: Buffer): Tabla {
   if (buf.length > MAXIMO_BYTES) {
     throw new Error(
-      `El archivo pesa ${(buf.length / 1024 ** 2).toFixed(1)} MB y el tope por la web es ` +
-        `${MAXIMO_BYTES / 1024 ** 2} MB. Pártelo o cárgalo con el script de línea de comandos.`,
+      `El archivo pesa ${(buf.length / 1024 ** 2).toFixed(1)} MB y el tope para Excel es ` +
+        `${MAXIMO_BYTES / 1024 ** 2} MB. Guárdalo como CSV: así no tiene tope, porque se lee ` +
+        'en el navegador en vez de subirlo.',
     )
   }
   const bajo = nombre.toLowerCase()

@@ -74,8 +74,21 @@ quién y con qué autorización. Eso es lo que se enseña cuando alguien
 pregunta de dónde salió un dato, y la pregunta llega cuando quien lo
 cargó puede que ya no trabaje ahí.
 
-Tope por la web: 15 MB y 50,000 filas. Un archivo más grande va por
-`db/importar-sua.mts`, que lee el DBF directo y pide lo mismo.
+**Tamaño:** el CSV y el DBF no tienen tope. No suben al servidor: los
+lee el navegador por rebanadas y manda lotes de filas, así que lo que
+cuenta es cuánto tarda, no cuánto pesan. Medido con 1.54 GB y 5.8
+millones de registros: se recorren en 5.5 segundos y la memoria se
+queda en 24 MB. De punta a punta contra la base, un millón de filas en
+11.4 segundos en local; en producción cuenta además la ida y vuelta de
+cada lote.
+
+El .xlsx sí sube entero y tiene tope de 8 MB, porque es un zip que hay
+que descomprimir completo antes de leer una sola fila. Para un padrón
+grande, guardarlo como CSV quita el tope.
+
+Mientras una carga grande corre, la pestaña tiene que quedarse abierta:
+el archivo se está leyendo desde ahí. Si se corta, la importación queda
+marcada como interrumpida y lo que ya entró se queda.
 
 ## Cómo queda el sistema mientras tanto
 
