@@ -57,6 +57,26 @@ la mitad; falta el procedimiento.
 | **Padrones de programas sociales (Bienestar)** | Su uso con fines electorales está tipificado como delito (Ley General en Materia de Delitos Electorales, art. 11). Para gestión social sin fin electoral habría que separarlo con mucho cuidado. |
 | **Padrón electoral nominal** | Confidencial por LGIPE art. 126; su uso indebido está tipificado en el art. 13 de la ley de delitos electorales. |
 
+## Cómo se sube un padrón
+
+Desde **Configuración → Importar datos**. Acepta Excel y CSV, propone
+solo a qué campo va cada columna y enseña las primeras filas antes de
+cargar nada.
+
+Pide dos cosas en cada carga:
+
+- **Fuente**: de dónde salió el archivo. Queda escrita en cada fila.
+- **Autorización**: solo si el destino lleva datos personales. Se
+  guarda en el historial junto al nombre de quien lo subió.
+
+El historial de la misma pantalla enseña qué se ha cargado, cuándo,
+quién y con qué autorización. Eso es lo que se enseña cuando alguien
+pregunta de dónde salió un dato, y la pregunta llega cuando quien lo
+cargó puede que ya no trabaje ahí.
+
+Tope por la web: 15 MB y 50,000 filas. Un archivo más grande va por
+`db/importar-sua.mts`, que lee el DBF directo y pide lo mismo.
+
 ## Cómo queda el sistema mientras tanto
 
 - El esquema está completo y es el definitivo: `db/migrations/22-fuentes-externas.sql`.
