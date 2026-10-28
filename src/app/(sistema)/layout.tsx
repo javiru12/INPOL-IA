@@ -5,8 +5,11 @@ import { filtrarNavegacion } from '@/lib/navegacion'
 import { conTenant } from '@/lib/db'
 import { BarraLateral } from '@/components/barra-lateral'
 import { Encabezado } from '@/components/encabezado'
+import { busquedaMaestra } from '@/lib/busqueda-maestra'
+import { BandaBusqueda } from './banda-busqueda'
 
 export default async function LayoutSistema({ children }: { children: React.ReactNode }) {
+  const termino = await busquedaMaestra()
   const tenant = await tenantDeLaPeticion()
   if (!tenant) redirect('/plaza')
 
@@ -33,7 +36,10 @@ export default async function LayoutSistema({ children }: { children: React.Reac
           perfil={sesion.perfil}
           campania={campania?.nombre ?? null}
         />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          {termino && <BandaBusqueda termino={termino} />}
+          {children}
+        </main>
       </div>
     </div>
   )

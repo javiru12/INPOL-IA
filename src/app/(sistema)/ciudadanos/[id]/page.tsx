@@ -67,7 +67,7 @@ export default async function FichaCiudadano({
   const datos = await obtenerCiudadano(tenant.id, id)
   if (!datos) notFound()
 
-  const { ciudadano: c, peticiones } = datos
+  const { ciudadano: c, externos, peticiones } = datos
 
   // Calle y números viven en columnas separadas; `direccion` es el campo
   // libre del padrón viejo y solo se usa cuando no hay nada desglosado.
@@ -102,6 +102,23 @@ export default async function FichaCiudadano({
         </div>
       }
     >
+      {/* La discrepancia va arriba de todo y no escondida en un panel:
+          es lo único de esta pantalla que le pide algo a quien la abre. */}
+      {c.zona_discrepante && (
+        <p
+          className="mb-3 flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-[var(--text-menuda)]"
+          style={{ background: 'var(--color-aviso-suave)', color: 'var(--color-aviso)' }}
+          role="status"
+        >
+          <strong className="font-semibold">Revisar la zona de esta persona.</strong>
+          <span>
+            La credencial la ubica en {externos.zona?.municipio ?? 'otro municipio'} y su ficha
+            dice {c.municipio ?? 'otro'}. Mientras no se aclare, sus peticiones cuentan en el
+            territorio equivocado.
+          </span>
+        </p>
+      )}
+
       <div className="grid items-start gap-3 lg:grid-cols-[21rem_1fr]">
         <section className="panel px-4 py-3.5">
           <h2 className="mb-3 text-[var(--text-base)] font-semibold">Datos personales</h2>
@@ -128,6 +145,59 @@ export default async function FichaCiudadano({
             <Dato etiqueta="Código postal" valor={c.codigo_postal} mono />
             <Dato etiqueta="Municipio" valor={c.municipio} />
             <Dato etiqueta="Sección electoral" valor={c.seccion} mono />
+          </Bloque>
+
+          <Bloque titulo="Atención prioritaria">
+            <Dato etiqueta="Adulto mayor" valor={c.adulto_mayor ? 'Sí' : 'No'} />
+            <Dato
+              etiqueta="Discapacidad"
+              valor={
+                c.discapacidad ? (c.tipo_discapacidad ?? 'Sí, sin especificar') : 'No registrada'
+              }
+            />
+          </Bloque>
+
+          {/* Qué dicen de esta persona los padrones que no produce el
+              sistema. Cada dato lleva de dónde salió: un dato personal
+              sin procedencia no se puede defender ante quien pregunte. */}
+          <Bloque titulo="Cruce por CURP">
+            <Dato etiqueta="CURP" valor={c.curp} mono ancho />
+            {c.curp ? (
+              <>
+                <Dato
+                  etiqueta="Teléfonos del padrón"
+                  valor={
+                    externos.telefonos.length
+                      ? externos.telefonos.map((t) => t.telefono).join(' · ')
+                      : 'Ninguno'
+                  }
+                  ancho
+                />
+                <Dato
+                  etiqueta="Vehículos"
+                  valor={
+                    externos.vehiculos.length
+                      ? externos.vehiculos
+                          .map((v) => [v.placa, v.tipo_vehiculo, v.modelo].filter(Boolean).join(' '))
+                          .join(' · ')
+                      : 'Ninguno'
+                  }
+                  ancho
+                />
+                <Dato
+                  etiqueta="Nivel crediticio"
+                  valor={externos.credito?.nivel ?? 'Sin registro'}
+                />
+                <Dato
+                  etiqueta="Zona según el padrón"
+                  valor={externos.zona?.municipio ?? 'Sin registro'}
+                />
+              </>
+            ) : (
+              <p className="col-span-2 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+                Sin CURP capturada no hay con qué cruzar esta ficha contra ningún padrón.
+              </p>
+            )}
           </Bloque>
         </section>
 

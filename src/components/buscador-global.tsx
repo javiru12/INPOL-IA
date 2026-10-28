@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { fijarBusquedaMaestra } from '@/app/(sistema)/busqueda-acciones'
 import { buscarEnTodo, type Hallazgo } from '@/lib/busqueda'
 import { IconoBuscar, IconoCiudadanos, IconoPeticiones, IconoMapa, IconoEstructura } from './iconos'
 
@@ -75,6 +76,20 @@ export function BuscadorGlobal() {
     router.push(h.ruta)
   }
 
+  // Saltar a un resultado y acotar todo el sistema son dos cosas
+  // distintas: la primera sirve cuando ya se sabe a quién se busca, la
+  // segunda cuando se quiere ver todo lo que haya de alguien.
+  function filtrarTodo() {
+    const t = termino.trim()
+    if (t.length < 2) return
+    setAbierto(false)
+    iniciar(async () => {
+      await fijarBusquedaMaestra(t)
+      router.push('/peticiones')
+      router.refresh()
+    })
+  }
+
   function teclas(e: React.KeyboardEvent) {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -85,6 +100,11 @@ export function BuscadorGlobal() {
     } else if (e.key === 'Enter' && hallazgos[elegido]) {
       e.preventDefault()
       ir(hallazgos[elegido])
+    } else if (e.key === 'Enter' && termino.trim().length >= 2) {
+      // Sin resultados concretos, Enter acota el sistema entero: es lo
+      // único útil que queda por hacer con lo escrito.
+      e.preventDefault()
+      filtrarTodo()
     }
   }
 
@@ -133,6 +153,23 @@ export function BuscadorGlobal() {
                 />
               )}
             </div>
+
+            {termino.trim().length >= 2 && (
+              <button
+                type="button"
+                onClick={filtrarTodo}
+                className="flex w-full items-center gap-2.5 border-b border-[var(--color-borde)] px-4 py-2.5 text-left hover:bg-[var(--color-acento-suave)]"
+              >
+                <IconoBuscar className="shrink-0 text-[var(--color-acento-fuerte)]" tamano={15} />
+                <span className="text-[var(--text-menuda)]">
+                  Filtrar todo el sistema por{' '}
+                  <strong className="font-semibold">«{termino.trim()}»</strong>
+                </span>
+                <span className="ml-auto text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                  se queda puesto
+                </span>
+              </button>
+            )}
 
             {hallazgos.length > 0 ? (
               <ul className="max-h-[22rem] overflow-y-auto py-1.5">

@@ -24,6 +24,10 @@ export type DatosCiudadano = {
   codigo_postal: string | null
   municipio_id: string | null
   seccion_clave: string | null
+  curp: string | null
+  discapacidad: boolean
+  tipo_discapacidad: string | null
+  adulto_mayor: boolean
 }
 
 export function FormaCiudadano({
@@ -76,6 +80,67 @@ export function FormaCiudadano({
             etiqueta="Fecha de nacimiento"
             valor={v?.fecha_nacimiento}
           />
+        </div>
+        <div className="mt-3">
+          {/* La CURP es la llave contra los padrones externos: sin ella
+              la ficha no se puede cruzar con nada. */}
+          <Campo
+            nombre="curp"
+            etiqueta="CURP"
+            valor={v?.curp}
+            ayuda="18 caracteres, como viene en la credencial de elector"
+          />
+        </div>
+      </section>
+
+      <section className="panel px-4 py-4">
+        <h2 className="mb-1 text-[var(--text-base)] font-semibold">Atención prioritaria</h2>
+        <p className="mb-4 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+          Marca lo que cambie cómo hay que atender a esta persona.
+        </p>
+        <div className="space-y-2.5">
+          {/* «Adulto mayor» no se captura: sale de la fecha de
+              nacimiento. Pedirlo a mano crearía dos verdades sobre lo
+              mismo y tarde o temprano dejarían de coincidir. */}
+          <p className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+            Adulto mayor:{' '}
+            <strong className="font-medium text-[var(--color-tinta)]">
+              {v?.adulto_mayor ? 'sí, por su edad' : 'no'}
+            </strong>
+            <span className="ml-1 text-[var(--color-tinta-3)]">
+              · se deduce de la fecha de nacimiento
+            </span>
+          </p>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="discapacidad"
+              value="si"
+              defaultChecked={v?.discapacidad ?? false}
+              className="cursor-pointer"
+            />
+            <span className="text-[var(--text-menuda)]">Vive con alguna discapacidad</span>
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
+              Tipo de discapacidad
+            </span>
+            <select
+              name="tipoDiscapacidad"
+              defaultValue={v?.tipo_discapacidad ?? ''}
+              className="campo"
+            >
+              <option value="">Sin especificar</option>
+              <option value="motriz">Motriz</option>
+              <option value="visual">Visual</option>
+              <option value="auditiva">Auditiva</option>
+              <option value="intelectual">Intelectual</option>
+              <option value="psicosocial">Psicosocial</option>
+              <option value="multiple">Múltiple</option>
+            </select>
+          </label>
         </div>
       </section>
 

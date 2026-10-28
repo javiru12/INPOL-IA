@@ -13,6 +13,7 @@ import { exigirAcceso } from '@/lib/acceso'
 import { puede } from '@/lib/permisos'
 import { esRango } from '@/lib/edades'
 import { Tabla } from '@/components/tabla'
+import { terminoVigente } from '@/lib/busqueda-maestra'
 
 export const metadata: Metadata = { title: 'Peticiones' }
 
@@ -39,7 +40,8 @@ export default async function Peticiones({
     typeof v === 'string' && v.trim() ? v.trim() : undefined
 
   const r = await listarPeticiones(tenant.id, {
-    q: texto(sp.q),
+    // Si la pantalla no trae su propio término, aplica el maestro.
+    q: await terminoVigente(texto(sp.q)),
     estatus: texto(sp.estatus),
     problematica: texto(sp.problematica),
     prioridad: texto(sp.prioridad),

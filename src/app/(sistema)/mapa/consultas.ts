@@ -114,26 +114,13 @@ export async function regionesConDatos(
     order by t.nombre`
 
   const propios = await conTenant(tenantId, (tx) =>
-    tx<{
-      clave: string
-      peticiones: number
-      ciudadanos: number
-      con_telefono: number
-      edades: Record<string, number>
-    }[]>`
+    tx<{ clave: string; peticiones: number; ciudadanos: number; con_telefono: number }[]>`
       select ${ambito === 'municipio' ? tx`m.clave` : tx`d.clave`} as clave,
              count(distinct p.id)::int as peticiones,
              count(distinct ci.id)::int as ciudadanos,
              count(distinct ci.id) filter (
                where nullif(trim(ci.telefono_movil), '') is not null
-             )::int as con_telefono,
-             -- Los segmentos de edad se arman aquí y no en una segunda
-             -- consulta: es el mismo recorrido y salen gratis.
-             jsonb_build_object(${RANGOS.map(
-               (r) => tx`${r.clave}, count(distinct ci.id) filter (
-                 where ${edadSql(tx)} between ${r.desde} and ${r.hasta}
-               )::int`,
-             )}) as edades
+             )::int as con_telefono
       from secciones s
       ${ambito === 'municipio'
         ? tx`join municipios m on m.id = s.municipio_id`
@@ -144,6 +131,36 @@ export async function regionesConDatos(
       group by 1`,
   )
 
+  // Los segmentos de edad salen aparte y se arman en JavaScript. Meterlos
+  // en la consulta de arriba como un objeto JSON obligaba a interpolar un
+  // fragmento por rango, y el driver no los separa con comas: la consulta
+  // salía con un paréntesis mal puesto y la pantalla entera daba 500.
+  const porEdad = await conTenant(tenantId, (tx) =>
+    tx<{ clave: string; rango: string; n: number }[]>`
+      select ${ambito === 'municipio' ? tx`m.clave` : tx`d.clave`} as clave,
+             case
+               ${RANGOS.map(
+                 (r) => tx`when ${edadSql(tx)} between ${r.desde} and ${r.hasta} then ${r.clave}`,
+               )}
+             end as rango,
+             count(distinct ci.id)::int as n
+      from secciones s
+      ${ambito === 'municipio'
+        ? tx`join municipios m on m.id = s.municipio_id`
+        : tx`join distritos d on d.id = s.distrito_local_id`}
+      join ciudadanos ci on ci.seccion_id = s.id
+      where s.estado_id = ${estadoId}
+      group by 1, 2`,
+  )
+
+  const edadesPorClave = new Map<string, Record<string, number>>()
+  for (const f of porEdad) {
+    if (!f.rango) continue
+    const actual = edadesPorClave.get(f.clave) ?? {}
+    actual[f.rango] = f.n
+    edadesPorClave.set(f.clave, actual)
+  }
+
   const porClave = new Map(propios.map((p) => [p.clave, p]))
 
   return electoral.map((e) => ({
@@ -151,7 +168,7 @@ export async function regionesConDatos(
     peticiones: porClave.get(e.clave)?.peticiones ?? 0,
     ciudadanos: porClave.get(e.clave)?.ciudadanos ?? 0,
     con_telefono: porClave.get(e.clave)?.con_telefono ?? 0,
-    edades: porClave.get(e.clave)?.edades ?? {},
+    edades: edadesPorClave.get(e.clave) ?? {},
   }))
 }
 

@@ -87,11 +87,17 @@ export async function listarCiudadanos(tenantId: string, f: FiltrosCiudadanos) {
 
     // Un solo predicado para las filas, el total y los indicadores: lo que
     // dice la cabecera y lo que se ve en la tabla no pueden contradecirse.
+    // La búsqueda ignora acentos, igual que en Peticiones: nadie los
+    // teclea y el padrón los trae puestos a medias, así que «trevino»
+    // tiene que encontrar a «Treviño». Se busca también por CURP, que es
+    // con lo que llega quien trae una credencial en la mano.
     const donde = tx`
       where (${como}::text is null or (
-              ${nombre} ilike ${como}
-              or c.colonia ilike ${como}
-              or c.telefono_movil ilike ${como}))
+              unaccent(lower(${nombre})) like unaccent(lower(${como}))
+              or unaccent(lower(coalesce(c.colonia, ''))) like unaccent(lower(${como}))
+              or coalesce(c.telefono_movil, '') like ${como}
+              or coalesce(c.telefono_fijo, '') like ${como}
+              or coalesce(c.curp, '') ilike ${como}))
         and (${f.colonia ?? null}::text is null or c.colonia = ${f.colonia ?? null})
         and (${f.sexo ?? null}::text is null
              or (${f.sexo ?? null}::text = 'mujer' and upper(trim(c.sexo)) = any(${FEMENINO}))
@@ -160,6 +166,13 @@ export type Ciudadano = {
   codigo_postal: string | null
   municipio: string | null
   seccion: string | null
+  curp: string | null
+  discapacidad: boolean
+  tipo_discapacidad: string | null
+  adulto_mayor: boolean
+  /** La zona del padrón externo no coincide con la sección de la ficha. */
+  zona_discrepante: boolean
+  telefono_verificado_en: string | null
   activo: boolean
 }
 
@@ -207,6 +220,12 @@ export async function obtenerCiudadano(tenantId: string, id: string) {
              c.codigo_postal,
              m.nombre as municipio,
              s.clave as seccion,
+             c.curp,
+             c.discapacidad,
+             c.tipo_discapacidad,
+             c.adulto_mayor,
+             c.zona_discrepante,
+             c.telefono_verificado_en::text as telefono_verificado_en,
              c.activo
       from ciudadanos c
       left join municipios m on m.id = c.municipio_id
@@ -214,6 +233,34 @@ export async function obtenerCiudadano(tenantId: string, id: string) {
       where c.id = ${id}`
 
     if (!ciudadano) return null
+
+    // El cruce con los padrones externos. Va en una consulta aparte y no
+    // en joins sobre la ficha porque son varias filas por persona y
+    // duplicarían el renglón del ciudadano.
+    const externos = ciudadano.curp
+      ? {
+          telefonos: await tx<{ telefono: string; tipo: string | null; fuente: string }[]>`
+            select telefono, tipo, fuente from ext_telefonos
+            where curp = ${ciudadano.curp} order by tipo`,
+          vehiculos: await tx<
+            { placa: string | null; licencia: string | null; tipo_vehiculo: string | null; modelo: number | null }[]
+          >`
+            select placa, licencia, tipo_vehiculo, modelo from ext_vehiculos
+            where curp = ${ciudadano.curp} order by modelo desc nulls last`,
+          credito: (
+            await tx<{ nivel: string | null; score: number | null; fuente: string }[]>`
+              select nivel, score, fuente from ext_buro_credito
+              where curp = ${ciudadano.curp} limit 1`
+          )[0] ?? null,
+          zona: (
+            await tx<{ municipio: string | null; fuente: string }[]>`
+              select m.nombre as municipio, z.fuente
+              from ext_curp_zona z
+              left join municipios m on m.id = z.municipio_id
+              where z.curp = ${ciudadano.curp} limit 1`
+          )[0] ?? null,
+        }
+      : { telefonos: [], vehiculos: [], credito: null, zona: null }
 
     const peticiones = await tx<PeticionDelCiudadano[]>`
       select p.id,
@@ -228,7 +275,7 @@ export async function obtenerCiudadano(tenantId: string, id: string) {
       where p.ciudadano_id = ${id}
       order by p.fecha_apertura desc nulls last`
 
-    return { ciudadano, peticiones }
+    return { ciudadano, externos, peticiones }
   })
 }
 
@@ -263,12 +310,17 @@ export async function ciudadanoParaEditar(tenantId: string, id: string) {
         codigo_postal: string | null
         municipio_id: string | null
         seccion_clave: string | null
+        curp: string | null
+        discapacidad: boolean
+        tipo_discapacidad: string | null
+        adulto_mayor: boolean
       }[]
     >`
       select c.id, c.nombre, c.apellido_paterno, c.apellido_materno, c.sexo,
              c.fecha_nacimiento::text, c.telefono_movil, c.telefono_fijo, c.correo,
              c.calle, c.numero_ext, c.numero_int, c.colonia, c.codigo_postal,
-             c.municipio_id::text, s.clave as seccion_clave
+             c.municipio_id::text, s.clave as seccion_clave,
+             c.curp, c.discapacidad, c.tipo_discapacidad, c.adulto_mayor
       from ciudadanos c
       left join secciones s on s.id = c.seccion_id
       where c.id = ${id}

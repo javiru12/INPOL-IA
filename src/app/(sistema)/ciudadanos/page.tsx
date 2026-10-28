@@ -9,6 +9,7 @@ import { IconoVer } from '@/components/iconos'
 import { cifra, porcentaje } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
 import { Tabla } from '@/components/tabla'
+import { terminoVigente } from '@/lib/busqueda-maestra'
 
 export const metadata: Metadata = { title: 'Ciudadanos' }
 
@@ -43,7 +44,8 @@ export default async function Ciudadanos({
     typeof v === 'string' && v.trim() ? v.trim() : undefined
 
   const r = await listarCiudadanos(tenant.id, {
-    q: texto(sp.q),
+    // Si la pantalla no trae su propio término, aplica el maestro.
+    q: await terminoVigente(texto(sp.q)),
     colonia: texto(sp.colonia),
     sexo: texto(sp.sexo),
     edad: texto(sp.edad),

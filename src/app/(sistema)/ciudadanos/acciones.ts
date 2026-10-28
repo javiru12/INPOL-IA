@@ -46,6 +46,18 @@ const Persona = z.object({
   codigoPostal: z.string().trim().optional(),
   municipioId: z.string().trim().optional(),
   seccionClave: z.string().trim().optional(),
+  // La CURP se valida con su estructura, no solo por largo: una cadena
+  // de 18 caracteres cualesquiera no cruza contra nada y el error se
+  // descubriría hasta que alguien busque a esa persona y no aparezca.
+  curp: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/, 'La CURP no tiene la estructura correcta')
+    .or(z.literal(''))
+    .optional(),
+  discapacidad: z.literal('si').optional(),
+  tipoDiscapacidad: z.string().trim().optional(),
 })
 
 const vacioANulo = (v: string | undefined) => (v && v.length ? v : null)
@@ -90,7 +102,8 @@ export async function crearCiudadano(
         (tenant_id, nombre, apellido_paterno, apellido_materno, nombre_completo,
          sexo, fecha_nacimiento, telefono_movil, telefono_fijo, correo,
          calle, numero_ext, numero_int, colonia, codigo_postal,
-         municipio_id, seccion_id, estado_id, origen, creado_por)
+         municipio_id, seccion_id, estado_id, origen, creado_por,
+         curp, discapacidad, tipo_discapacidad, adulto_mayor)
       values (${tenant.id}, ${d.nombre}, ${vacioANulo(d.apellidoPaterno)},
               ${vacioANulo(d.apellidoMaterno)}, ${completo},
               ${vacioANulo(d.sexo)}, ${vacioANulo(d.fechaNacimiento)}::date,
@@ -99,7 +112,13 @@ export async function crearCiudadano(
               ${vacioANulo(d.numeroExt)}, ${vacioANulo(d.numeroInt)},
               ${vacioANulo(d.colonia)}, ${vacioANulo(d.codigoPostal)},
               ${vacioANulo(d.municipioId)}::uuid, ${seccionId}::uuid,
-              ${tenant.estado_id}::uuid, 'captura', ${sesion.usuarioId})
+              ${tenant.estado_id}::uuid, 'captura', ${sesion.usuarioId},
+              ${vacioANulo(d.curp)}, ${d.discapacidad === 'si'},
+              ${vacioANulo(d.tipoDiscapacidad)},
+              -- Adulto mayor se deduce, no se captura: dos verdades
+              -- sobre lo mismo acaban por no coincidir.
+              coalesce(${vacioANulo(d.fechaNacimiento)}::date
+                       <= current_date - interval '65 years', false))
       returning id`
 
     await tx`
@@ -156,6 +175,11 @@ export async function editarCiudadano(
         codigo_postal = ${vacioANulo(d.codigoPostal)},
         municipio_id = ${vacioANulo(d.municipioId)}::uuid,
         seccion_id = coalesce(${seccionId}::uuid, seccion_id),
+        curp = ${vacioANulo(d.curp)},
+        discapacidad = ${d.discapacidad === 'si'},
+        tipo_discapacidad = ${vacioANulo(d.tipoDiscapacidad)},
+        adulto_mayor = coalesce(${vacioANulo(d.fechaNacimiento)}::date
+                                <= current_date - interval '65 years', false),
         actualizado_en = now(),
         actualizado_por = ${sesion.usuarioId}
       where id = ${id}
