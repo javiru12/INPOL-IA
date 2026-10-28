@@ -1,10 +1,16 @@
 import { conTenant } from '@/lib/db'
 import { leerSesion, tenantDeLaPeticion } from '@/lib/sesion'
-import { permisosDelUsuario } from '@/lib/permisos'
-import { aCsv, respuestaCsv, nombreConFecha } from '@/lib/csv'
+import { puede } from '@/lib/permisos'
+import { aXlsx, respuestaXlsx, nombreConFechaXlsx } from '@/lib/xlsx'
+import { zonaDeEstado } from '@/lib/zona'
+import { filasParaExportar } from '../consultas'
 
 /**
  * Exporta el listado de peticiones respetando los filtros de la pantalla.
+ *
+ * Sale en .xlsx y no en CSV: en CSV no hay forma de que los acentos y las
+ * fechas se vean bien a la vez en cualquier Excel. El porqué está en
+ * `src/lib/xlsx.ts`.
  *
  * La exportación de datos personales queda registrada en bitácora: un
  * archivo con nombres y teléfonos sale del sistema y tiene que saberse
@@ -15,85 +21,58 @@ export async function GET(peticion: Request) {
   const sesion = await leerSesion()
   if (!tenant || !sesion) return new Response('Sin sesión', { status: 401 })
 
-  const permisos = await permisosDelUsuario()
-  const puede = [...permisos].some((p) => p.startsWith('creacion_de_peticion') || p.startsWith('estadisticas.peticiones'))
-  if (!puede) return new Response('Sin permiso', { status: 403 })
+  // Ver un listado en pantalla y descargarlo no son lo mismo: lo
+  // descargado ya no está bajo control de nadie. Por eso es su propio
+  // permiso y no se deduce de poder capturar peticiones.
+  if (!(await puede('exportacion.peticiones'))) {
+    return new Response('Tu perfil no tiene permiso para exportar.', { status: 403 })
+  }
 
   const url = new URL(peticion.url)
-  const texto = (n: string) => url.searchParams.get(n)?.trim() || null
+  const texto = (n: string) => url.searchParams.get(n)?.trim() || undefined
 
-  const q = texto('q')
-  const estatus = texto('estatus')
-  const problematica = texto('problematica')
-  const prioridad = texto('prioridad')
-  const pendientes = url.searchParams.get('pendientes') === 'si'
+  const filtros = {
+    q: texto('q'),
+    estatus: texto('estatus'),
+    problematica: texto('problematica'),
+    prioridad: texto('prioridad'),
+    pendientes: url.searchParams.get('pendientes') === 'si',
+    mes: texto('mes'),
+    municipio: texto('municipio'),
+  }
 
-  const filas = await conTenant(tenant.id, async (tx) => {
-    const datos = await tx<Record<string, unknown>[]>`
-      select upper(substr(p.id::text, 1, 6)) as folio,
-             to_char(p.fecha_apertura, 'DD/MM/YYYY') as fecha,
-             to_char(p.fecha_cierre, 'DD/MM/YYYY') as cierre,
-             coalesce(ci.nombre_completo, concat_ws(' ', ci.nombre, ci.apellido_paterno)) as ciudadano,
-             ci.telefono_movil as telefono,
-             ci.colonia,
-             s.clave as seccion,
-             pr.titulo as problematica,
-             sp.titulo as subproblematica,
-             pri.descripcion as prioridad,
-             e.descripcion as estatus,
-             f.descripcion as fuente,
-             d.descripcion as dependencia,
-             nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as responsable,
-             p.descripcion
-      from peticiones p
-      left join ciudadanos ci on ci.id = p.ciudadano_id
-      left join secciones s on s.id = p.seccion_id
-      left join problematicas pr on pr.id = p.problematica_id
-      left join subproblematicas sp on sp.id = p.subproblematica_id
-      left join estatus_peticiones e on e.id = p.estatus_id
-      left join prioridades pri on pri.id = p.prioridad_id
-      left join fuentes f on f.id = p.fuente_id
-      left join dependencias d on d.id = p.dependencia_id
-      left join operadores o on o.id = p.operador_id
-      left join usuarios u on u.id = o.usuario_id
-      where (${q}::text is null or (
-              ci.nombre_completo ilike ${'%' + (q ?? '') + '%'}
-              or ci.colonia ilike ${'%' + (q ?? '') + '%'}
-              or p.descripcion ilike ${'%' + (q ?? '') + '%'}))
-        and (${estatus}::text is null or e.descripcion = ${estatus})
-        and (${problematica}::text is null or pr.titulo = ${problematica})
-        and (${prioridad}::text is null or pri.descripcion = ${prioridad})
-        and (not ${pendientes} or coalesce(e.descripcion, '') not in ('Completada', 'Cancelada'))
-      order by p.fecha_apertura desc nulls last`
+  const filas = await filasParaExportar(tenant.id, filtros, tenant.estado_clave)
 
+  await conTenant(tenant.id, async (tx) => {
     await tx`
       insert into bitacora (tenant_id, usuario_id, accion, entidad, detalle)
       values (${tenant.id}, ${sesion.usuarioId}, 'exportacion', 'peticiones',
-              ${tx.json({ filas: datos.length, filtros: { q, estatus, problematica, prioridad } })})`
-
-    return datos
+              ${tx.json({ filas: filas.length, filtros })})`
   })
 
-  const csv = aCsv(
+  const libro = aXlsx(
     [
       { clave: 'folio', titulo: 'Folio' },
-      { clave: 'fecha', titulo: 'Fecha de alta' },
-      { clave: 'cierre', titulo: 'Fecha de cierre' },
+      { clave: 'fecha', titulo: 'Fecha de alta', tipo: 'fecha' },
+      { clave: 'cierre', titulo: 'Fecha de cierre', tipo: 'fecha' },
       { clave: 'ciudadano', titulo: 'Ciudadano' },
       { clave: 'telefono', titulo: 'Teléfono' },
       { clave: 'colonia', titulo: 'Colonia' },
+      { clave: 'municipio', titulo: 'Municipio' },
       { clave: 'seccion', titulo: 'Sección' },
       { clave: 'problematica', titulo: 'Problemática' },
       { clave: 'subproblematica', titulo: 'Sub-problemática' },
       { clave: 'prioridad', titulo: 'Prioridad' },
       { clave: 'estatus', titulo: 'Estatus' },
-      { clave: 'fuente', titulo: 'Fuente' },
-      { clave: 'dependencia', titulo: 'Dependencia' },
       { clave: 'responsable', titulo: 'Responsable' },
       { clave: 'descripcion', titulo: 'Descripción' },
     ],
     filas,
+    'Peticiones',
   )
 
-  return respuestaCsv(csv, nombreConFecha('peticiones'))
+  return respuestaXlsx(
+    libro,
+    nombreConFechaXlsx('peticiones', zonaDeEstado(tenant.estado_clave)),
+  )
 }
