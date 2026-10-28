@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
 import { guardarActividad, type EstadoAccion } from './acciones'
 import { CampoFecha, CampoHora } from '@/components/campos-fecha'
+import { BuscadorDeLugar } from './buscador-lugar'
 
 export type DatosActividad = {
   id: string
@@ -39,6 +40,14 @@ export function FormaActividad({
   const esEdicion = Boolean(actividad)
   const [estado, accion] = useActionState<EstadoAccion, FormData>(guardarActividad, {})
   const [tipo, setTipo] = useState<'evento' | 'recorrido'>(actividad?.tipo ?? 'evento')
+
+  // Los campos de «Dónde» son controlados porque el buscador de
+  // direcciones los llena de golpe; el resto del formulario sigue sin
+  // estado, que es más simple de leer.
+  const [lugar, setLugar] = useState(actividad?.lugar ?? '')
+  const [colonia, setColonia] = useState(actividad?.colonia ?? '')
+  const [municipioId, setMunicipioId] = useState(actividad?.municipio_id ?? '')
+  const [seccion, setSeccion] = useState(actividad?.seccion_clave ?? '')
   const router = useRouter()
 
   useEffect(() => {
@@ -148,18 +157,39 @@ export function FormaActividad({
           La sección electoral liga la actividad con el territorio: sin ella no cuenta en los
           análisis por distrito.
         </p>
+        <BuscadorDeLugar
+          municipios={municipios}
+          alElegir={(d) => {
+            setLugar(d.lugar)
+            if (d.colonia) setColonia(d.colonia)
+            if (d.municipioId) setMunicipioId(d.municipioId)
+            if (d.seccion) setSeccion(d.seccion)
+          }}
+        />
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Campo
+          <CampoControlado
             nombre="lugar"
             etiqueta={tipo === 'evento' ? 'Lugar' : 'Punto de salida'}
-            valor={v?.lugar}
+            valor={lugar}
+            alCambiar={setLugar}
           />
-          <Campo nombre="colonia" etiqueta="Colonia" valor={v?.colonia} />
+          <CampoControlado
+            nombre="colonia"
+            etiqueta="Colonia"
+            valor={colonia}
+            alCambiar={setColonia}
+          />
           <label className="block">
             <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
               Municipio
             </span>
-            <select name="municipioId" defaultValue={v?.municipio_id ?? ''} className="campo">
+            <select
+              name="municipioId"
+              value={municipioId}
+              onChange={(e) => setMunicipioId(e.target.value)}
+              className="campo"
+            >
               <option value="">Sin especificar</option>
               {municipios.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -168,10 +198,11 @@ export function FormaActividad({
               ))}
             </select>
           </label>
-          <Campo
+          <CampoControlado
             nombre="seccionClave"
             etiqueta="Sección electoral"
-            valor={v?.seccion_clave}
+            valor={seccion}
+            alCambiar={setSeccion}
             ayuda="Cuatro dígitos"
           />
         </div>
@@ -247,6 +278,41 @@ function Campo({
         name={nombre}
         required={requerido}
         defaultValue={valor ?? ''}
+        className="campo"
+      />
+      {ayuda && (
+        <span className="mt-1 block text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+          {ayuda}
+        </span>
+      )}
+    </label>
+  )
+}
+
+/** Igual que `Campo`, pero su valor lo manda quien lo usa. */
+function CampoControlado({
+  nombre,
+  etiqueta,
+  valor,
+  alCambiar,
+  ayuda,
+}: {
+  nombre: string
+  etiqueta: string
+  valor: string
+  alCambiar: (v: string) => void
+  ayuda?: string
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[var(--text-menuda)] font-medium text-[var(--color-tinta-2)]">
+        {etiqueta}
+      </span>
+      <input
+        type="text"
+        name={nombre}
+        value={valor}
+        onChange={(e) => alCambiar(e.target.value)}
         className="campo"
       />
       {ayuda && (

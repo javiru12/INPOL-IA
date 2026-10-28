@@ -7,6 +7,7 @@ import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { BotonBaja } from './baja'
 import { fechaLarga, fechaCorta, cifra } from '@/lib/formato'
 import { Tabla } from '@/components/tabla'
+import { VerificarTelefono } from './verificar'
 
 export const metadata: Metadata = { title: 'Ficha ciudadana' }
 
@@ -145,6 +146,16 @@ export default async function FichaCiudadano({
             <Dato etiqueta="Código postal" valor={c.codigo_postal} mono />
             <Dato etiqueta="Municipio" valor={c.municipio} />
             <Dato etiqueta="Sección electoral" valor={c.seccion} mono />
+          </Bloque>
+
+          <Bloque titulo="Contacto verificado">
+            <div className="col-span-2">
+              <VerificarTelefono
+                ciudadanoId={c.id}
+                telefono={c.telefono_movil}
+                verificadoEn={c.telefono_verificado_en}
+              />
+            </div>
           </Bloque>
 
           <Bloque titulo="Atención prioritaria">
