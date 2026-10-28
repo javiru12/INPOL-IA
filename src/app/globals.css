@@ -401,19 +401,15 @@
 }
 
 @layer utilities {
-  /* El armazón, en vidrio, cuando la pantalla lo es: si el fondo es uno
-     solo no puede haber dos tapas opacas encima partiéndolo en tres.
+  /* El vidrio es del tablero, no del armazón: la barra y la cabecera se
+     quedan opacas. Son los bordes fijos de la aplicación —lo que está
+     siempre— y teñirlas hacía que el color se metiera donde no se está
+     mirando. Solo se destapa el área de contenido para que el fondo del
+     body llegue hasta ahí.
+
      Va en esta capa y no en `components` porque las utilidades de
      Tailwind se aplican después y ganarían aunque tengan menos
      especificidad: el orden de capa decide antes que la especificidad. */
-  body:has([data-vidrio]) nav[aria-label='Navegación principal'],
-  body:has([data-vidrio]) header {
-    background: rgb(255 255 255 / 0.48);
-    -webkit-backdrop-filter: blur(30px) saturate(185%);
-    backdrop-filter: blur(30px) saturate(185%);
-    border-color: rgb(255 255 255 / 0.55);
-  }
-
   body:has([data-vidrio]) main {
     background: transparent;
   }
