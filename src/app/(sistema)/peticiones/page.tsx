@@ -10,6 +10,9 @@ import { FilaAbrible } from '@/components/fila-abrible'
 import { IconoVer } from '@/components/iconos'
 import { fechaCorta } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
+import { puede } from '@/lib/permisos'
+import { esRango } from '@/lib/edades'
+import { Tabla } from '@/components/tabla'
 
 export const metadata: Metadata = { title: 'Peticiones' }
 
@@ -43,8 +46,11 @@ export default async function Peticiones({
     pendientes: texto(sp.pendientes) === 'si',
     mes: texto(sp.mes),
     municipio: texto(sp.municipio),
+    edad: texto(sp.edad),
     pagina: Number(texto(sp.pagina) ?? 1) || 1,
-  })
+  }, tenant.estado_clave)
+
+  const puedeExportar = await puede('exportacion.peticiones')
 
   // Recortes que no viven en los selectores pero sí acotan la lista.
   const conSp = (quitar: string) => {
@@ -76,6 +82,9 @@ export default async function Peticiones({
     texto(sp.municipio)
       ? { llave: 'municipio', texto: texto(sp.municipio)!, sinEste: conSp('municipio') }
       : null,
+    esRango(texto(sp.edad))
+      ? { llave: 'edad', texto: `${texto(sp.edad)} años`, sinEste: conSp('edad') }
+      : null,
   ].filter((x): x is { llave: string; texto: string; sinEste: string } => x !== null)
 
   return (
@@ -84,17 +93,22 @@ export default async function Peticiones({
       descripcion="Solicitudes ciudadanas levantadas en campo, eventos y oficina"
       acciones={
         <>
-          <a
-            href={`/peticiones/exportar?${new URLSearchParams(
-              Object.entries(sp).flatMap(([k, v]) =>
-                typeof v === 'string' && v.trim() && k !== 'pagina' ? [[k, v]] : [],
-              ) as [string, string][],
-            ).toString()}`}
-            className="boton boton-neutro"
-            download
-          >
-            Exportar
-          </a>
+          {/* El botón solo aparece si el perfil puede exportar. La ruta
+              lo vuelve a comprobar: esconder el botón no protege nada,
+              cualquiera escribe la dirección. */}
+          {puedeExportar && (
+            <a
+              href={`/peticiones/exportar?${new URLSearchParams(
+                Object.entries(sp).flatMap(([k, v]) =>
+                  typeof v === 'string' && v.trim() && k !== 'pagina' ? [[k, v]] : [],
+                ) as [string, string][],
+              ).toString()}`}
+              className="boton boton-neutro"
+              download
+            >
+              Exportar
+            </a>
+          )}
           <Link href="/peticiones/nueva" className="boton boton-primario">
             Nueva petición
           </Link>
@@ -141,86 +155,84 @@ export default async function Peticiones({
         />
       ) : (
         <div className="panel overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th className="w-8">
+          <Tabla>
+            <thead>
+              <tr>
+                <th className="w-8">
+                  <input
+                    type="checkbox"
+                    data-todas=""
+                    aria-label="Seleccionar todas las de esta página"
+                    className="cursor-pointer"
+                  />
+                </th>
+                <th>Folio</th>
+                <th>Ciudadano</th>
+                <th>Petición</th>
+                <th className="hidden 2xl:table-cell">Colonia</th>
+                <th>Prioridad</th>
+                <th>Estatus</th>
+                <th className="num">Fecha</th>
+                <th aria-label="Acciones" />
+              </tr>
+            </thead>
+            <tbody>
+              {r.filas.map((p) => (
+                <FilaAbrible key={p.id} href={`/peticiones/${p.id}`}>
+                  <td>
                     <input
                       type="checkbox"
-                      data-todas=""
-                      aria-label="Seleccionar todas las de esta página"
+                      data-peticion={p.id}
+                      aria-label={`Seleccionar la petición ${p.folio}`}
                       className="cursor-pointer"
                     />
-                  </th>
-                  <th>Folio</th>
-                  <th>Ciudadano</th>
-                  <th>Petición</th>
-                  <th className="hidden 2xl:table-cell">Colonia</th>
-                  <th>Prioridad</th>
-                  <th>Estatus</th>
-                  <th className="num">Fecha</th>
-                  <th aria-label="Acciones" />
-                </tr>
-              </thead>
-              <tbody>
-                {r.filas.map((p) => (
-                  <FilaAbrible key={p.id} href={`/peticiones/${p.id}`}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        data-peticion={p.id}
-                        aria-label={`Seleccionar la petición ${p.folio}`}
-                        className="cursor-pointer"
-                      />
-                    </td>
-                    <td className="clave">{p.folio}</td>
-                    <td className="whitespace-nowrap font-medium">
-                      <Link
-                        href={`/ciudadanos/${p.ciudadano_id}`}
-                        className="hover:text-[var(--color-acento-fuerte)] hover:underline"
-                      >
-                        {p.ciudadano ?? '—'}
-                      </Link>
-                    </td>
-                    <td className="w-full max-w-0">
-                      <span className="block truncate" title={p.descripcion ?? undefined}>
-                        {p.descripcion ?? '—'}
-                      </span>
-                      <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
-                        {[p.problematica, p.subproblematica].filter(Boolean).join(' · ')}
-                      </span>
-                    </td>
-                    <td className="hidden whitespace-nowrap text-[var(--color-tinta-2)] 2xl:table-cell">
-                      {p.colonia ?? '—'}
-                    </td>
-                    <td>
-                      {p.prioridad === 'Urgente' ? (
-                        <Distintivo tono="alerta">Urgente</Distintivo>
-                      ) : (
-                        <span className="text-[var(--color-tinta-2)]">{p.prioridad ?? '—'}</span>
-                      )}
-                    </td>
-                    <td>
-                      <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
-                        {p.estatus ?? 'Sin estatus'}
-                      </Distintivo>
-                    </td>
-                    <td className="num clave whitespace-nowrap">{fechaCorta(p.fecha)}</td>
-                    <td className="w-10">
-                      <Link
-                        href={`/peticiones/${p.id}`}
-                        className="boton boton-llano !h-7 !w-7 !p-0"
-                        aria-label={`Ver petición ${p.folio}`}
-                      >
-                        <IconoVer />
-                      </Link>
-                    </td>
-                  </FilaAbrible>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  </td>
+                  <td className="clave">{p.folio}</td>
+                  <td className="whitespace-nowrap font-medium">
+                    <Link
+                      href={`/ciudadanos/${p.ciudadano_id}`}
+                      className="hover:text-[var(--color-acento-fuerte)] hover:underline"
+                    >
+                      {p.ciudadano ?? '—'}
+                    </Link>
+                  </td>
+                  <td className="w-full max-w-0">
+                    <span className="block truncate" title={p.descripcion ?? undefined}>
+                      {p.descripcion ?? '—'}
+                    </span>
+                    <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+                      {[p.problematica, p.subproblematica].filter(Boolean).join(' · ')}
+                    </span>
+                  </td>
+                  <td className="hidden whitespace-nowrap text-[var(--color-tinta-2)] 2xl:table-cell">
+                    {p.colonia ?? '—'}
+                  </td>
+                  <td>
+                    {p.prioridad === 'Urgente' ? (
+                      <Distintivo tono="alerta">Urgente</Distintivo>
+                    ) : (
+                      <span className="text-[var(--color-tinta-2)]">{p.prioridad ?? '—'}</span>
+                    )}
+                  </td>
+                  <td>
+                    <Distintivo tono={TONO[p.estatus ?? ''] ?? 'neutro'}>
+                      {p.estatus ?? 'Sin estatus'}
+                    </Distintivo>
+                  </td>
+                  <td className="num clave whitespace-nowrap">{fechaCorta(p.fecha)}</td>
+                  <td className="w-10">
+                    <Link
+                      href={`/peticiones/${p.id}`}
+                      className="boton boton-llano !h-7 !w-7 !p-0"
+                      aria-label={`Ver petición ${p.folio}`}
+                    >
+                      <IconoVer />
+                    </Link>
+                  </td>
+                </FilaAbrible>
+              ))}
+            </tbody>
+          </Tabla>
           <Paginador pagina={r.pagina} porPagina={POR_PAGINA} total={r.total} />
         </div>
       )}

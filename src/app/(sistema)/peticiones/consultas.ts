@@ -1,5 +1,8 @@
 import 'server-only'
 import { conTenant } from '@/lib/db'
+import { zonaDeEstado } from '@/lib/zona'
+import { edadSql } from '@/lib/edades-sql'
+import { rango } from '@/lib/edades'
 
 export type FiltrosPeticiones = {
   q?: string
@@ -8,10 +11,12 @@ export type FiltrosPeticiones = {
   prioridad?: string
   /** Solo lo que sigue abierto: ni completadas ni canceladas. */
   pendientes?: boolean
-  /** Mes de alta, como 'AAAA-MM'. Lo manda la gráfica del panel. */
+  /** Mes de alta. Llega como 'AAAA-MM' o como 'AAAA-MM-01'. */
   mes?: string
   /** Nombre del municipio. Lo manda el mapa del panel. */
   municipio?: string
+  /** Rango de edad del ciudadano. Lo manda la estadística. */
+  edad?: string
   pagina?: number
 }
 
@@ -34,47 +39,84 @@ export type FilaPeticion = {
   fecha: string
 }
 
-export async function listarPeticiones(tenantId: string, f: FiltrosPeticiones) {
+type Sql = Parameters<Parameters<typeof conTenant>[1]>[0]
+
+/**
+ * Cada condición por separado, para poder armar tanto el predicado
+ * completo como los conteos de cada selector —que aplican todos los
+ * filtros menos el propio— y el de la exportación.
+ */
+function condiciones(tx: Sql, f: FiltrosPeticiones, zona: string) {
+  // La búsqueda ignora acentos y mayúsculas: quien teclea «peña» tiene
+  // que encontrar a «PEÑA» y a «Pena», porque nadie escribe los acentos
+  // al buscar y el padrón viene con ellos puestos a medias.
+  const porTexto = () =>
+    f.q
+      ? tx`and (
+            unaccent(lower(coalesce(ci.nombre_completo, ''))) like unaccent(lower(${'%' + f.q + '%'}))
+            or unaccent(lower(coalesce(ci.colonia, ''))) like unaccent(lower(${'%' + f.q + '%'}))
+            or unaccent(lower(coalesce(p.descripcion, ''))) like unaccent(lower(${'%' + f.q + '%'}))
+            or upper(substr(p.id::text, 1, 6)) = upper(${f.q}))`
+      : tx``
+
+  const porEstatus = () => (f.estatus ? tx`and e.descripcion = ${f.estatus}` : tx``)
+  const porProblematica = () => (f.problematica ? tx`and pr.titulo = ${f.problematica}` : tx``)
+  const porPrioridad = () => (f.prioridad ? tx`and pri.descripcion = ${f.prioridad}` : tx``)
+  const porPendientes = () =>
+    f.pendientes
+      ? tx`and coalesce(e.descripcion, '') not in ${tx(ESTATUS_TERMINALES)}`
+      : tx``
+
+  // La gráfica del panel manda el primer día del mes ('2026-10-01') y
+  // el selector manda 'AAAA-MM'. Comparar uno contra otro no empata
+  // nunca, así que los dos se recortan a la misma forma: sin esto, al
+  // dar doble clic en una barra la lista salía vacía.
+  const porMes = () =>
+    f.mes
+      ? tx`and to_char(p.fecha_apertura at time zone ${zona}, 'YYYY-MM') = ${f.mes.slice(0, 7)}`
+      : tx``
+
+  const porMunicipio = () => (f.municipio ? tx`and mu.nombre = ${f.municipio}` : tx``)
+
+  // El rango llega como '35-44'; se traduce a sus dos extremos aquí y no
+  // se confía en lo que venga en la dirección.
+  const porEdad = () => {
+    const r = f.edad ? rango(f.edad) : null
+    return r
+      ? tx`and ${edadSql(tx)} between ${r.desde} and ${r.hasta}`
+      : tx``
+  }
+
+  return {
+    porTexto,
+    porEstatus,
+    porProblematica,
+    porPrioridad,
+    porPendientes,
+    porMes,
+    porMunicipio,
+    porEdad,
+    // Un solo predicado compartido por el conteo, la página y la
+    // exportación, para que no puedan contradecirse.
+    donde: tx`
+      where true
+        ${porTexto()} ${porEstatus()} ${porProblematica()}
+        ${porPrioridad()} ${porPendientes()} ${porMes()} ${porMunicipio()} ${porEdad()}`,
+  }
+}
+
+export async function listarPeticiones(
+  tenantId: string,
+  f: FiltrosPeticiones,
+  estadoClave?: string | null,
+) {
+  const zona = zonaDeEstado(estadoClave)
   const pagina = Math.max(1, f.pagina ?? 1)
   const salto = (pagina - 1) * POR_PAGINA
 
   return conTenant(tenantId, async (tx) => {
-    // Cada condición por separado, para poder armar tanto el predicado
-    // completo como los de los conteos de cada selector.
-    //
-    // La búsqueda ignora acentos y mayúsculas: quien teclea «peña» tiene
-    // que encontrar a «PEÑA» y a «Pena», porque nadie escribe los acentos
-    // al buscar y el padrón viene con ellos puestos a medias.
-    const porTexto = () =>
-      f.q
-        ? tx`and (
-              unaccent(lower(coalesce(ci.nombre_completo, ''))) like unaccent(lower(${'%' + f.q + '%'}))
-              or unaccent(lower(coalesce(ci.colonia, ''))) like unaccent(lower(${'%' + f.q + '%'}))
-              or unaccent(lower(coalesce(p.descripcion, ''))) like unaccent(lower(${'%' + f.q + '%'}))
-              or upper(substr(p.id::text, 1, 6)) = upper(${f.q}))`
-        : tx``
-
-    const porEstatus = () =>
-      f.estatus ? tx`and e.descripcion = ${f.estatus}` : tx``
-    const porProblematica = () =>
-      f.problematica ? tx`and pr.titulo = ${f.problematica}` : tx``
-    const porPrioridad = () =>
-      f.prioridad ? tx`and pri.descripcion = ${f.prioridad}` : tx``
-    const porPendientes = () =>
-      f.pendientes
-        ? tx`and coalesce(e.descripcion, '') not in ${tx(ESTATUS_TERMINALES)}`
-        : tx``
-    const porMes = () =>
-      f.mes ? tx`and to_char(p.fecha_apertura, 'YYYY-MM') = ${f.mes}` : tx``
-    const porMunicipio = () =>
-      f.municipio ? tx`and mu.nombre = ${f.municipio}` : tx``
-
-    // Un solo predicado compartido por el conteo y la página, para que
-    // el total y las filas nunca se contradigan.
-    const donde = tx`
-      where true
-        ${porTexto()} ${porEstatus()} ${porProblematica()}
-        ${porPrioridad()} ${porPendientes()} ${porMes()} ${porMunicipio()}`
+    const { porTexto, porEstatus, porProblematica, porPrioridad,
+            porPendientes, porMes, porMunicipio, porEdad, donde } = condiciones(tx, f, zona)
 
     const desde = tx`
       from peticiones p
@@ -122,7 +164,7 @@ export async function listarPeticiones(tenantId: string, f: FiltrosPeticiones) {
         left join secciones se on se.id = p.seccion_id
         left join municipios mu on mu.id = se.municipio_id
         where true ${porTexto()} ${porProblematica()} ${porPrioridad()} ${porPendientes()}
-              ${porMes()} ${porMunicipio()}
+              ${porMes()} ${porMunicipio()} ${porEdad()}
         group by 1, 2 order by 3 desc`,
 
       tx<{ valor: string; etiqueta: string; conteo: number }[]>`
@@ -135,7 +177,7 @@ export async function listarPeticiones(tenantId: string, f: FiltrosPeticiones) {
         left join secciones se on se.id = p.seccion_id
         left join municipios mu on mu.id = se.municipio_id
         where true ${porTexto()} ${porEstatus()} ${porPrioridad()} ${porPendientes()}
-              ${porMes()} ${porMunicipio()}
+              ${porMes()} ${porMunicipio()} ${porEdad()}
         group by 1, 2 order by 3 desc`,
 
       tx<{ valor: string; etiqueta: string; conteo: number }[]>`
@@ -148,7 +190,7 @@ export async function listarPeticiones(tenantId: string, f: FiltrosPeticiones) {
         left join secciones se on se.id = p.seccion_id
         left join municipios mu on mu.id = se.municipio_id
         where true ${porTexto()} ${porEstatus()} ${porProblematica()} ${porPendientes()}
-              ${porMes()} ${porMunicipio()}
+              ${porMes()} ${porMunicipio()} ${porEdad()}
         group by pri.id, pri.descripcion
         order by pri.id`,
     ])
@@ -157,5 +199,53 @@ export async function listarPeticiones(tenantId: string, f: FiltrosPeticiones) {
       select id, descripcion from estatus_peticiones order by descripcion`
 
     return { filas, total, pagina, estatus, problematicas, prioridades, estatusConId }
+  })
+}
+
+/**
+ * Las mismas filas que enseña la pantalla, sin paginar, para exportar.
+ *
+ * Comparte el predicado con `listarPeticiones` a propósito: si la
+ * exportación armara el suyo, el archivo traería un recorte distinto al
+ * que se ve en pantalla y nadie sabría cuál de los dos creer. Ya pasaba:
+ * la pantalla filtraba por mes y por municipio y el archivo no.
+ */
+export async function filasParaExportar(
+  tenantId: string,
+  f: FiltrosPeticiones,
+  estadoClave?: string | null,
+) {
+  const zona = zonaDeEstado(estadoClave)
+
+  return conTenant(tenantId, async (tx) => {
+    const w = condiciones(tx, f, zona)
+    return tx<Record<string, unknown>[]>`
+      select upper(substr(p.id::text, 1, 6)) as folio,
+             p.fecha_apertura at time zone ${zona} as fecha,
+             p.fecha_cierre at time zone ${zona} as cierre,
+             nullif(trim(coalesce(ci.nombre_completo,
+               concat_ws(' ', ci.nombre, ci.apellido_paterno))), '') as ciudadano,
+             ci.telefono_movil as telefono,
+             ci.colonia,
+             mu.nombre as municipio,
+             se.clave as seccion,
+             pr.titulo as problematica,
+             sp.titulo as subproblematica,
+             pri.descripcion as prioridad,
+             e.descripcion as estatus,
+             nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as responsable,
+             p.descripcion
+      from peticiones p
+      left join ciudadanos ci on ci.id = p.ciudadano_id
+      left join problematicas pr on pr.id = p.problematica_id
+      left join subproblematicas sp on sp.id = p.subproblematica_id
+      left join estatus_peticiones e on e.id = p.estatus_id
+      left join prioridades pri on pri.id = p.prioridad_id
+      left join secciones se on se.id = p.seccion_id
+      left join municipios mu on mu.id = se.municipio_id
+      left join operadores o on o.id = p.operador_id
+      left join usuarios u on u.id = o.usuario_id
+      ${w.donde}
+      order by p.fecha_apertura desc nulls last`
   })
 }

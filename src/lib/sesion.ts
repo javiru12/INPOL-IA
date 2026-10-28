@@ -74,6 +74,8 @@ export type Tenant = {
   /** En qué estado opera. Sin esto no se le puede enseñar geografía. */
   estado_id: string | null
   estado_nombre: string | null
+  /** Clave INE del estado: decide zona horaria y cartografía. */
+  estado_clave: string | null
 }
 
 /**
@@ -106,7 +108,7 @@ export const tenantDeLaPeticion = cache(async (): Promise<Tenant | null> => {
   const buscar = (c: string) => sinTenant<Tenant[]>`
     select t.id, t.clave, t.nombre, t.nombre_corto, t.color_acento,
            t.licencia_vence::text,
-           t.estado_id, e.nombre as estado_nombre
+           t.estado_id, e.nombre as estado_nombre, e.clave as estado_clave
     from tenants t
     left join estados e on e.id = t.estado_id
     where t.clave = ${c} and t.activo = true`

@@ -1,5 +1,6 @@
 import 'server-only'
 import { conTenant } from '@/lib/db'
+import { zonaDeEstado } from '@/lib/zona'
 import { ANIO, fuerzaSql } from '@/lib/electoral'
 
 export type ResumenPanel = {
@@ -20,7 +21,11 @@ export type ResumenPanel = {
   totales: { total: number; abiertas: number; completadas: number; urgentes: number }
 }
 
-export async function resumenDelPanel(tenantId: string): Promise<ResumenPanel> {
+export async function resumenDelPanel(
+  tenantId: string,
+  estadoClave?: string | null,
+): Promise<ResumenPanel> {
+  const zona = zonaDeEstado(estadoClave)
   return conTenant(tenantId, async (tx) => {
     const [porEstatus, porMes, porProblematica, porColonia, recientes, totales, porMunicipio] =
       await Promise.all([
@@ -30,14 +35,19 @@ export async function resumenDelPanel(tenantId: string): Promise<ResumenPanel> {
           left join estatus_peticiones e on e.id = p.estatus_id
           group by 1 order by 2 desc`,
 
+        // El mes se agrupa en la hora del estado del cliente, igual que
+        // lo filtra la lista: en UTC, una petición de las 9 de la noche
+        // del último día del mes cuenta en el mes siguiente y la barra
+        // deja de cuadrar con la lista que abre al darle doble clic.
         tx<{ etiqueta: string; valor: number }[]>`
           select mes::date::text as etiqueta, coalesce(c.n, 0)::int as valor
           from generate_series(
-                 date_trunc('month', now()) - interval '11 months',
-                 date_trunc('month', now()),
+                 date_trunc('month', now() at time zone ${zona}) - interval '11 months',
+                 date_trunc('month', now() at time zone ${zona}),
                  interval '1 month') as mes
           left join (
-            select date_trunc('month', fecha_apertura) as m, count(*) as n
+            select date_trunc('month', fecha_apertura at time zone ${zona}) as m,
+                   count(*) as n
             from peticiones group by 1
           ) c on c.m = mes
           order by mes`,

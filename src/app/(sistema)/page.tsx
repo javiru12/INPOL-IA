@@ -7,6 +7,8 @@ import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
 import { BarrasHorizontales, BarrasTemporales } from '@/components/graficas'
 import { MapaDelPanel } from './mapa-panel'
 import { mesCorto, fechaCorta } from '@/lib/formato'
+import { Tabla } from '@/components/tabla'
+import { archivoDeMapa } from '@/lib/mapas'
 
 const TONO_ESTATUS: Record<string, 'exito' | 'aviso' | 'alerta' | 'dato' | 'neutro'> = {
   Completada: 'exito',
@@ -23,7 +25,7 @@ export default async function Panel() {
   if (!tenant || !sesion) redirect('/entrar')
 
   const [r, foco] = await Promise.all([
-    resumenDelPanel(tenant.id),
+    resumenDelPanel(tenant.id, tenant.estado_clave),
     focoElectoral(tenant.id, tenant.estado_id),
   ])
   const problematicas = agruparCola(r.porProblematica)
@@ -146,7 +148,10 @@ export default async function Panel() {
                   Abrir el mapa
                 </Link>
               </div>
-              <MapaDelPanel municipios={r.porMunicipio} />
+              <MapaDelPanel
+                municipios={r.porMunicipio}
+                archivo={archivoDeMapa(tenant.estado_clave)}
+              />
             </section>
 
             {foco && foco.sin_resolver_total > 0 && (
@@ -217,42 +222,40 @@ export default async function Panel() {
                 Ver todas
               </Link>
             </div>
-            <div className="overflow-x-auto">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Ciudadano</th>
-                    <th>Problemática</th>
-                    <th>Colonia</th>
-                    <th>Prioridad</th>
-                    <th>Estatus</th>
-                    <th className="num">Fecha</th>
+            <Tabla>
+              <thead>
+                <tr>
+                  <th>Ciudadano</th>
+                  <th>Problemática</th>
+                  <th>Colonia</th>
+                  <th>Prioridad</th>
+                  <th>Estatus</th>
+                  <th className="num">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {r.recientes.map((p) => (
+                  <tr key={p.id}>
+                    <td className="font-medium">{p.ciudadano ?? '—'}</td>
+                    <td className="text-[var(--color-tinta-2)]">{p.problematica ?? '—'}</td>
+                    <td className="text-[var(--color-tinta-2)]">{p.colonia ?? '—'}</td>
+                    <td>
+                      {p.prioridad === 'Urgente' ? (
+                        <Distintivo tono="alerta">Urgente</Distintivo>
+                      ) : (
+                        <span className="text-[var(--color-tinta-2)]">{p.prioridad ?? '—'}</span>
+                      )}
+                    </td>
+                    <td>
+                      <Distintivo tono={TONO_ESTATUS[p.estatus ?? ''] ?? 'neutro'}>
+                        {p.estatus ?? 'Sin estatus'}
+                      </Distintivo>
+                    </td>
+                    <td className="num clave">{fechaCorta(p.fecha)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {r.recientes.map((p) => (
-                    <tr key={p.id}>
-                      <td className="font-medium">{p.ciudadano ?? '—'}</td>
-                      <td className="text-[var(--color-tinta-2)]">{p.problematica ?? '—'}</td>
-                      <td className="text-[var(--color-tinta-2)]">{p.colonia ?? '—'}</td>
-                      <td>
-                        {p.prioridad === 'Urgente' ? (
-                          <Distintivo tono="alerta">Urgente</Distintivo>
-                        ) : (
-                          <span className="text-[var(--color-tinta-2)]">{p.prioridad ?? '—'}</span>
-                        )}
-                      </td>
-                      <td>
-                        <Distintivo tono={TONO_ESTATUS[p.estatus ?? ''] ?? 'neutro'}>
-                          {p.estatus ?? 'Sin estatus'}
-                        </Distintivo>
-                      </td>
-                      <td className="num clave">{fechaCorta(p.fecha)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </Tabla>
           </section>
         </>
       )}
