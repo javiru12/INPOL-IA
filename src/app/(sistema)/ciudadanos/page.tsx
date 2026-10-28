@@ -3,13 +3,14 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import { listarCiudadanos, etiquetaSexo, POR_PAGINA } from './consultas'
-import { Pagina, Indicador, Vacio } from '@/components/pagina'
+import { Pagina, Indicador, Vacio, Distintivo } from '@/components/pagina'
 import { Filtros, Paginador } from '@/components/filtros'
 import { IconoVer } from '@/components/iconos'
 import { cifra, porcentaje } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
 import { Tabla } from '@/components/tabla'
 import { terminoVigente } from '@/lib/busqueda-maestra'
+import { ORIGENES, TONO_ORIGEN, etiquetaOrigen } from '@/lib/origenes'
 
 export const metadata: Metadata = { title: 'Ciudadanos' }
 
@@ -50,6 +51,7 @@ export default async function Ciudadanos({
     sexo: texto(sp.sexo),
     edad: texto(sp.edad),
     peticiones: texto(sp.peticiones),
+    origen: texto(sp.origen),
     pagina: Number(texto(sp.pagina) ?? 1) || 1,
   })
 
@@ -70,6 +72,11 @@ export default async function Ciudadanos({
           { nombre: 'sexo', etiqueta: 'Sexo', opciones: SEXOS },
           { nombre: 'edad', etiqueta: 'Edad', opciones: EDADES },
           { nombre: 'peticiones', etiqueta: 'Peticiones', opciones: PETICIONES },
+          {
+            nombre: 'origen',
+            etiqueta: 'Origen',
+            opciones: ORIGENES.map((o) => ({ valor: o.clave, etiqueta: o.etiqueta })),
+          },
         ]}
       />
 
@@ -114,6 +121,7 @@ export default async function Ciudadanos({
                   <th>Colonia</th>
                   <th>Sección</th>
                   <th>Móvil</th>
+                  <th className="hidden xl:table-cell">Origen</th>
                   <th className="num">Peticiones</th>
                   <th aria-label="Acciones" />
                 </tr>
@@ -133,6 +141,15 @@ export default async function Ciudadanos({
                     </td>
                     <td className="clave">{c.seccion ?? '—'}</td>
                     <td className="clave whitespace-nowrap">{c.telefono_movil ?? '—'}</td>
+                    {/* De dónde salió la ficha: una capturada en campo y
+                        una que llegó sola por la app no se verifican
+                        igual, y mezclarlas sin distinguirlas hace que el
+                        conteo de afiliación no se pueda auditar. */}
+                    <td className="hidden xl:table-cell whitespace-nowrap">
+                      <Distintivo tono={TONO_ORIGEN[c.origen ?? ''] ?? 'neutro'}>
+                        {etiquetaOrigen(c.origen)}
+                      </Distintivo>
+                    </td>
                     <td className="num">
                       {c.peticiones > 0 ? (
                         cifra(c.peticiones)

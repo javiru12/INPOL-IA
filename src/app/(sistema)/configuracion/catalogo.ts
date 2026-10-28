@@ -6,10 +6,18 @@
  * para saber qué campos dibujar. Aquí no hay consultas ni `server-only`.
  */
 
-export type ClaveSeccion = 'usuarios' | 'campanias' | 'catalogos' | 'cliente'
+export type ClaveSeccion =
+  | 'usuarios'
+  | 'ciudadanos'
+  | 'movilizadores'
+  | 'campanias'
+  | 'catalogos'
+  | 'cliente'
 
 export const SECCIONES: { clave: ClaveSeccion; etiqueta: string }[] = [
   { clave: 'usuarios', etiqueta: 'Usuarios' },
+  { clave: 'ciudadanos', etiqueta: 'Ciudadanos' },
+  { clave: 'movilizadores', etiqueta: 'Movilizadores' },
   { clave: 'campanias', etiqueta: 'Campañas' },
   { clave: 'catalogos', etiqueta: 'Catálogos' },
   { clave: 'cliente', etiqueta: 'Datos del cliente' },
@@ -38,6 +46,10 @@ export const PERMISOS = {
   candidatos: ['configuracion.alta_de_candidatos'],
   catalogos: ['configuracion.alta_de_problematicas', 'configuracion.alta_fuente_de_campana'],
   cliente: ['configuracion.edicion_de_usuarios'],
+  // El padrón y la red de movilización se administran con el mismo
+  // rango que los usuarios: son altas de gente, no catálogos.
+  ciudadanos: ['configuracion.creacion_de_usuarios', 'configuracion.edicion_de_usuarios'],
+  movilizadores: ['configuracion.creacion_de_usuarios', 'configuracion.edicion_de_usuarios'],
 } as const
 
 /** Mismo criterio de prefijos que `exigirAcceso`: `a.b` habilita `a.b.c`. */

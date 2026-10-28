@@ -31,6 +31,7 @@ import {
 import { PanelCatalogo, type FilaCatalogo } from './catalogos'
 import { FormaCliente } from './cliente'
 import { Tabla } from '@/components/tabla'
+import { SeccionCiudadanos, SeccionMovilizadores } from './secciones-padron'
 
 export const metadata: Metadata = { title: 'Configuración' }
 
@@ -127,6 +128,8 @@ export default async function Configuracion({
 
       <div className="mt-4">
         {seccion === 'usuarios' && <SeccionUsuarios tenantId={tenant.id} puedeVerDetalle={puede.usuariosCambio} />}
+        {seccion === 'ciudadanos' && <SeccionCiudadanos tenantId={tenant.id} />}
+        {seccion === 'movilizadores' && <SeccionMovilizadores tenantId={tenant.id} />}
         {seccion === 'campanias' && <SeccionCampanias tenantId={tenant.id} />}
         {seccion === 'catalogos' && (
           <SeccionCatalogos

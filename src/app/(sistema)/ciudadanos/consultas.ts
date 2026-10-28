@@ -22,6 +22,8 @@ export type FiltrosCiudadanos = {
   sexo?: string
   edad?: string
   peticiones?: string
+  /** De dónde salió la ficha: captura, app, portal… */
+  origen?: string
   pagina?: number
 }
 
@@ -32,6 +34,7 @@ export type FilaCiudadano = {
   sexo: string | null
   colonia: string | null
   seccion: string | null
+  origen: string | null
   telefono_movil: string | null
   peticiones: number
 }
@@ -106,7 +109,9 @@ export async function listarCiudadanos(tenantId: string, f: FiltrosCiudadanos) {
              or ${edad} between ${rango?.[0] ?? null} and ${rango?.[1] ?? null})
         and (${f.peticiones ?? null}::text is null
              or (${f.peticiones ?? null}::text = 'con' and coalesce(pe.n, 0) > 0)
-             or (${f.peticiones ?? null}::text = 'sin' and coalesce(pe.n, 0) = 0))`
+             or (${f.peticiones ?? null}::text = 'sin' and coalesce(pe.n, 0) = 0))
+        and (${f.origen ?? null}::text is null
+             or coalesce(c.origen, 'captura') = ${f.origen ?? null}::text)`
 
     const [filas, [{ total }], [resumen], colonias] = await Promise.all([
       tx<FilaCiudadano[]>`
@@ -116,6 +121,7 @@ export async function listarCiudadanos(tenantId: string, f: FiltrosCiudadanos) {
                c.sexo,
                c.colonia,
                s.clave as seccion,
+               coalesce(c.origen, 'captura') as origen,
                c.telefono_movil,
                coalesce(pe.n, 0) as peticiones
         ${desde} ${donde}
