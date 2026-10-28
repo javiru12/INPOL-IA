@@ -1,5 +1,7 @@
 import 'server-only'
 import { conTenant } from '@/lib/db'
+import { edadSql } from '@/lib/edades-sql'
+import { RANGOS as RANGOS_EDAD } from '@/lib/edades'
 
 /**
  * Analítica de la gestión social.
@@ -107,6 +109,7 @@ export type Estadisticas = {
   responsables: Responsable[]
   porFuente: { etiqueta: string; valor: number }[]
   porDependencia: { etiqueta: string; valor: number }[]
+  porEdad: { clave: string; etiqueta: string; valor: number }[]
   opciones: { problematicas: Opcion[]; dependencias: Opcion[] }
 }
 
@@ -125,6 +128,7 @@ const SIN_DATOS: Estadisticas = {
   responsables: [],
   porFuente: [],
   porDependencia: [],
+  porEdad: [],
   opciones: { problematicas: [], dependencias: [] },
 }
 
@@ -211,7 +215,8 @@ export async function estadisticasDeGestion(
 
     const [
       totales, tiempos, evolucion, porProblematica, atoradas,
-      responsables, porFuente, porDependencia, optProblematicas, optDependencias,
+      responsables, porFuente, porDependencia, porEdad,
+      optProblematicas, optDependencias,
     ] = await Promise.all([
       // 1 · Totales del cohorte.
       tx<{
@@ -337,7 +342,30 @@ export async function estadisticasDeGestion(
         where ${enCohorte()} and ${cond()}
         group by 1 order by 2 desc`,
 
-      // 9 y 10 · Opciones de los selectores. Cada lista lleva el conteo del
+      // 9 · Quién pide, por edad.
+      //
+      // Se agrupa en una sola pasada: la primera versión cruzaba cada
+      // petición contra la lista de rangos y la pantalla tardaba 60
+      // segundos en cargar. Los rangos vacíos se rellenan después, en
+      // JavaScript, que es más barato que hacérselo pedir a la base.
+      tx<{ clave: string; valor: number }[]>`
+        select case
+                 ${RANGOS_EDAD.map(
+                   (r) => tx`when e.edad between ${r.desde} and ${r.hasta} then ${r.clave}`,
+                 )}
+               end as clave,
+               count(*)::int as valor
+        from (
+          select ${edadSql(tx)} as edad
+          from peticiones p
+          join ciudadanos ci on ci.id = p.ciudadano_id
+          ${catalogos()}
+          where ${enCohorte()} and ${cond()}
+        ) e
+        where e.edad is not null
+        group by 1`,
+
+      // 10 y 11 · Opciones de los selectores. Cada lista lleva el conteo del
       // periodo con el *otro* filtro aplicado, nunca con el propio: si se
       // aplicara el propio, elegir una opción dejaría las demás en cero y
       // no habría forma de cambiar de parecer.
@@ -418,6 +446,14 @@ export async function estadisticasDeGestion(
       })),
       responsables: ordenar(filas, f.orden, f.dir),
       porFuente,
+      // Los rangos sin una sola petición no vuelven de la consulta;
+      // aquí se rellenan para que la tabla siempre enseñe la escala
+      // completa y se vea cuál está vacío.
+      porEdad: RANGOS_EDAD.map((r) => ({
+        clave: r.clave,
+        etiqueta: r.etiqueta,
+        valor: porEdad.find((e) => e.clave === r.clave)?.valor ?? 0,
+      })),
       porDependencia,
       opciones: { problematicas: optProblematicas, dependencias: optDependencias },
     }

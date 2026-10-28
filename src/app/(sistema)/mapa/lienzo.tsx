@@ -6,6 +6,7 @@ import { Mapa, type Region, type DatoRegion } from '@/components/mapa'
 import { colorDePartido, nombreDePartido, SIN_DATO } from '@/lib/escalas'
 import { cifra } from '@/lib/formato'
 import type { FilaRegion, Metrica } from './consultas'
+import { RANGOS } from '@/lib/edades'
 
 type Props = {
   archivo: string
@@ -45,6 +46,18 @@ export function LienzoMapa({ archivo, regiones, metrica, unidad }: Props) {
 
       if (metrica === 'peticiones') {
         detalle.push(['Ciudadanos', cifra(r.ciudadanos)])
+        // Con cuántos se puede hablar: un padrón sin teléfono no sirve
+        // para movilizar, y el total solo no lo deja ver.
+        detalle.push([
+          'Con teléfono',
+          r.ciudadanos
+            ? `${cifra(r.con_telefono)} · ${Math.round((r.con_telefono / r.ciudadanos) * 100)}%`
+            : '—',
+        ])
+        for (const g of RANGOS) {
+          const n = r.edades?.[g.clave] ?? 0
+          if (n > 0) detalle.push([`${g.etiqueta} años`, cifra(n)])
+        }
       } else if (metrica === 'ganador' || metrica === 'margen') {
         if (r.ganador) {
           detalle.push([nombreDePartido(r.ganador), cifra(r.votos_ganador)])

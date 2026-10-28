@@ -1,4 +1,6 @@
 import 'server-only'
+import { edadSql } from '@/lib/edades-sql'
+import { RANGOS } from '@/lib/edades'
 import { conTenant, sinTenant } from '@/lib/db'
 
 export type Metrica =
@@ -23,6 +25,10 @@ export type FilaRegion = {
   nombre: string
   peticiones: number
   ciudadanos: number
+  /** Ciudadanos con teléfono móvil capturado: con quién se puede hablar. */
+  con_telefono: number
+  /** Cuántos ciudadanos caen en cada rango de edad. */
+  edades: Record<string, number>
   secciones: number
   lista_nominal: number
   votos_totales: number
@@ -108,15 +114,31 @@ export async function regionesConDatos(
     order by t.nombre`
 
   const propios = await conTenant(tenantId, (tx) =>
-    tx<{ clave: string; peticiones: number; ciudadanos: number }[]>`
+    tx<{
+      clave: string
+      peticiones: number
+      ciudadanos: number
+      con_telefono: number
+      edades: Record<string, number>
+    }[]>`
       select ${ambito === 'municipio' ? tx`m.clave` : tx`d.clave`} as clave,
              count(distinct p.id)::int as peticiones,
-             count(distinct c.id)::int as ciudadanos
+             count(distinct ci.id)::int as ciudadanos,
+             count(distinct ci.id) filter (
+               where nullif(trim(ci.telefono_movil), '') is not null
+             )::int as con_telefono,
+             -- Los segmentos de edad se arman aquí y no en una segunda
+             -- consulta: es el mismo recorrido y salen gratis.
+             jsonb_build_object(${RANGOS.map(
+               (r) => tx`${r.clave}, count(distinct ci.id) filter (
+                 where ${edadSql(tx)} between ${r.desde} and ${r.hasta}
+               )::int`,
+             )}) as edades
       from secciones s
       ${ambito === 'municipio'
         ? tx`join municipios m on m.id = s.municipio_id`
         : tx`join distritos d on d.id = s.distrito_local_id`}
-      left join ciudadanos c on c.seccion_id = s.id
+      left join ciudadanos ci on ci.seccion_id = s.id
       left join peticiones p on p.seccion_id = s.id
       where s.estado_id = ${estadoId}
       group by 1`,
@@ -128,6 +150,8 @@ export async function regionesConDatos(
     ...e,
     peticiones: porClave.get(e.clave)?.peticiones ?? 0,
     ciudadanos: porClave.get(e.clave)?.ciudadanos ?? 0,
+    con_telefono: porClave.get(e.clave)?.con_telefono ?? 0,
+    edades: porClave.get(e.clave)?.edades ?? {},
   }))
 }
 

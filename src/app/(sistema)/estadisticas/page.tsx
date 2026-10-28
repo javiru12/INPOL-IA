@@ -19,6 +19,8 @@ import { agruparCola, CATEGORICA } from '@/lib/paleta'
 import { RAMPA_SECUENCIAL } from '@/lib/escalas'
 import { mesLargo, cifra, porcentaje } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
+import { FilaAbrible } from '@/components/fila-abrible'
 
 export const metadata: Metadata = { title: 'Estadísticas' }
 
@@ -147,6 +149,13 @@ export default async function Estadisticas({
   const fuentes = agruparCola(r.porFuente, 8)
   const dependencias = agruparCola(r.porDependencia, 8)
   const totalFuente = r.porFuente.reduce((s, f) => s + f.valor, 0)
+
+  // El porcentaje va sobre las peticiones que SÍ traen edad, no sobre
+  // todas: con 723 fichas sin fecha de nacimiento, dividir entre el
+  // total haría que todos los rangos se vieran chicos y la suma no
+  // llegara a 100 sin que se entienda por qué.
+  const totalEdad = r.porEdad.reduce((s, e) => s + e.valor, 0)
+  const maxEdad = Math.max(1, ...r.porEdad.map((e) => e.valor))
 
   return (
     <Pagina
@@ -399,67 +408,65 @@ export default async function Estadisticas({
             Ninguna petición del periodo tiene responsable asignado.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  {COLUMNAS.map((c) => (
-                    <th key={c.clave} className={c.num ? 'num' : undefined}>
-                      <Link
-                        href={enlaceOrden(c.clave)}
-                        scroll={false}
-                        className="inline-flex items-center gap-1 hover:text-[var(--color-acento-fuerte)]"
-                        aria-sort={
-                          orden === c.clave
-                            ? dir === 'asc'
-                              ? 'ascending'
-                              : 'descending'
-                            : 'none'
-                        }
-                      >
-                        {c.titulo}
-                        <span aria-hidden="true" className="text-[var(--color-tinta-3)]">
-                          {orden === c.clave ? (dir === 'asc' ? '↑' : '↓') : '·'}
-                        </span>
-                      </Link>
-                    </th>
-                  ))}
-                  <th>Avance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {r.responsables.map((p) => (
-                  <tr key={p.id}>
-                    <td className="whitespace-nowrap font-medium">
-                      {p.nombre}
-                      <span className="ml-2 text-[length:var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
-                        {nombrePerfil(p.perfil)}
+          <Tabla>
+            <thead>
+              <tr>
+                {COLUMNAS.map((c) => (
+                  <th key={c.clave} className={c.num ? 'num' : undefined}>
+                    <Link
+                      href={enlaceOrden(c.clave)}
+                      scroll={false}
+                      className="inline-flex items-center gap-1 hover:text-[var(--color-acento-fuerte)]"
+                      aria-sort={
+                        orden === c.clave
+                          ? dir === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
+                      }
+                    >
+                      {c.titulo}
+                      <span aria-hidden="true" className="text-[var(--color-tinta-3)]">
+                        {orden === c.clave ? (dir === 'asc' ? '↑' : '↓') : '·'}
                       </span>
-                    </td>
-                    <td className="num cifra">{cifra(p.asignadas)}</td>
-                    <td className="num cifra">{cifra(p.resueltas)}</td>
-                    <td className="num cifra font-semibold">
-                      {Math.round(p.tasa * 100)}%
-                    </td>
-                    <td className="num cifra">
-                      {p.mediana !== null ? diasEnColumna(p.mediana) : '—'}
-                    </td>
-                    <td className="w-40">
-                      <span className="block h-[7px] w-full overflow-hidden rounded-full bg-[var(--color-superficie-2)]">
-                        <span
-                          className="block h-full rounded-full"
-                          style={{
-                            width: `${Math.max(p.tasa * 100, 1.5)}%`,
-                            background: 'var(--color-exito)',
-                          }}
-                        />
-                      </span>
-                    </td>
-                  </tr>
+                    </Link>
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+                <th>Avance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {r.responsables.map((p) => (
+                <tr key={p.id}>
+                  <td className="whitespace-nowrap font-medium">
+                    {p.nombre}
+                    <span className="ml-2 text-[length:var(--text-micro)] font-normal text-[var(--color-tinta-3)]">
+                      {nombrePerfil(p.perfil)}
+                    </span>
+                  </td>
+                  <td className="num cifra">{cifra(p.asignadas)}</td>
+                  <td className="num cifra">{cifra(p.resueltas)}</td>
+                  <td className="num cifra font-semibold">
+                    {Math.round(p.tasa * 100)}%
+                  </td>
+                  <td className="num cifra">
+                    {p.mediana !== null ? diasEnColumna(p.mediana) : '—'}
+                  </td>
+                  <td className="w-40">
+                    <span className="block h-[7px] w-full overflow-hidden rounded-full bg-[var(--color-superficie-2)]">
+                      <span
+                        className="block h-full rounded-full"
+                        style={{
+                          width: `${Math.max(p.tasa * 100, 1.5)}%`,
+                          background: 'var(--color-exito)',
+                        }}
+                      />
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Tabla>
         )}
       </section>
 
@@ -485,6 +492,73 @@ export default async function Estadisticas({
           <BarrasHorizontales datos={dependencias} colorUnico="var(--color-acento)" />
         </section>
       </div>
+
+      {/* 5 · ¿Quién pide? -------------------------------------------
+          Va al final porque responde una pregunta distinta de las de
+          arriba: no cómo va la gestión, sino a quién le está sirviendo. */}
+      <section className="panel mt-3 overflow-hidden">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
+          <div>
+            <h2 className="text-[var(--text-base)] font-semibold">Quién pide, por edad</h2>
+            <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+              Elige un rango para ver esas peticiones en el listado
+            </p>
+          </div>
+          <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
+            {cifra(totalEdad)} con edad capturada
+            {totalFuente > totalEdad && ` · ${cifra(totalFuente - totalEdad)} sin dato`}
+          </p>
+        </div>
+        {totalEdad === 0 ? (
+          <p className="px-4 py-10 text-center text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+            Ninguna petición del periodo trae la edad del ciudadano capturada.
+          </p>
+        ) : (
+          <Tabla>
+            <thead>
+              <tr>
+                <th>Rango de edad</th>
+                <th>Distribución</th>
+                <th className="num">Peticiones</th>
+                <th className="num">% del total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {r.porEdad.map((e) => (
+                <FilaAbrible key={e.clave} href={`/peticiones?edad=${e.clave}`}>
+                  <td className="whitespace-nowrap font-medium">
+                    <Link
+                      href={`/peticiones?edad=${e.clave}`}
+                      className="hover:text-[var(--color-acento-fuerte)] hover:underline"
+                    >
+                      {e.etiqueta} años
+                    </Link>
+                  </td>
+                  <td className="w-full max-w-0">
+                    <span
+                      className="block h-[6px] overflow-hidden rounded-full bg-[var(--color-borde)]"
+                      aria-hidden="true"
+                    >
+                      <span
+                        className="block h-full rounded-full"
+                        style={{
+                          width: `${e.valor > 0 ? Math.max((e.valor / maxEdad) * 100, 2) : 0}%`,
+                          background: 'var(--color-acento)',
+                        }}
+                      />
+                    </span>
+                  </td>
+                  <td className="num font-medium">{cifra(e.valor)}</td>
+                  <td className="num text-[var(--color-tinta-2)]">
+                    {((e.valor / totalEdad) * 100).toFixed(1)}%
+                  </td>
+                </FilaAbrible>
+              ))}
+            </tbody>
+          </Tabla>
+        )}
+      </section>
+
     </Pagina>
   )
 }
