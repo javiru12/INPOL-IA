@@ -58,10 +58,36 @@ export default async function Panel() {
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Indicador etiqueta="Peticiones totales" valor={r.totales.total} pie="Desde el inicio de la campaña" />
-            <Indicador etiqueta="En atención" valor={r.totales.abiertas} tono="dato" pie="Abiertas, en proceso o en gestión" />
-            <Indicador etiqueta="Completadas" valor={r.totales.completadas} tono="exito" pie={`${avance}% del total`} />
-            <Indicador etiqueta="Urgentes sin resolver" valor={r.totales.urgentes} tono={r.totales.urgentes > 0 ? 'alerta' : 'neutro'} pie="Requieren atención inmediata" />
+            {/* Cada cifra lleva a la lista que la produjo. Un número
+                que no se puede abrir obliga a reconstruir a mano el
+                filtro que lo generó, y casi siempre sale distinto. */}
+            <Indicador
+              etiqueta="Peticiones totales"
+              valor={r.totales.total}
+              pie="Desde el inicio de la campaña"
+              href="/peticiones"
+            />
+            <Indicador
+              etiqueta="En atención"
+              valor={r.totales.abiertas}
+              tono="dato"
+              pie="Abiertas, en proceso o en gestión"
+              href="/peticiones?pendientes=si"
+            />
+            <Indicador
+              etiqueta="Completadas"
+              valor={r.totales.completadas}
+              tono="exito"
+              pie={`${avance}% del total`}
+              href="/peticiones?estatus=Completada"
+            />
+            <Indicador
+              etiqueta="Urgentes sin resolver"
+              valor={r.totales.urgentes}
+              tono={r.totales.urgentes > 0 ? 'alerta' : 'neutro'}
+              pie="Requieren atención inmediata"
+              href="/peticiones?prioridad=Urgente&pendientes=si"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-[1.35fr_1fr]">

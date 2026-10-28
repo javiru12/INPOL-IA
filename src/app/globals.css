@@ -122,6 +122,14 @@
 @layer components {
   /* --- Etiqueta de sección: versalitas espaciadas. Ordena una
          pantalla densa sin gastar color ni tamaño. --- */
+  /* Una cifra con la misma forma que una etiqueta no se lee como cifra.
+     Los números tabulares además alinean las columnas al comparar. */
+  .cifra {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
   .rotulo {
     font-size: var(--text-micro);
     font-weight: 600;
@@ -130,11 +138,29 @@
     color: var(--color-tinta-3);
   }
 
-  /* --- Superficie base --- */
+  /* --- Superficie base ---
+     Un borde de 1px y nada más deja todo al mismo nivel: tarjetas,
+     tablas y formularios flotando sin relación entre sí. La sombra es
+     mínima a propósito —apenas dos píxeles— porque lo que hace que una
+     superficie se lea como superficie no es la sombra, es que la haya.
+     Mucha convierte un sistema de trabajo en una presentación. */
   .panel {
     background: var(--color-superficie);
     border: 1px solid var(--color-borde);
     border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px rgb(28 24 36 / 0.04);
+  }
+
+  /* Un panel sobre el que se puede actuar se levanta al pasar encima.
+     Se marca a mano y no por omisión: la mayoría son contenedores y
+     levantar algo que no responde al clic es una mentira. */
+  .panel-vivo {
+    transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  }
+  .panel-vivo:hover {
+    border-color: var(--color-borde-fuerte);
+    box-shadow: 0 4px 12px -4px rgb(28 24 36 / 0.12), 0 1px 2px rgb(28 24 36 / 0.04);
+    transform: translateY(-1px);
   }
 
   /* --- Distintivo de estado --- */
@@ -191,6 +217,10 @@
     white-space: nowrap;
     transition: background-color 120ms, border-color 120ms, color 120ms;
   }
+  .boton { transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease; }
+  /* Hundir un milímetro al pulsar es lo que hace que un botón se sienta
+     pulsado y no solo cambiado de color. */
+  .boton:active:not(:disabled) { transform: translateY(0.5px); }
   .boton:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .boton-primario {
@@ -251,6 +281,7 @@
     vertical-align: middle;
   }
   .tabla tbody tr:last-child td { border-bottom: none; }
+  .tabla tbody td { transition: background-color 120ms ease; }
   .tabla tbody tr:hover td { background: var(--color-acento-suave); }
   .tabla .num { text-align: right; font-variant-numeric: tabular-nums; }
 }

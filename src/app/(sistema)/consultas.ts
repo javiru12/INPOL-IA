@@ -7,7 +7,7 @@ export type ResumenPanel = {
   porMunicipio: { clave: string; nombre: string; peticiones: number }[]
   porEstatus: { etiqueta: string; valor: number }[]
   porMes: { etiqueta: string; valor: number }[]
-  porProblematica: { etiqueta: string; valor: number }[]
+  porProblematica: { etiqueta: string; valor: number; color: string | null }[]
   porColonia: { etiqueta: string; valor: number }[]
   recientes: {
     id: string
@@ -52,8 +52,12 @@ export async function resumenDelPanel(
           ) c on c.m = mes
           order by mes`,
 
-        tx<{ etiqueta: string; valor: number }[]>`
-          select pr.titulo as etiqueta, count(*)::int as valor
+        // El color sale del catálogo, no de la posición en el ranking:
+        // una problemática tiene que verse igual en todas las pantallas
+        // y no cambiar de color porque subió un lugar.
+        tx<{ etiqueta: string; valor: number; color: string | null }[]>`
+          select pr.titulo as etiqueta, count(*)::int as valor,
+                 max(pr.color_rgb) as color
           from peticiones p
           join problematicas pr on pr.id = p.problematica_id
           group by 1 order by 2 desc`,

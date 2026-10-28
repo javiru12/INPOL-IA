@@ -36,16 +36,21 @@ export const ESTADO = {
 } as const
 
 /** Agrupa la cola de una distribución para no pasar de 8 colores. */
-export function agruparCola<T extends { etiqueta: string; valor: number }>(
+export function agruparCola<T extends { etiqueta: string; valor: number; color?: string | null }>(
   datos: T[],
   maximo = MAXIMO_CATEGORIAS,
 ): { etiqueta: string; valor: number; color: string }[] {
   const ordenados = [...datos].sort((a, b) => b.valor - a.valor)
+
+  // Si el dato trae su propio color, ese manda. Pintar por posición
+  // hace que una categoría cambie de color al subir un lugar en el
+  // ranking, y entonces el color no significa nada: el ojo busca un
+  // sentido que no existe.
   const cabeza: { etiqueta: string; valor: number; color: string }[] =
     ordenados.slice(0, maximo).map((d, i) => ({
       etiqueta: d.etiqueta,
       valor: d.valor,
-      color: CATEGORICA[i],
+      color: d.color ?? CATEGORICA[i],
     }))
   const cola = ordenados.slice(maximo)
   if (cola.length) {

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 /** Encabezado de pantalla. Un solo patrón para todo el sistema. */
 export function Pagina({
   titulo,
@@ -34,11 +35,14 @@ export function Indicador({
   valor,
   pie,
   tono = 'neutro',
+  href,
 }: {
   etiqueta: string
   valor: number | string
   pie?: string
   tono?: 'neutro' | 'exito' | 'aviso' | 'alerta' | 'dato'
+  /** A dónde lleva esta cifra, si lleva a algún lado. */
+  href?: string
 }) {
   const colores = {
     neutro: 'var(--color-tinta)',
@@ -48,19 +52,31 @@ export function Indicador({
     dato: 'var(--color-dato)',
   } as const
 
-  return (
-    <div className="panel px-4 py-3.5">
+  const cuerpo = (
+    <>
       <p className="rotulo">{etiqueta}</p>
       <p
-        className="cifra mt-1.5 text-[length:var(--text-cifra)] font-semibold leading-none tracking-tight"
+        className="cifra mt-2 text-[length:var(--text-cifra)] leading-none"
         style={{ color: colores[tono] }}
       >
         {typeof valor === 'number' ? valor.toLocaleString('es-MX') : valor}
       </p>
       {pie && (
-        <p className="mt-1.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">{pie}</p>
+        <p className="mt-2 text-[var(--text-menuda)] leading-snug text-[var(--color-tinta-3)]">
+          {pie}
+        </p>
       )}
-    </div>
+    </>
+  )
+
+  // Solo se levanta al pasar el cursor si de verdad lleva a algún lado.
+  // Una tarjeta que reacciona y no hace nada promete algo que no cumple.
+  if (!href) return <div className="panel px-4 py-3.5">{cuerpo}</div>
+
+  return (
+    <Link href={href} className="panel panel-vivo block px-4 py-3.5">
+      {cuerpo}
+    </Link>
   )
 }
 
