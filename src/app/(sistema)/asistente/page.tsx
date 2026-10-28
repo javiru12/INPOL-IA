@@ -30,7 +30,7 @@ export default async function Asistente() {
   return (
     <Pagina
       titulo="IA"
-      descripcion="Pregunta en español y cruza lo que quieras: territorio, elección, estructura y demanda"
+      descripcion="Cruza territorio, elección, estructura y demanda"
     >
       <Conversacion />
     </Pagina>

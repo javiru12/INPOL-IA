@@ -53,11 +53,17 @@
   --text-media:   1rem;      /* 16px */
   --text-titulo:  1.125rem;  /* 18px · título de pantalla */
   --text-cifra:   1.75rem;   /* 28px · indicadores */
+  /* Un sistema denso no tiene dónde poner un protagonista: todo pesa
+     igual y el ojo no sabe dónde ver primero. Esto es para las pocas
+     pantallas que sí tienen un centro. */
+  --text-presente: 2.25rem;  /* 36px · el centro de una pantalla vacía */
 
   /* --- Formas. Radios cortos: se lee como instrumento --- */
   --radius-xs: 3px;
   --radius-sm: 4px;
   --radius-md: 6px;
+  --radius-lg: 12px;  /* campos protagonistas: un chat no es un formulario */
+  --radius-full: 999px;
 
   /* --- Elevación. Casi inexistente, solo para capas flotantes --- */
   --shadow-menu:  0 4px 16px -4px rgb(28 24 36 / 0.16), 0 0 0 1px rgb(28 24 36 / 0.06);
