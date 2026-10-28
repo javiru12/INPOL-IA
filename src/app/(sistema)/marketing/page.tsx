@@ -55,7 +55,7 @@ export default async function Comunicacion({
 
   return (
     <Pagina
-      titulo="Comunicación"
+      titulo="Avisos y campañas"
       descripcion="Avisarle al ciudadano qué pasó con su petición, y mandar campañas segmentadas"
       acciones={
         <Link href="/marketing/nueva" className="boton boton-primario">
@@ -174,7 +174,7 @@ export default async function Comunicacion({
                       )}
                     </td>
                     <td className="w-full max-w-0">
-                      <span className="block truncate" title={a.descripcion ?? undefined}>
+                      <span className="line-clamp-2" title={a.descripcion ?? undefined}>
                         {a.descripcion ?? '—'}
                       </span>
                       <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">

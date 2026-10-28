@@ -50,7 +50,7 @@ export const NAVEGACION: Grupo[] = [
     titulo: 'Comunicación',
     entradas: [
       { etiqueta: 'Mensajes', ruta: '/mensajes', icono: 'mensajes', permisos: ['mensajes'] },
-      { etiqueta: 'Marketing', ruta: '/marketing', icono: 'mensajes', permisos: ['marketing'] },
+      { etiqueta: 'Avisos y campañas', ruta: '/marketing', icono: 'mensajes', permisos: ['marketing'] },
     ],
   },
   {

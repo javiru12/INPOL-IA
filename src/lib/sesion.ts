@@ -165,9 +165,17 @@ export async function olvidarTenant() {
 
 /** Lista de clientes para el selector de plaza. */
 export async function tenantsDisponibles() {
-  return sinTenant<Pick<Tenant, 'clave' | 'nombre' | 'nombre_corto' | 'color_acento'>[]>`
-    select clave, nombre, nombre_corto, color_acento
-    from tenants
-    where activo = true
-    order by nombre`
+  // El estado viene con la plaza: en la pantalla de elección es lo que
+  // le da identidad a cada tarjeta. «Gobierno de Chihuahua» y su estado
+  // dicen más que un subdominio.
+  return sinTenant<
+    (Pick<Tenant, 'clave' | 'nombre' | 'nombre_corto' | 'color_acento'> & {
+      estado: string | null
+    })[]
+  >`
+    select t.clave, t.nombre, t.nombre_corto, t.color_acento, e.nombre as estado
+    from tenants t
+    left join estados e on e.id = t.estado_id
+    where t.activo = true
+    order by t.nombre`
 }

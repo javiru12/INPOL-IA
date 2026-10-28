@@ -77,8 +77,17 @@ const peticionId = await p.$eval('input[name=peticionId]', (e) =>
 const [{ antes }] = await admin<{ antes: number }[]>`
   select count(*)::int as antes from mensajes_enviados where peticion_id = ${peticionId}`
 
-await p.select('select[name=via]', 'whatsapp')
-await enviarFormularioCon('input[name=peticionId]')
+// El renglón ya no trae un selector: el botón abre las vías y cada una
+// es su propio submit, así que la vía viaja en el envío.
+await p.evaluate((id) => {
+  const forma = document.querySelector(`input[name=peticionId][value="${id}"]`)?.closest('form')
+  ;(forma?.querySelector('button[type=button]') as HTMLButtonElement)?.click()
+}, peticionId)
+await new Promise((r) => setTimeout(r, 300))
+await p.evaluate((id) => {
+  const forma = document.querySelector(`input[name=peticionId][value="${id}"]`)?.closest('form')
+  ;(forma?.querySelector('button[name=via][value="whatsapp"]') as HTMLButtonElement)?.click()
+}, peticionId)
 await p.waitForFunction(
   (id) => !document.querySelector(`input[name=peticionId][value="${id}"]`),
   { timeout: 15000 },

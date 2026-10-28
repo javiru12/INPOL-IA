@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { tenantDeLaPeticion } from '@/lib/sesion'
 import { exigirAcceso } from '@/lib/acceso'
 import { permisosDelUsuario } from '@/lib/permisos'
-import { Pagina, Indicador, Distintivo, Vacio } from '@/components/pagina'
+import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { IconoVer, IconoMas } from '@/components/iconos'
 import { fechaLarga, fechaHora, cifra } from '@/lib/formato'
 import {
@@ -78,34 +78,36 @@ export default async function Configuracion({
       descripcion={`Usuarios, campañas y catálogos de ${tenant.nombre}`}
       acciones={<AccionDeSeccion seccion={seccion} puede={puede} />}
     >
-      <div className="franja">
-        <Indicador
-          etiqueta="Usuarios activos"
-          valor={resumen.usuariosActivos}
-          pie={`${cifra(resumen.usuariosTotales)} dados de alta`}
-        />
-        <Indicador
-          etiqueta="Súper Administradores"
-          valor={resumen.superAdmins}
-          tono={resumen.superAdmins > 1 ? 'exito' : 'aviso'}
-          pie={
-            resumen.superAdmins > 1
-              ? 'Nadie es imprescindible'
-              : 'Uno solo: nombra a otro antes de que haga falta'
-          }
-        />
-        <Indicador etiqueta="Campañas en curso" valor={resumen.campaniasActivas} pie="Activas" />
-        <Indicador
-          etiqueta="Licencia"
-          valor={tenant.licencia_vence ? fechaLarga(tenant.licencia_vence) : '—'}
-          pie="Fecha de vencimiento"
-          tono="dato"
-        />
-      </div>
+      {/* Estas cuatro cifras se repetían encima de las seis pestañas y
+          empujaban 160px hacia abajo la sección que de verdad vienes a
+          ver. Dichas en una línea ocupan 20 y se leen igual. */}
+      <p className="-mt-3 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+        <span>
+          <span className="cifra">{cifra(resumen.usuariosActivos)}</span> usuarios activos de{' '}
+          {cifra(resumen.usuariosTotales)}
+        </span>
+        <span aria-hidden="true" className="text-[var(--color-tinta-3)]">·</span>
+        <span>
+          <span className="cifra">{cifra(resumen.campaniasActivas)}</span> campaña
+          {resumen.campaniasActivas === 1 ? '' : 's'} en curso
+        </span>
+        <span aria-hidden="true" className="text-[var(--color-tinta-3)]">·</span>
+        <span>
+          Licencia hasta el{' '}
+          {tenant.licencia_vence ? fechaLarga(tenant.licencia_vence) : 'sin fecha'}
+        </span>
+        {/* Que haya un solo súper administrador sí es un aviso: si esa
+            persona se va, nadie puede nombrar a la siguiente. */}
+        {resumen.superAdmins <= 1 && (
+          <Distintivo tono="aviso">
+            Un solo súper administrador: nombra a otro antes de que haga falta
+          </Distintivo>
+        )}
+      </p>
 
       <nav
         aria-label="Secciones de configuración"
-        className="mt-5 flex flex-wrap items-center gap-1 border-b border-[var(--color-borde)]"
+        className="flex flex-wrap items-center gap-1 border-b border-[var(--color-borde)]"
       >
         {SECCIONES.map((s) => {
           const activa = s.clave === seccion

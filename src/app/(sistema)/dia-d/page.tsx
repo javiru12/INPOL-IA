@@ -42,6 +42,20 @@ export default async function DiaD() {
   const abiertas = t.incidencias.filter((i) => !i.resuelta)
   const urgentes = abiertas.filter((i) => i.gravedad === 'urgente').length
 
+  // ¿Esta jornada es hoy, ya pasó o falta? La pantalla hablaba siempre
+  // en presente —«a quién llamar ahora», «todavía se les puede
+  // llamar»— aunque la fecha llevara semanas atrás, y no había forma de
+  // saber si lo que se veía era la jornada en curso o el archivo de una
+  // que terminó.
+  const hoy = new Date()
+  const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`
+  const cuando: 'hoy' | 'pasada' | 'futura' =
+    jornada.fecha === hoyIso ? 'hoy' : jornada.fecha < hoyIso ? 'pasada' : 'futura'
+  const diasDeDiferencia = Math.round(
+    Math.abs(new Date(`${jornada.fecha}T12:00:00`).getTime() - new Date(`${hoyIso}T12:00:00`).getTime()) /
+      86400000,
+  )
+
   // El acumulado es la lectura real de una jornada: lo que importa no es
   // cuánta gente llegó a las once, sino cuánta lleva uno a las once.
   let suma = 0
@@ -53,6 +67,19 @@ export default async function DiaD() {
   return (
     <Pagina
       titulo="Día D"
+      insignias={
+        cuando === 'hoy' ? (
+          <Distintivo tono="exito">En curso</Distintivo>
+        ) : cuando === 'pasada' ? (
+          <Distintivo tono="neutro">
+            Terminó hace {diasDeDiferencia} {diasDeDiferencia === 1 ? 'día' : 'días'}
+          </Distintivo>
+        ) : (
+          <Distintivo tono="dato">
+            Faltan {diasDeDiferencia} {diasDeDiferencia === 1 ? 'día' : 'días'}
+          </Distintivo>
+        )
+      }
       descripcion={`${jornada.nombre} · ${fechaLarga(jornada.fecha)} · de ${jornada.hora_apertura.slice(0, 5)} a ${jornada.hora_cierre.slice(0, 5)}`}
       acciones={
         urgentes > 0 ? (
@@ -78,7 +105,13 @@ export default async function DiaD() {
           etiqueta="Faltan por salir"
           valor={faltan}
           tono={faltan > 0 ? 'aviso' : 'exito'}
-          pie={faltan > 0 ? 'Todavía se les puede llamar' : 'Salieron todos'}
+          pie={
+            faltan === 0
+              ? 'Salieron todos'
+              : cuando === 'hoy'
+                ? 'Todavía se les puede llamar'
+                : 'No salieron ese día'
+          }
         />
         <Indicador
           etiqueta="Incidencias abiertas"
@@ -108,9 +141,13 @@ export default async function DiaD() {
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <section className="panel self-start overflow-hidden">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
-            <h2 className="text-[var(--text-base)] font-semibold">A quién llamar ahora</h2>
+            <h2 className="text-[var(--text-base)] font-semibold">
+              {cuando === 'hoy' ? 'A quién llamar ahora' : 'Quiénes se quedaron sin salir'}
+            </h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-              Movilizadores con más gente comprometida que todavía no sale
+              {cuando === 'hoy'
+                ? 'Movilizadores con más gente comprometida que todavía no sale'
+                : 'Movilizadores con más gente comprometida que no acudió'}
             </p>
           </div>
           {t.rezagados.length === 0 ? (

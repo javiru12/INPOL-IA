@@ -26,39 +26,64 @@ export default async function Plaza() {
 
   return (
     <main className="grid min-h-screen place-items-center px-6 py-16">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-xl">
         <Marca />
-        <h1 className="mt-9 text-[var(--text-titulo)]">Elige la plaza</h1>
-        <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-          Cada plaza tiene su propio acceso e información. En producción se entra
-          directamente por el subdominio de cada una.
+
+        {/* Antes decía «en producción se entra por el subdominio de cada
+            una»: le explicaba al usuario cómo está montado el sistema en
+            vez de qué está eligiendo. */}
+        <h1 className="mt-9 text-[length:var(--text-pagina)] font-semibold leading-tight tracking-[-0.02em]">
+          ¿A qué plaza entras?
+        </h1>
+        <p className="mt-2 text-[var(--color-tinta-2)]">
+          Cada plaza lleva su propia operación: sus peticiones, su padrón y su
+          equipo. Elige la tuya para entrar.
         </p>
 
-        <ul className="mt-6 space-y-2">
-          {clientes.map((c) => (
-            <li key={c.clave}>
-              <form action={elegir}>
-                <input type="hidden" name="clave" value={c.clave} />
-                <button
-                  type="submit"
-                  className="panel group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:border-[var(--color-acento-borde)] hover:bg-[var(--color-acento-suave)]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="h-7 w-1 shrink-0 rounded-full"
-                    style={{ background: c.color_acento ?? 'var(--color-acento)' }}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{c.nombre}</span>
-                    <span className="clave block">{c.clave}.inpol.mx</span>
-                  </span>
-                  <span className="text-[var(--color-tinta-3)] transition-transform group-hover:translate-x-0.5">
-                    →
-                  </span>
-                </button>
-              </form>
-            </li>
-          ))}
+        <ul className="mt-7 space-y-3">
+          {clientes.map((c) => {
+            const color = c.color_acento ?? 'var(--color-acento)'
+            const iniciales = (c.nombre_corto ?? c.nombre)
+              .split(' ')
+              .filter((x) => x.length > 2)
+              .slice(0, 2)
+              .map((x) => x[0])
+              .join('')
+              .toUpperCase()
+            return (
+              <li key={c.clave}>
+                <form action={elegir}>
+                  <input type="hidden" name="clave" value={c.clave} />
+                  <button
+                    type="submit"
+                    className="panel group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:border-[var(--color-acento-borde)] hover:bg-[var(--color-acento-suave)]"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-md)] text-[var(--text-media)] font-semibold text-white"
+                      style={{ background: color }}
+                    >
+                      {iniciales}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[length:var(--text-titulo)] font-semibold">
+                        {c.nombre}
+                      </span>
+                      <span className="mt-0.5 block text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+                        {c.estado ?? 'Sin estado asignado'}
+                        <span className="clave ml-2 text-[var(--color-tinta-3)]">
+                          {c.clave}.inpol.mx
+                        </span>
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-[var(--color-tinta-3)] transition-transform group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </button>
+                </form>
+              </li>
+            )
+          })}
         </ul>
 
         {clientes.length === 0 && (
