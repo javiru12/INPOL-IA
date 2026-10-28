@@ -71,7 +71,7 @@ export function PanelCatalogo({
         </section>
       )}
 
-      <section className="panel overflow-hidden">
+      <section className="panel overflow-clip">
         {(ultimo.error || ultimo.mensaje) && (
           <div className="border-b border-[var(--color-borde)] p-3">
             <Aviso estado={ultimo} />

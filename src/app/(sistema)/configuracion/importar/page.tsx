@@ -72,7 +72,7 @@ export default async function Importar() {
     >
       <FormaImportar />
 
-      <section className="panel mt-6 overflow-hidden">
+      <section className="panel mt-6 overflow-clip">
         <div className="border-b border-[var(--color-borde)] px-4 py-3">
           <h2 className="text-[var(--text-base)] font-semibold">Qué se ha cargado</h2>
           <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">

@@ -236,7 +236,7 @@ export default async function DetallePeticion({
 
           <MensajesDePeticion peticionId={p.id} />
 
-          <section className="panel overflow-hidden">
+          <section className="panel overflow-clip">
             <h2 className="border-b border-[var(--color-borde)] px-4 py-3 text-[var(--text-base)] font-semibold">
               Historial de seguimiento
             </h2>

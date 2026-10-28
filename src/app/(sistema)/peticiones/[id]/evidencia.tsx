@@ -43,7 +43,7 @@ export function Evidencia({
     .filter((g) => g.items.length > 0)
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <div className="flex items-center justify-between border-b border-[var(--color-borde)] px-4 py-3">
         <h2 className="text-[var(--text-base)] font-semibold">Evidencia</h2>
         <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">

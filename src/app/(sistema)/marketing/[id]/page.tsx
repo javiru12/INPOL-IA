@@ -75,7 +75,7 @@ export default async function DetalleCampania({
           </p>
         </section>
 
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="flex items-baseline justify-between gap-3 px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Destinatarios</h2>
             <span className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">

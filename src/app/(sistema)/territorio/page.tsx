@@ -176,9 +176,9 @@ export default async function Territorio({
           pie={filtros.municipio ?? 'Nuevo León, los 51 municipios'}
         />
         <Indicador
-          etiqueta="Lista nominal"
+          etiqueta="Lista nominal 2015"
           valor={ind.lista_nominal}
-          pie="Electores registrados según el INE"
+          pie="Corte del INE de esa elección, no el padrón de hoy"
         />
         <Indicador
           etiqueta="Peticiones por sección"
@@ -195,7 +195,7 @@ export default async function Territorio({
           />
         </div>
       ) : (
-        <section className="panel mt-3 overflow-hidden">
+        <section className="panel mt-3 overflow-clip">
           {ind.peticiones === 0 && (
             <p className="border-b border-[var(--color-borde)] bg-[var(--color-superficie-2)] px-4 py-2 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
               Todavía no hay peticiones ligadas a una sección. Mientras tanto, el padrón y los
@@ -204,6 +204,17 @@ export default async function Territorio({
           )}
           <Tabla>
             <thead>
+              {/* Un renglón de grupo arriba: en la misma tabla conviven
+                  la geografía del INE, la operación de hoy y el
+                  resultado de una elección de hace once años. Sin
+                  decirlo, se leen como si fueran la misma foto. */}
+              <tr className="grupos">
+                <th colSpan={3}>Territorio · INE 2015</th>
+                <th>Padrón · INE 2015</th>
+                <th colSpan={2}>Operación · hoy</th>
+                <th colSpan={2}>Elección · gubernatura 2015</th>
+                <th />
+              </tr>
               <tr>
                 <th>Sección</th>
                 <th>Municipio</th>
@@ -216,9 +227,9 @@ export default async function Territorio({
                 </Ordenable>
                 <th className="num hidden xl:table-cell">Ciudadanos</th>
                 <Ordenable columna="participacion" actual={orden} consulta={consulta}>
-                  Participación 2015
+                  Participación
                 </Ordenable>
-                <th className="hidden 2xl:table-cell">Más votado 2015</th>
+                <th className="hidden 2xl:table-cell">Más votado</th>
                 <th className="w-20">Carga</th>
               </tr>
             </thead>
@@ -296,7 +307,7 @@ export default async function Territorio({
       )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Secciones prioritarias</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">

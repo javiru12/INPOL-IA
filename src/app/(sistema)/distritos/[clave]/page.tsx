@@ -81,7 +81,7 @@ export default async function Distrito({
       }
     >
       <div className="franja">
-        <Indicador etiqueta="Padrón" valor={padron} pie="Lista nominal del INE" />
+        <Indicador etiqueta="Padrón" valor={padron} pie="Lista nominal del INE, corte de 2015" />
         <Indicador
           etiqueta="Participación"
           valor={participacion === null ? '—' : `${participacion.toFixed(1)}%`}
@@ -102,7 +102,7 @@ export default async function Distrito({
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">Cómo votó el distrito</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -144,7 +144,7 @@ export default async function Distrito({
           )}
         </section>
 
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">Qué le pide la gente</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -180,7 +180,7 @@ export default async function Distrito({
       {secciones.length === 0 ? (
         <Vacio titulo="Este distrito no tiene secciones cargadas" />
       ) : (
-        <section className="panel mt-3 overflow-hidden">
+        <section className="panel mt-3 overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">Sus secciones</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">

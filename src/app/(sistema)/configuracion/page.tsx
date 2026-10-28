@@ -196,7 +196,7 @@ async function SeccionUsuarios({
   const nombrePerfil = new Map(perfiles.map((p) => [p.clave, p.nombre]))
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <Tabla>
         <thead>
           <tr>
@@ -261,7 +261,7 @@ async function SeccionCampanias({ tenantId }: { tenantId: string }) {
   }
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <Tabla>
         <thead>
           <tr>

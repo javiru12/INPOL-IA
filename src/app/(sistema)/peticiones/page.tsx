@@ -136,7 +136,7 @@ export default async function Peticiones({
           descripcion="Prueba quitando algún filtro o buscando con otras palabras."
         />
       ) : (
-        <div className="panel overflow-hidden">
+        <div className="panel overflow-clip">
           <Tabla>
             <thead>
               <tr>

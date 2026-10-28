@@ -179,7 +179,7 @@ export default async function Actividades({
             />
 
             {lista && lista.total > 0 ? (
-              <div className="panel overflow-hidden">
+              <div className="panel overflow-clip">
                 <Tabla>
                   <thead>
                     <tr>

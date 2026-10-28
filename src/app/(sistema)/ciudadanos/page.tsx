@@ -112,7 +112,7 @@ export default async function Ciudadanos({
             />
           </div>
 
-          <div className="panel overflow-hidden">
+          <div className="panel overflow-clip">
             <Tabla>
               <thead>
                 <tr>

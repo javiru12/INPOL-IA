@@ -221,7 +221,7 @@ export function Calendario({
   const ultimaFila = Math.floor((celdas.length - 1) / 7)
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-borde)] px-4 py-3">
         <div className="flex items-center gap-2">
           <Link

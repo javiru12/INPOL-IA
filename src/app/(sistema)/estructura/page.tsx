@@ -241,7 +241,7 @@ export default async function Estructura({
           </div>
 
           {/* 1 · ¿Quién compone el equipo y qué carga lleva? ---------- */}
-          <section className="panel mt-3 overflow-hidden">
+          <section className="panel mt-3 overflow-clip">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">
                 El equipo
@@ -316,7 +316,7 @@ export default async function Estructura({
 
           {/* 2 · ¿Qué territorio cubre la persona elegida? ------------ */}
           {elegida && r.detalle && (
-            <section className="panel mt-3 overflow-hidden">
+            <section className="panel mt-3 overflow-clip">
               <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-[var(--color-borde)] px-4 py-3">
                 <div>
                   <h2 className="text-[var(--text-base)] font-semibold">
@@ -445,7 +445,7 @@ export default async function Estructura({
               )}
             </section>
 
-            <section className="panel overflow-hidden">
+            <section className="panel overflow-clip">
               <div className="border-b border-[var(--color-borde)] px-4 py-3">
                 <h2 className="text-[var(--text-base)] font-semibold">Cobertura por municipio</h2>
                 <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -517,7 +517,7 @@ export default async function Estructura({
 
           {/* 4 · Lo accionable: zonas y ramas ------------------------- */}
           <div className="mt-6 grid gap-4 xl:grid-cols-[1.5fr_1fr] xl:items-start">
-            <section className="panel overflow-hidden">
+            <section className="panel overflow-clip">
               <div className="border-b border-[var(--color-borde)] px-4 py-3">
                 <h2 className="text-[var(--text-base)] font-semibold">
                   Zonas que piden intervención
@@ -588,7 +588,7 @@ export default async function Estructura({
               )}
             </section>
 
-            <section className="panel overflow-hidden">
+            <section className="panel overflow-clip">
               <div className="border-b border-[var(--color-borde)] px-4 py-3">
                 <h2 className="text-[var(--text-base)] font-semibold">Cómo va cada área</h2>
                 <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">

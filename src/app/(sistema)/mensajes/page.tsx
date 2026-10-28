@@ -133,7 +133,7 @@ export default async function Mensajes({
               }
             />
           ) : (
-            <div className="panel overflow-hidden">
+            <div className="panel overflow-clip">
               <ul>
                 {r.filas.map((h) => (
                   <li key={h.id} className="border-b border-[var(--color-borde)] last:border-b-0">

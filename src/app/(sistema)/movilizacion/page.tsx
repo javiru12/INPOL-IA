@@ -252,7 +252,7 @@ export default async function Movilizacion({
           </section>
 
           {/* 2 · La tabla de la red ---------------------------------- */}
-          <section className="panel mt-3 overflow-hidden">
+          <section className="panel mt-3 overflow-clip">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">La red</h2>
               <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
@@ -348,7 +348,7 @@ export default async function Movilizacion({
               )}
             </section>
 
-            <section className="panel overflow-hidden">
+            <section className="panel overflow-clip">
               <div className="border-b border-[var(--color-borde)] px-4 py-3">
                 <h2 className="text-[var(--text-base)] font-semibold">Avance por municipio</h2>
                 <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -406,7 +406,7 @@ export default async function Movilizacion({
 
       {/* 4 · Crecer la red: prospectos y alta --------------------- */}
       <div className="mt-6 grid gap-4 xl:grid-cols-[1.5fr_1fr] xl:items-start">
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">
               Prospectos de movilizador
@@ -469,7 +469,7 @@ export default async function Movilizacion({
           )}
         </section>
 
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Sumar a la red</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">

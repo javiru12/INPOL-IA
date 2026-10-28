@@ -389,6 +389,27 @@
   /* Una fila de 34px es una hoja de cálculo. El nombre de una persona
      y lo que vino a pedir necesitan sitio para respirar: 1rem arriba y
      abajo deja la fila en unos 56px con una línea, 64 con dos. */
+  /* Renglón que agrupa columnas por procedencia. Se queda pegado junto
+     con el de los nombres: de qué año es cada dato es justo lo que no
+     puede desaparecer al bajar por la tabla. Alto fijo porque el
+     renglón de abajo necesita saber dónde empezar. */
+  .tabla thead tr.grupos th {
+    top: 0;
+    height: 28px;
+    padding: 0.4rem 1rem 0.2rem;
+    font-size: var(--text-micro);
+    font-weight: 600;
+    color: var(--color-tinta-3);
+    background: var(--color-superficie-2);
+    border-bottom: none;
+  }
+  .tabla thead:has(tr.grupos) tr:not(.grupos) th {
+    top: 28px;
+  }
+  .tabla thead tr.grupos th:not(:first-child):not(:empty) {
+    border-left: 1px solid var(--color-borde);
+  }
+
   .tabla tbody td {
     padding: 1rem;
     border-bottom: 1px solid var(--color-borde);

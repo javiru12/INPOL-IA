@@ -107,7 +107,11 @@ export default async function MapaTerritorial({
           pie={`${totales.conPeticiones} con peticiones capturadas`}
         />
         <Indicador etiqueta="Peticiones" valor={totales.peticiones} tono="dato" pie="En todo el territorio" />
-        <Indicador etiqueta="Lista nominal" valor={totales.lista} pie="Electores según el INE" />
+        <Indicador
+          etiqueta="Lista nominal 2015"
+          valor={totales.lista}
+          pie="Corte del INE de esa elección"
+        />
         <Indicador
           etiqueta="Participación 2015"
           valor={`${participacionGlobal}%`}
@@ -123,7 +127,7 @@ export default async function MapaTerritorial({
           unidad={definicion.unidad}
         />
 
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <h2 className="border-b border-[var(--color-borde)] px-4 py-3 text-[var(--text-base)] font-semibold">
             {metrica === 'margen' ? 'Las más competidas' : 'Ranking'}
           </h2>

@@ -67,7 +67,7 @@ export async function SeccionCiudadanos({ tenantId }: { tenantId: string }) {
         />
       </div>
 
-      <section className="panel overflow-hidden">
+      <section className="panel overflow-clip">
         <div className="border-b border-[var(--color-borde)] px-4 py-3">
           <h3 className="text-[var(--text-base)] font-semibold">De dónde viene cada ficha</h3>
           <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -192,7 +192,7 @@ export async function SeccionMovilizadores({ tenantId }: { tenantId: string }) {
           descripcion="La red se arma desde Movilización, dando de alta a quien se compromete a llevar gente a votar."
         />
       ) : (
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <Tabla>
             <thead>
               <tr>

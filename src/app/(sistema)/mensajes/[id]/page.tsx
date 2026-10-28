@@ -47,7 +47,7 @@ export default async function DetalleHilo({
       <MarcarVisto hiloId={hilo.id} pendientes={pendientes} />
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Mensajes</h2>
             {hilo.archivado && <Distintivo>Archivado</Distintivo>}

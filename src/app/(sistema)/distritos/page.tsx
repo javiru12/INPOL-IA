@@ -102,7 +102,7 @@ export default async function Distritos({
         <Indicador
           etiqueta="Padrón del estado"
           valor={padron}
-          pie="Lista nominal según el INE"
+          pie="Lista nominal del INE, corte de 2015"
         />
         <Indicador
           etiqueta="Se deciden por menos de 15 puntos"
@@ -152,7 +152,7 @@ export default async function Distritos({
           }
         />
       ) : (
-        <section className="panel mt-3 overflow-hidden">
+        <section className="panel mt-3 overflow-clip">
           <Tabla>
             <thead>
               <tr>

@@ -200,7 +200,7 @@ export default async function FichaMovilizador({ params }: { params: Promise<{ i
             </Bloque>
           </section>
 
-          <section className="panel overflow-hidden">
+          <section className="panel overflow-clip">
             <div className="border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">Asignarle a alguien más</h2>
               <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
@@ -211,7 +211,7 @@ export default async function FichaMovilizador({ params }: { params: Promise<{ i
           </section>
         </div>
 
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-[var(--color-borde)] px-4 py-3">
             <div>
               <h2 className="text-[var(--text-base)] font-semibold">A quién lleva</h2>

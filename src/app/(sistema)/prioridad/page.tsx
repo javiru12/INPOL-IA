@@ -137,7 +137,7 @@ export default async function Prioridad({
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">El estado, por prioridad</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -147,7 +147,7 @@ export default async function Prioridad({
           <LienzoPrioridad distritos={distritos} />
         </section>
 
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="font-medium">Distritos</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -186,7 +186,7 @@ export default async function Prioridad({
         </section>
       </div>
 
-      <section className="panel mt-3 overflow-hidden">
+      <section className="panel mt-3 overflow-clip">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--color-borde)] px-4 py-3">
           <div>
             <h2 className="font-medium">Las {CUANTAS} secciones que más rinden</h2>

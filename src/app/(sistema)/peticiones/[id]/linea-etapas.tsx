@@ -82,7 +82,7 @@ export function LineaDeEtapas({
   const marcador = trazo.current && largo ? trazo.current.getPointAtLength(avance) : null
 
   return (
-    <section className="panel overflow-hidden px-5 py-4">
+    <section className="panel overflow-clip px-5 py-4">
       <svg
         viewBox={`0 0 ${ANCHO} ${ALTO}`}
         className="h-auto w-full"

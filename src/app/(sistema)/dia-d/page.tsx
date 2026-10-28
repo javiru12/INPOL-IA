@@ -140,7 +140,7 @@ export default async function DiaD() {
       </section>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">
               {cuando === 'hoy' ? 'A quién llamar ahora' : 'Quiénes se quedaron sin salir'}
@@ -219,7 +219,7 @@ export default async function DiaD() {
           )}
         </section>
 
-        <section className="panel self-start overflow-hidden">
+        <section className="panel self-start overflow-clip">
           <div className="border-b border-[var(--color-borde)] px-4 py-3">
             <h2 className="text-[var(--text-base)] font-semibold">Avance por distrito</h2>
             <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
@@ -266,7 +266,7 @@ export default async function DiaD() {
         </section>
       </div>
 
-      <section className="panel mt-3 overflow-hidden">
+      <section className="panel mt-3 overflow-clip">
         <div className="border-b border-[var(--color-borde)] px-4 py-3">
           <h2 className="text-[var(--text-base)] font-semibold">Incidencias en casilla</h2>
           <p className="mt-0.5 text-[var(--text-menuda)] text-[var(--color-tinta-2)]">

@@ -161,7 +161,7 @@ export default async function DetalleActividad({
             }
           />
         ) : (
-          <div className="panel overflow-hidden">
+          <div className="panel overflow-clip">
             <Tabla>
               <thead>
                 <tr>

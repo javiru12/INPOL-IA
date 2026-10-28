@@ -255,7 +255,7 @@ export default async function FichaCiudadano({
           descripcion="Esta persona está en el padrón, pero todavía no ha levantado ninguna solicitud. En cuanto lo haga, aquí quedará el seguimiento completo."
         />
       ) : (
-        <section className="panel overflow-hidden">
+        <section className="panel overflow-clip">
             <div className="flex items-center justify-between border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">Historial de peticiones</h2>
               <span className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">

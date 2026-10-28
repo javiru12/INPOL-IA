@@ -78,7 +78,7 @@ function Resultado({ datos }: { datos: NonNullable<Consulta['resultado']> }) {
   const estatus = datos.estatus ?? 'Abierta'
 
   return (
-    <section className="panel mt-4 overflow-hidden">
+    <section className="panel mt-4 overflow-clip">
       <div className="border-b border-[var(--color-borde)] px-5 py-4">
         <p className="clave">{datos.folio}</p>
         <p

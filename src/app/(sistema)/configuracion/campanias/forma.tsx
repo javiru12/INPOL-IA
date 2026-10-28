@@ -168,7 +168,7 @@ export function Candidatos({
   const [edicion, setEdicion] = useState<DatosCandidato | null>(null)
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <h2 className="border-b border-[var(--color-borde)] px-4 py-3 text-[var(--text-base)] font-semibold">
         Candidatos
       </h2>

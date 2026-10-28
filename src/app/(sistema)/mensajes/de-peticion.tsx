@@ -23,7 +23,7 @@ export async function MensajesDePeticion({ peticionId }: { peticionId: string })
   const hilos = await hilosDePeticion(tenant.id, sesion.usuarioId, peticionId)
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel overflow-clip">
       <div className="flex items-center gap-2 border-b border-[var(--color-borde)] px-4 py-3">
         <h2 className="text-[var(--text-base)] font-semibold">Mensajes del equipo</h2>
         <Link

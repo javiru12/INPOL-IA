@@ -41,7 +41,7 @@ export function LienzoMapa({ archivo, regiones, metrica, unidad }: Props) {
     for (const r of regiones) {
       const detalle: [string, string][] = [
         ['Secciones', cifra(r.secciones)],
-        ['Lista nominal', cifra(r.lista_nominal)],
+        ['Lista nominal 2015', cifra(r.lista_nominal)],
       ]
 
       if (metrica === 'peticiones') {

@@ -128,7 +128,7 @@ export default async function Comunicacion({
             descripcion="Toda petición con desenlace tiene su aviso registrado. Si acabas de filtrar, prueba quitando algún filtro."
           />
         ) : (
-          <div className="panel overflow-hidden">
+          <div className="panel overflow-clip">
             <Tabla>
               <thead>
                 <tr>
@@ -239,7 +239,7 @@ export default async function Comunicacion({
             }
           />
         ) : (
-          <div className="panel overflow-hidden">
+          <div className="panel overflow-clip">
             <Tabla>
               <thead>
                 <tr>

@@ -263,7 +263,7 @@ export default async function Panel() {
             )}
           </div>
 
-          <section className="panel overflow-hidden">
+          <section className="panel overflow-clip">
             <div className="flex items-center justify-between border-b border-[var(--color-borde)] px-4 py-3">
               <h2 className="text-[var(--text-base)] font-semibold">Registros recientes</h2>
               <Link href="/peticiones" className="boton boton-llano !h-7 text-[var(--text-menuda)]">

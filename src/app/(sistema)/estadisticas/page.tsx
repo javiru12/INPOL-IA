@@ -446,7 +446,7 @@ export default async function Estadisticas({
 
       {vista === 'equipo' && (
       /* 3 · ¿Cómo va cada quien? ------------------------------------ */
-      <section className="panel mt-3 overflow-hidden">
+      <section className="panel mt-3 overflow-clip">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
           <h2 className="text-[var(--text-base)] font-semibold">Cómo va cada responsable</h2>
           <p className="text-[var(--text-micro)] text-[var(--color-tinta-3)]">
@@ -551,7 +551,7 @@ export default async function Estadisticas({
       {/* 5 · ¿Quién pide? -------------------------------------------
           Va al final porque responde una pregunta distinta de las de
           arriba: no cómo va la gestión, sino a quién le está sirviendo. */}
-      <section className="panel mt-3 overflow-hidden">
+      <section className="panel mt-3 overflow-clip">
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-borde)] px-4 py-3">
           <div>
             <h2 className="text-[var(--text-base)] font-semibold">Quién pide, por edad</h2>
