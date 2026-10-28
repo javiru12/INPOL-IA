@@ -38,10 +38,10 @@ export default async function Panel() {
 
   return (
     <>
-      {/* El vidrio necesita algo detrás que desenfocar: sin un fondo con
-          profundidad, una tarjeta translúcida se ve gris y no de vidrio.
-          Va fijo porque el contenido rueda por encima. */}
-      <div aria-hidden="true" className="lienzo-profundo pointer-events-none fixed inset-0 -z-10" />
+      {/* El color lo pone el body —ahí sí queda detrás de la barra y de
+          la cabecera—; esta capa solo añade el grano, que es lo que
+          separa un degradado de CSS de una foto desenfocada. */}
+      <div aria-hidden="true" className="fondo-padre" />
     <Pagina
       titulo={`Buen día, ${sesion.nombre.split(' ')[0]}`}
       descripcion={`Panorama de ${tenant.nombre_corto ?? tenant.nombre} al día de hoy`}

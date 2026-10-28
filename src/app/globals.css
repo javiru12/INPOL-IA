@@ -159,47 +159,87 @@
     border-radius: var(--radius-md);
   }
 
-  /* --- Vidrio ---
-     El efecto necesita dos cosas: una superficie translúcida y un fondo
-     con profundidad debajo. Sin lo segundo el desenfoque no tiene nada
-     que tomar y la tarjeta se ve gris, no de vidrio. Por eso van juntos
-     y por eso se aplica por pantalla, no a todo el sistema: una tabla
-     de trabajo de ocho horas quiere blanco opaco. */
-  .lienzo-profundo {
+  /* --- Vidrio líquido ---
+     Lo que hace que una superficie se lea como vidrio y no como un
+     plástico blanco son tres cosas, y faltando una se cae el efecto:
+     un fondo con color debajo que el desenfoque pueda tomar, muy poca
+     opacidad propia, y un brillo en el canto —el reflejo de la luz en
+     el borde de una lente—. Por eso el borde no es un color plano sino
+     un degradado enmascarado.
+
+     Se marca por pantalla con `data-vidrio`, no en todo el sistema: una
+     tabla que se mira ocho horas quiere blanco opaco. */
+  /* El fondo va en el body, no dentro del contenido: ahí dentro queda
+     atrapado por el armazón y se corta justo en la barra y la cabecera,
+     que es donde más se tiene que ver que son una sola pieza. */
+  body:has([data-vidrio]) {
     background:
-      radial-gradient(1100px 680px at 6% -10%, rgb(130 84 155 / 0.42), transparent 58%),
-      radial-gradient(980px 640px at 98% 2%, rgb(46 112 158 / 0.34), transparent 60%),
-      radial-gradient(900px 620px at 52% 108%, rgb(158 96 150 / 0.30), transparent 58%),
-      radial-gradient(760px 520px at 78% 56%, rgb(86 118 176 / 0.22), transparent 62%),
-      var(--color-lienzo);
+      radial-gradient(1200px 760px at 4% -12%, rgb(140 86 170 / 0.55), transparent 58%),
+      radial-gradient(1050px 700px at 100% -4%, rgb(40 118 170 / 0.48), transparent 58%),
+      radial-gradient(1000px 700px at 46% 112%, rgb(196 102 150 / 0.42), transparent 56%),
+      radial-gradient(820px 600px at 84% 62%, rgb(78 124 196 / 0.34), transparent 60%),
+      radial-gradient(700px 520px at 16% 70%, rgb(118 180 196 / 0.28), transparent 60%),
+      linear-gradient(160deg, #f3f0f8, #eef2f7 55%, #f7f1f4);
   }
 
-  /* Toda superficie de una pantalla de vidrio, sin tocar los componentes:
-     se marca el contenedor y las tarjetas de dentro cambian solas. */
+  /* El grano es lo que separa un degradado de CSS de una fotografía
+     desenfocada: sin él la superficie se ve digital y plana. */
+  .fondo-padre {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
   [data-vidrio] .panel,
   [data-vidrio] .franja {
-    /* Translúcido de verdad: a 0.68 sobre un fondo casi blanco el
-       resultado era blanco, y el desenfoque no tenía nada que tomar. */
-    background: rgb(255 255 255 / 0.5);
-    border-color: rgb(255 255 255 / 0.65);
-    border-radius: 1rem;
-    -webkit-backdrop-filter: blur(26px) saturate(180%);
-    backdrop-filter: blur(26px) saturate(180%);
+    position: relative;
+    background: rgb(255 255 255 / 0.3);
+    border-color: transparent;
+    border-radius: 1.5rem;
+    -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(1.07);
+    backdrop-filter: blur(32px) saturate(190%) brightness(1.07);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.75),
-      0 16px 40px -24px rgb(32 33 43 / 0.35);
+      inset 0 0 26px rgb(255 255 255 / 0.2),
+      0 22px 52px -26px rgb(28 24 40 / 0.45);
   }
-  [data-vidrio] .franja { gap: 1px; background: rgb(255 255 255 / 0.38); }
-  [data-vidrio] .franja > * { background: rgb(255 255 255 / 0.42); }
 
-  /* Levantarse al pasar encima es lo que hace que un tablero se sienta
-     vivo y no una imagen pegada. */
+  /* El canto: degradado enmascarado para que solo quede el anillo de
+     1px. Un borde de color plano no refleja; este sí. */
+  [data-vidrio] .panel::before,
+  [data-vidrio] .franja::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: linear-gradient(
+      145deg,
+      rgb(255 255 255 / 0.95),
+      rgb(255 255 255 / 0.28) 36%,
+      rgb(255 255 255 / 0.12) 58%,
+      rgb(255 255 255 / 0.8)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  [data-vidrio] .franja { gap: 1px; background: rgb(255 255 255 / 0.22); }
+  [data-vidrio] .franja > * { background: rgb(255 255 255 / 0.26); }
+
   [data-vidrio] .panel-vivo {
-    transition: transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1), background-color 220ms;
+    transition: transform 240ms cubic-bezier(0.2, 0.7, 0.3, 1), background-color 240ms;
   }
   [data-vidrio] .panel-vivo:hover {
     transform: translateY(-3px);
-    background: rgb(255 255 255 / 0.85);
+    background: rgb(255 255 255 / 0.45);
   }
 
   /* --- Franja de indicadores ---
@@ -361,6 +401,23 @@
 }
 
 @layer utilities {
+  /* El armazón, en vidrio, cuando la pantalla lo es: si el fondo es uno
+     solo no puede haber dos tapas opacas encima partiéndolo en tres.
+     Va en esta capa y no en `components` porque las utilidades de
+     Tailwind se aplican después y ganarían aunque tengan menos
+     especificidad: el orden de capa decide antes que la especificidad. */
+  body:has([data-vidrio]) nav[aria-label='Navegación principal'],
+  body:has([data-vidrio]) header {
+    background: rgb(255 255 255 / 0.48);
+    -webkit-backdrop-filter: blur(30px) saturate(185%);
+    backdrop-filter: blur(30px) saturate(185%);
+    border-color: rgb(255 255 255 / 0.55);
+  }
+
+  body:has([data-vidrio]) main {
+    background: transparent;
+  }
+
   /* Claves, folios y secciones: monoespaciado y un punto más chico
      para que no compitan con el nombre de la persona. */
   .clave {

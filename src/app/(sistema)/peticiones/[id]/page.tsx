@@ -6,8 +6,9 @@ import { tenantDeLaPeticion } from '@/lib/sesion'
 import { Pagina, Distintivo, Vacio } from '@/components/pagina'
 import { PanelSeguimiento } from './seguimiento'
 import { Evidencia, type Adjunto } from './evidencia'
+import { LineaDeEtapas } from './linea-etapas'
 import { MensajesDePeticion } from '@/app/(sistema)/mensajes/de-peticion'
-import { fechaLarga, fechaHora } from '@/lib/formato'
+import { fechaLarga, fechaHora, fechaCorta } from '@/lib/formato'
 
 export const metadata: Metadata = { title: 'Detalle de petición' }
 
@@ -94,9 +95,16 @@ export default async function DetallePeticion({
 
     const [seguimientos, estatusPosibles, adjuntos] = await Promise.all([
       tx<
-        { id: string; tipo: string; detalle: string; autor: string | null; cuando: string }[]
+        {
+          id: string
+          tipo: string
+          detalle: string
+          autor: string | null
+          cuando: string
+          estatus_nuevo: string | null
+        }[]
       >`
-        select s.id, s.tipo, s.detalle,
+        select s.id, s.tipo, s.detalle, s.estatus_nuevo,
                nullif(trim(concat_ws(' ', u.nombre, u.apellido_paterno)), '') as autor,
                s.creado_en::text as cuando
         from peticion_seguimientos s
@@ -128,6 +136,36 @@ export default async function DetallePeticion({
   // una petición y no saber si alguien la tiene es lo peor que puede
   // pasar en esta pantalla—, y sale del propio seguimiento.
   const ultimoMovimiento = seguimientos.find((s) => s.autor)
+
+  // --- La ruta de atención -------------------------------------------
+  // Cancelada y «No interpretada» no son etapas del camino: son salirse
+  // de él. Pintarlas en la línea haría creer que cancelar es avanzar.
+  const RUTA = ['Abierta', 'En proceso', 'En gestión', 'Completada'] as const
+  const enOrden = [...seguimientos].reverse()
+
+  const etapas = RUTA.map((nombre) => {
+    const llegada =
+      nombre === 'Abierta'
+        ? p.fecha_apertura
+        : enOrden.find((s) => s.estatus_nuevo === nombre)?.cuando ?? null
+    return { nombre, fecha: llegada ? fechaCorta(llegada) : null }
+  })
+
+  const indiceActual = RUTA.indexOf((p.estatus ?? '') as (typeof RUTA)[number])
+
+  // Desde cuándo está en la etapa en la que está.
+  const entroEnLaEtapa =
+    indiceActual === 0
+      ? p.fecha_apertura
+      : enOrden.find((s) => s.estatus_nuevo === p.estatus)?.cuando ?? null
+  // Sin tocar el espacio: Postgres manda '2026-09-30 16:30:00+00' y
+  // cambiarlo por una T lo vuelve ISO mal formado —el huso pide
+  // '+00:00'— y Date lo rechaza. Con el espacio, V8 sí lo parsea.
+  const entroEl = entroEnLaEtapa ? new Date(entroEnLaEtapa) : null
+  const diasEnLaEtapa =
+    entroEl && !Number.isNaN(entroEl.getTime())
+      ? Math.max(0, Math.floor((Date.now() - entroEl.getTime()) / 86400000))
+      : null
 
   // Problemática y prioridad ya van en el encabezado: repetirlas aquí
   // hacía leer dos veces lo mismo antes de llegar a lo que no se sabe.
@@ -163,7 +201,14 @@ export default async function DetallePeticion({
         </Link>
       }
     >
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+      <LineaDeEtapas
+        etapas={etapas}
+        actual={indiceActual}
+        diasEnLaEtapa={diasEnLaEtapa}
+        desviada={indiceActual < 0 ? (p.estatus ?? 'Sin estatus') : null}
+      />
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:items-start">
         <div className="space-y-4">
           <section className="panel px-5 py-5">
             <h2 className="rotulo mb-2">Lo que pidió</h2>
