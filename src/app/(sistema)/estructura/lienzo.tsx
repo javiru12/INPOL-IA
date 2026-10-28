@@ -8,31 +8,33 @@ import { colorDeIndice } from '@/lib/paleta'
 import { cifra } from '@/lib/formato'
 import type { MunicipioCarga, Pinta } from './consultas'
 
-const ARCHIVO = 'nl-municipios.json'
-
 type Props = {
   municipios: MunicipioCarga[]
   pinta: Pinta
   /** Persona elegida: el mapa pasa a mostrar su territorio. */
   persona: { id: string; nombre: string } | null
+  /** Cartografía del estado del cliente. */
+  archivo: string | null
 }
 
 /**
  * El territorio pintado por carga o por responsable.
  *
  * La cartografía se trae en el cliente, como en Mapa territorial: son
- * 51 polígonos y no tiene caso que viajen en el HTML de la página.
+ * unas decenas de polígonos y no tiene caso que viajen en el HTML de la
+ * página. Cuál se trae depende del estado del cliente.
  */
-export function LienzoEquipo({ municipios, pinta, persona }: Props) {
+export function LienzoEquipo({ municipios, pinta, persona, archivo }: Props) {
   const [geo, setGeo] = useState<FeatureCollection<Geometry, Region> | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activa, setActiva] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!archivo) return
     let vigente = true
-    fetch(`/geo/${ARCHIVO}`)
+    fetch(`/geo/${archivo}`)
       .then((r) => {
-        if (!r.ok) throw new Error(`No se encontró ${ARCHIVO}`)
+        if (!r.ok) throw new Error(`No se encontró ${archivo}`)
         return r.json()
       })
       .then((j) => vigente && setGeo(j))
@@ -40,7 +42,7 @@ export function LienzoEquipo({ municipios, pinta, persona }: Props) {
     return () => {
       vigente = false
     }
-  }, [])
+  }, [archivo])
 
   // Un color por responsable, asignado entre quienes de verdad encabezan
   // alguna zona: así la leyenda no pasa de ocho entradas aunque el equipo
@@ -132,7 +134,7 @@ export function LienzoEquipo({ municipios, pinta, persona }: Props) {
       <div className="panel flex h-[420px] flex-col items-center justify-center px-6 text-center">
         <p className="font-medium">No se pudo cargar la cartografía</p>
         <p className="mt-1 max-w-sm text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-          Falta el archivo <span className="clave">{ARCHIVO}</span> en{' '}
+          Falta el archivo <span className="clave">{archivo}</span> en{' '}
           <span className="clave">public/geo/</span>. El resto de la pantalla funciona sin él.
         </p>
       </div>

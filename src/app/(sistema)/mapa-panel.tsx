@@ -12,22 +12,26 @@ import { cifra } from '@/lib/formato'
  */
 export function MapaDelPanel({
   municipios,
+  archivo,
 }: {
   municipios: { clave: string; nombre: string; peticiones: number }[]
+  /** Cartografía del estado del cliente. Null si no está cargada. */
+  archivo: string | null
 }) {
   const [geo, setGeo] = useState<FeatureCollection<Geometry, Region> | null>(null)
   const router = useRouter()
 
   useEffect(() => {
+    if (!archivo) return
     let vigente = true
-    fetch('/geo/nl-municipios.json')
+    fetch(`/geo/${archivo}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => vigente && setGeo(j))
       .catch(() => {})
     return () => {
       vigente = false
     }
-  }, [])
+  }, [archivo])
 
   if (!municipios.length) {
     return (

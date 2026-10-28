@@ -1,5 +1,5 @@
 {
-  "generado": "2026-10-01",
+  "generado": "2026-10-27",
   "fuente": "INE · Marco Geográfico Seccional (corte 31-ene-2025), descargado de https://storage.googleapis.com/mapoteca/MGS_CCL/SHAPEFILE.7z — archivo publicado en https://cartografia.ine.mx/sige8/productosCartograficos/bases",
   "proyeccion": "EPSG:4326 (lon/lat). El origen viene en Cónica Conforme de Lambert y se reproyectó con mapshaper -proj wgs84.",
   "capas": {
@@ -34,6 +34,62 @@
       "origen": "DISTRITO_FEDERAL.shp",
       "simplificacion": "2.5%",
       "nota": "300 distritos electorales federales (distritación vigente aprobada en 2023). clave = entidad-distrito, p. ej. 19-05. Nuevo León tiene 14 distritos en esta distritación; la tabla `distritos` ambito='federal' todavía trae 12 (distritación 2017)."
+    },
+    "chih-municipios": {
+      "archivo": "chih-municipios.json",
+      "rasgos": 67,
+      "bytes": 378652,
+      "origen": "MUNICIPIO.shp (ENTIDAD=08)",
+      "simplificacion": "Douglas-Peucker 0.0012°"
+    },
+    "chih-distritos-locales": {
+      "archivo": "chih-distritos-locales.json",
+      "rasgos": 22,
+      "bytes": 108772,
+      "origen": "DISTRITO_LOCAL.shp (ENTIDAD=08)",
+      "simplificacion": "Douglas-Peucker 0.0025°"
+    },
+    "mrls-municipios": {
+      "archivo": "mrls-municipios.json",
+      "rasgos": 36,
+      "bytes": 51938,
+      "origen": "MUNICIPIO.shp (ENTIDAD=17)",
+      "simplificacion": "Douglas-Peucker 0.0012°"
+    },
+    "mrls-distritos-locales": {
+      "archivo": "mrls-distritos-locales.json",
+      "rasgos": 12,
+      "bytes": 20327,
+      "origen": "DISTRITO_LOCAL.shp (ENTIDAD=17)",
+      "simplificacion": "Douglas-Peucker 0.0025°"
+    },
+    "bcs-municipios": {
+      "archivo": "bcs-municipios.json",
+      "rasgos": 5,
+      "bytes": 123668,
+      "origen": "MUNICIPIO.shp (ENTIDAD=03)",
+      "simplificacion": "Douglas-Peucker 0.0012°"
+    },
+    "bcs-distritos-locales": {
+      "archivo": "bcs-distritos-locales.json",
+      "rasgos": 16,
+      "bytes": 81487,
+      "origen": "DISTRITO_LOCAL.shp (ENTIDAD=03)",
+      "simplificacion": "Douglas-Peucker 0.0025°"
+    },
+    "nl2027-municipios": {
+      "archivo": "nl2027-municipios.json",
+      "rasgos": 51,
+      "bytes": 200575,
+      "origen": "MUNICIPIO.shp (ENTIDAD=19)",
+      "simplificacion": "Douglas-Peucker 0.0012°"
+    },
+    "nl2027-distritos-locales": {
+      "archivo": "nl2027-distritos-locales.json",
+      "rasgos": 26,
+      "bytes": 58123,
+      "origen": "DISTRITO_LOCAL.shp (ENTIDAD=19)",
+      "simplificacion": "Douglas-Peucker 0.0025°"
     }
   }
 }

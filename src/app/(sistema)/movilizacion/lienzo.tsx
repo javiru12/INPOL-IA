@@ -7,31 +7,33 @@ import { RAMPA_SECUENCIAL } from '@/lib/escalas'
 import { cifra } from '@/lib/formato'
 import type { MunicipioMovilizacion, Pinta } from './consultas'
 
-const ARCHIVO = 'nl-municipios.json'
-
 /**
  * El territorio de la red, pintado por volumen de promovidos o por qué
  * tan cerca está cada zona de la meta que ahí se comprometió.
  *
- * La cartografía se trae en el cliente, como en Mapa territorial: son 51
- * polígonos y no tiene caso que viajen en el HTML de la página.
+ * La cartografía se trae en el cliente, como en Mapa territorial, y cuál
+ * se trae depende del estado del cliente.
  */
 export function LienzoMovilizacion({
   municipios,
   pinta,
+  archivo,
 }: {
   municipios: MunicipioMovilizacion[]
   pinta: Pinta
+  /** Cartografía del estado del cliente. */
+  archivo: string | null
 }) {
   const [geo, setGeo] = useState<FeatureCollection<Geometry, Region> | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activa, setActiva] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!archivo) return
     let vigente = true
-    fetch(`/geo/${ARCHIVO}`)
+    fetch(`/geo/${archivo}`)
       .then((r) => {
-        if (!r.ok) throw new Error(`No se encontró ${ARCHIVO}`)
+        if (!r.ok) throw new Error(`No se encontró ${archivo}`)
         return r.json()
       })
       .then((j) => vigente && setGeo(j))
@@ -39,7 +41,7 @@ export function LienzoMovilizacion({
     return () => {
       vigente = false
     }
-  }, [])
+  }, [archivo])
 
   // Con una sola zona pintada los cuantiles degeneran: todos los cortes
   // valen lo mismo y la rampa devuelve su tono más claro, que se lee como
@@ -86,7 +88,7 @@ export function LienzoMovilizacion({
       <div className="panel flex h-[420px] flex-col items-center justify-center px-6 text-center">
         <p className="font-medium">No se pudo cargar la cartografía</p>
         <p className="mt-1 max-w-sm text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
-          Falta el archivo <span className="clave">{ARCHIVO}</span> en{' '}
+          Falta el archivo <span className="clave">{archivo}</span> en{' '}
           <span className="clave">public/geo/</span>. El resto de la pantalla funciona sin él.
         </p>
       </div>

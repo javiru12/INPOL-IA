@@ -8,12 +8,14 @@ import { Pagina, Indicador } from '@/components/pagina'
 import { colorDePartido, nombreDePartido } from '@/lib/escalas'
 import { cifra } from '@/lib/formato'
 import { exigirAcceso } from '@/lib/acceso'
+import { Tabla } from '@/components/tabla'
+import { archivoDeMapa, type CapaDeMapa } from '@/lib/mapas'
 
 export const metadata: Metadata = { title: 'Mapa' }
 
-const AMBITOS: { valor: Ambito; etiqueta: string; archivo: string }[] = [
-  { valor: 'municipio', etiqueta: 'Municipios', archivo: 'nl-municipios.json' },
-  { valor: 'distrito', etiqueta: 'Distritos locales', archivo: 'nl-distritos-locales.json' },
+const AMBITOS: { valor: Ambito; etiqueta: string; capa: CapaDeMapa }[] = [
+  { valor: 'municipio', etiqueta: 'Municipios', capa: 'municipios' },
+  { valor: 'distrito', etiqueta: 'Distritos locales', capa: 'distritos-locales' },
 ]
 
 export default async function MapaTerritorial({
@@ -115,7 +117,7 @@ export default async function MapaTerritorial({
 
       <div className="mt-3 grid gap-3 xl:grid-cols-[1.6fr_1fr] xl:items-start">
         <LienzoMapa
-          archivo={capa.archivo}
+          archivo={archivoDeMapa(tenant.estado_clave, capa.capa) ?? ''}
           regiones={regiones}
           metrica={metrica}
           unidad={definicion.unidad}
@@ -126,7 +128,7 @@ export default async function MapaTerritorial({
             {metrica === 'margen' ? 'Las más competidas' : 'Ranking'}
           </h2>
           <div className="max-h-[27rem] overflow-y-auto">
-            <table className="tabla">
+            <Tabla>
               <thead>
                 <tr>
                   <th>{ambito === 'municipio' ? 'Municipio' : 'Distrito'}</th>
@@ -170,7 +172,7 @@ export default async function MapaTerritorial({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Tabla>
           </div>
         </section>
       </div>

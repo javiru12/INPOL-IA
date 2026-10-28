@@ -1,48 +1,49 @@
 /**
- * Reparte los ciudadanos del cliente entre secciones electorales reales y
- * hereda esa sección a sus peticiones.
+ * Reparte los ciudadanos de un cliente entre secciones electorales
+ * reales y hereda esa sección a sus peticiones.
  *
- * El reparto es proporcional a la población de cada municipio, no uniforme:
+ *   npx tsx --env-file=.env.local db/vincular-secciones.mts [clave-del-cliente]
+ *
+ * El reparto es proporcional al tamaño de cada municipio y no uniforme:
  * la demanda ciudadana se concentra donde vive la gente, y un mapa con
- * todos los municipios iguales no diría nada.
+ * todos los municipios iguales no diría nada. El tamaño se mide por
+ * cuántas secciones tiene el municipio, que es como el INE reparte el
+ * territorio: una sección por cada tanto de electores.
  *
- *   npm run db:secciones
+ * ⚠️ Todo se acota al estado del cliente. Hay municipios que se llaman
+ * igual en varios estados —JUAREZ, ALLENDE, GUERRERO, HIDALGO— así que
+ * buscar secciones por nombre de municipio sin decir de qué estado le
+ * asigna a un ciudadano de Monterrey una sección de Chihuahua. Ya pasó
+ * una vez y por eso la consulta filtra por `estado_id` y no por nombre.
  */
 import postgres from 'postgres'
 
 const sql = postgres(process.env.DATABASE_URL_ADMIN!, { max: 1 })
+const clave = process.argv[2] ?? 'monterrey'
 
-/** Peso de cada municipio del área metropolitana, por su población. */
-const AREA_METROPOLITANA: [string, number][] = [
-  ['MONTERREY', 1140],
-  ['GUADALUPE', 680],
-  ['APODACA', 660],
-  ['JUAREZ', 470],
-  ['GRAL. ESCOBEDO', 490],
-  ['SAN NICOLAS DE LOS GARZA', 410],
-  ['GARCIA', 400],
-  ['SANTA CATARINA', 310],
-  ['SAN PEDRO GARZA GARCIA', 130],
-]
-
-const [tenant] = await sql<{ id: string; nombre: string }[]>`
-  select id, nombre from tenants where clave = 'monterrey'`
+const [tenant] = await sql<{ id: string; nombre: string; estado_id: string | null; estado: string }[]>`
+  select t.id, t.nombre, t.estado_id, coalesce(e.nombre, '') as estado
+  from tenants t left join estados e on e.id = t.estado_id
+  where t.clave = ${clave}`
 
 if (!tenant) {
-  console.error('No existe el tenant monterrey.')
+  console.error(`No existe el cliente ${clave}.`)
+  process.exit(1)
+}
+if (!tenant.estado_id) {
+  console.error(`${tenant.nombre} no tiene estado asignado; sin eso no hay territorio que repartir.`)
   process.exit(1)
 }
 
-// Secciones agrupadas por municipio, en orden estable.
 const secciones = await sql<{ id: string; municipio: string }[]>`
   select s.id, m.nombre as municipio
   from secciones s
   join municipios m on m.id = s.municipio_id
-  where m.nombre = any(${AREA_METROPOLITANA.map(([n]) => n)})
+  where s.estado_id = ${tenant.estado_id}
   order by m.nombre, s.clave`
 
 if (!secciones.length) {
-  console.error('No hay secciones cargadas. Corre las migraciones.')
+  console.error(`No hay secciones cargadas de ${tenant.estado}. Corre db/cargar-geografia.mts.`)
   process.exit(1)
 }
 
@@ -53,20 +54,20 @@ for (const s of secciones) {
   porMunicipio.set(s.municipio, lista)
 }
 
-// El rol dueño es superusuario y evade Row Level Security: todo filtro por
-// tenant va explícito en el WHERE.
+// El rol dueño es superusuario y evade Row Level Security: todo filtro
+// por cliente va explícito en el WHERE.
 const ciudadanos = await sql<{ id: string }[]>`
   select id from ciudadanos where tenant_id = ${tenant.id} order by id`
 
-const pesoTotal = AREA_METROPOLITANA.reduce((s, [, p]) => s + p, 0)
+const pesos = [...porMunicipio.entries()].map(([m, s]) => [m, s.length] as const)
+const pesoTotal = pesos.reduce((s, [, p]) => s + p, 0)
+
 const asignaciones: { id: string; seccion: string }[] = []
 let cursor = 0
 
-for (const [municipio, peso] of AREA_METROPOLITANA) {
+for (const [municipio, peso] of pesos) {
   const cuantos = Math.round((peso / pesoTotal) * ciudadanos.length)
-  const disponibles = porMunicipio.get(municipio) ?? []
-  if (!disponibles.length) continue
-
+  const disponibles = porMunicipio.get(municipio)!
   for (let i = 0; i < cuantos && cursor < ciudadanos.length; i++, cursor++) {
     // Salto grande para no amontonar a todos en secciones contiguas.
     asignaciones.push({
@@ -76,20 +77,20 @@ for (const [municipio, peso] of AREA_METROPOLITANA) {
   }
 }
 
-// Lo que sobre por redondeo se queda en la capital.
-const capital = porMunicipio.get('MONTERREY') ?? []
+// Lo que sobre por redondeo se queda en el municipio más grande.
+const mayor = pesos.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+const resto = porMunicipio.get(mayor)!
 for (; cursor < ciudadanos.length; cursor++) {
-  asignaciones.push({
-    id: ciudadanos[cursor].id,
-    seccion: capital[cursor % capital.length],
-  })
+  asignaciones.push({ id: ciudadanos[cursor].id, seccion: resto[cursor % resto.length] })
 }
 
-await sql`
-  update ciudadanos c
-  set seccion_id = v.seccion::uuid
-  from (values ${sql(asignaciones.map((a) => [a.id, a.seccion]))}) as v(id, seccion)
-  where c.id = v.id::uuid and c.tenant_id = ${tenant.id}`
+if (asignaciones.length) {
+  await sql`
+    update ciudadanos c
+    set seccion_id = v.seccion::uuid
+    from (values ${sql(asignaciones.map((a) => [a.id, a.seccion]))}) as v(id, seccion)
+    where c.id = v.id::uuid and c.tenant_id = ${tenant.id}`
+}
 
 const { count } = await sql`
   update peticiones p
@@ -110,11 +111,14 @@ const reparto = await sql<{ municipio: string; ciudadanos: number; peticiones: n
   left join peticiones p on p.ciudadano_id = c.id and p.tenant_id = ${tenant.id}
   where c.tenant_id = ${tenant.id}
   group by m.nombre
-  order by 3 desc`
+  order by 3 desc
+  limit 10`
 
-console.log(`\n  ${tenant.nombre}\n`)
+console.log(`\n  ${tenant.nombre} · ${tenant.estado}\n`)
 for (const r of reparto) {
-  console.log(`  ${r.municipio.padEnd(26)} ${String(r.ciudadanos).padStart(4)} ciudadanos  ${String(r.peticiones).padStart(5)} peticiones`)
+  console.log(
+    `  ${r.municipio.padEnd(26)} ${String(r.ciudadanos).padStart(4)} ciudadanos  ${String(r.peticiones).padStart(5)} peticiones`,
+  )
 }
 console.log(`\n  ${count} peticiones vinculadas a su sección\n`)
 
