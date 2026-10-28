@@ -3,14 +3,19 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Marca } from '@/components/marca'
+import { Anillo } from '@/components/anillo'
 import { mesCorto, cifra } from '@/lib/formato'
-import { CATEGORICA } from '@/lib/paleta'
+import { CATEGORICA, ESTADO } from '@/lib/paleta'
 import type { Pulso } from './consultas'
 
 /**
- * Sala de mando: pensada para quedarse puesta en un monitor de la oficina.
- * Fondo oscuro, cifras grandes y legibles a varios metros, y lo accionable
- * —lo urgente que lleva días sin resolverse— en el lugar más visible.
+ * Sala de mando: pensada para quedarse puesta en un monitor de la
+ * oficina. Mismo lenguaje que los demás tableros —fondo con luz,
+ * superficies de vidrio— y todo un punto más grande que en una pantalla
+ * de trabajo, porque esta se lee de pie y desde lejos.
+ *
+ * Lo accionable —lo urgente que lleva días sin moverse— ocupa el lugar
+ * más visible y es lo único que se pinta en rojo.
  */
 export function Tablero({
   cliente,
@@ -32,57 +37,54 @@ export function Tablero({
   const mejora = mediana !== null && previa !== null ? previa - mediana : null
 
   return (
-    <div className="min-h-screen bg-[#151119] px-7 py-6 text-white">
-      <header className="flex items-center justify-between gap-6 border-b border-white/10 pb-5">
+    <div data-vidrio className="min-h-screen px-8 py-6">
+      <div aria-hidden="true" className="fondo-padre" />
+
+      <header className="flex flex-wrap items-center justify-between gap-6 pb-6">
         <div className="flex items-center gap-5">
-          <Marca tono="claro" />
-          <div className="border-l border-white/15 pl-5">
-            <p className="text-[length:var(--text-micro)] font-semibold uppercase tracking-[0.1em] text-white/50">
-              Sala de mando
-            </p>
-            <p className="text-[1.0625rem] font-semibold">{cliente}</p>
+          <Marca />
+          <div className="border-l border-[var(--color-borde)] pl-5">
+            <p className="rotulo">Sala de mando</p>
+            <p className="text-[length:var(--text-titulo)] font-semibold">{cliente}</p>
           </div>
         </div>
+
         <div className="flex items-center gap-6">
-          <p className="text-right text-[var(--text-menuda)] text-white/55">
-            Datos al <span className="tabular-nums text-white/75">{leidoEn}</span>
-            <span className="block text-[length:var(--text-micro)] text-white/45">
+          <p className="text-right text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+            Datos al <span className="cifra">{leidoEn}</span>
+            <span className="block text-[length:var(--text-micro)] text-[var(--color-tinta-3)]">
               Se recalculan cada minuto
             </span>
           </p>
           <Reloj />
-          <Link
-            href="/"
-            className="rounded-[var(--radius-sm)] border border-white/15 px-3 py-1.5 text-[var(--text-menuda)] text-white/60 transition-colors hover:bg-white/5 hover:text-white"
-          >
+          <Link href="/" className="boton boton-neutro">
             Salir de la sala
           </Link>
         </div>
       </header>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-4">
+      <div className="franja">
         <Cifra
           rotulo="Peticiones vivas"
           valor={pulso.totales.abiertas}
           pie="Abiertas, en proceso o en gestión"
-          tono="#c7add6"
         />
         <Cifra
           rotulo="Urgentes sin resolver"
           valor={pulso.totales.urgentes}
           pie="Requieren atención hoy"
-          tono={pulso.totales.urgentes > 0 ? '#f0836f' : '#7fd0a0'}
-          alarma={pulso.totales.urgentes > 0}
+          tono={pulso.totales.urgentes > 0 ? 'var(--color-alerta)' : 'var(--color-exito)'}
         />
         <Cifra
           rotulo="Resueltas"
           valor={`${avance}%`}
           pie={`${cifra(pulso.totales.completadas)} de ${cifra(pulso.totales.total)}`}
-          tono="#7fd0a0"
+          tono="var(--color-exito)"
         />
         <Cifra
           rotulo="Días para resolver"
           valor={mediana !== null ? mediana.toFixed(1) : '—'}
+          tono={mejora !== null && mejora > 0 ? 'var(--color-exito)' : 'var(--color-aviso)'}
           variacion={
             mediana !== null && previa !== null && previa > 0
               ? { porcentaje: ((mediana - previa) / previa) * 100, subirEsBueno: false }
@@ -95,37 +97,102 @@ export function Tablero({
                 ? `${mejora.toFixed(1)} días menos que el trimestre anterior`
                 : `${Math.abs(mejora).toFixed(1)} días más que el trimestre anterior`
           }
-          tono={mejora !== null && mejora > 0 ? '#7fd0a0' : '#e8c468'}
         />
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.7fr_1fr]">
-        <section className="rounded-[var(--radius-md)] border border-white/10 bg-white/[0.025] px-5 py-4">
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="font-semibold">Demanda ciudadana</h2>
-            <p className="text-[var(--text-menuda)] text-white/55">
-              {cifra(pulso.totales.hoy)} hoy · {cifra(pulso.totales.semana)} esta semana
+        <section className="panel px-6 py-5">
+          <div className="mb-5 flex items-baseline justify-between gap-4">
+            <h2 className="text-[length:var(--text-titulo)] font-semibold">Demanda ciudadana</h2>
+            <p className="text-[var(--color-tinta-2)]">
+              <span className="cifra">{cifra(pulso.totales.hoy)}</span> hoy ·{' '}
+              <span className="cifra">{cifra(pulso.totales.semana)}</span> esta semana
             </p>
           </div>
           <Tendencia datos={pulso.porMes} />
         </section>
 
-        <section className="rounded-[var(--radius-md)] border border-white/10 bg-white/[0.025] px-5 py-4">
-          <h2 className="mb-4 font-semibold">Qué pide la gente</h2>
-          <ul className="space-y-2.5">
+        <section className="panel flex items-center gap-6 px-6 py-5">
+          {/* El avance en anillo: a distancia, cuánto falta para cerrar
+              se ve antes en un hueco que en un porcentaje escrito. */}
+          <Anillo porcentaje={avance} color={ESTADO.exito} tamano={130} grosor={11}>
+            <span
+              className="cifra text-[2rem] leading-none"
+              style={{ color: ESTADO.exito }}
+            >
+              {avance}%
+            </span>
+          </Anillo>
+          <div className="min-w-0">
+            <h2 className="text-[length:var(--text-titulo)] font-semibold">Avance de atención</h2>
+            <p className="mt-1.5 leading-snug text-[var(--color-tinta-2)]">
+              {cifra(pulso.totales.completadas)} de {cifra(pulso.totales.total)} peticiones ya
+              tienen desenlace.
+            </p>
+            <p className="mt-2 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
+              Faltan {cifra(pulso.totales.total - pulso.totales.completadas)} por cerrar.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.7fr_1fr]">
+        {/* Lo único que se pinta de rojo en toda la pantalla: si todo
+            grita, nada grita. */}
+        <section
+          className="panel px-6 py-5"
+          style={{ borderColor: 'var(--color-alerta)', background: 'var(--color-alerta-suave)' }}
+        >
+          <div className="mb-4 flex items-baseline justify-between gap-4">
+            <h2 className="text-[length:var(--text-titulo)] font-semibold">
+              Urgentes sin resolver
+            </h2>
+            <span className="text-[var(--text-menuda)] text-[var(--color-tinta-2)]">
+              Ordenadas por antigüedad
+            </span>
+          </div>
+          {pulso.urgentes.length === 0 ? (
+            <p className="py-7 text-center text-[var(--color-tinta-2)]">
+              No hay peticiones urgentes pendientes.
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--color-borde)]">
+              {pulso.urgentes.map((u) => (
+                <li key={u.id} className="flex items-center gap-4 py-2.5">
+                  <span className="clave w-16 shrink-0">{u.folio}</span>
+                  <span className="min-w-0 flex-1 truncate font-medium">
+                    {u.ciudadano ?? 'Sin ciudadano'}
+                    <span className="ml-2 font-normal text-[var(--color-tinta-2)]">
+                      {u.problematica}
+                    </span>
+                  </span>
+                  <span className="hidden w-40 shrink-0 truncate text-[var(--color-tinta-2)] sm:block">
+                    {u.colonia ?? '—'}
+                  </span>
+                  <span
+                    className="cifra w-24 shrink-0 text-right"
+                    style={{ color: u.dias > 14 ? 'var(--color-alerta)' : 'var(--color-aviso)' }}
+                  >
+                    {u.dias} {u.dias === 1 ? 'día' : 'días'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="panel px-6 py-5">
+          <h2 className="mb-4 text-[length:var(--text-titulo)] font-semibold">Qué pide la gente</h2>
+          <ul className="space-y-3">
             {pulso.porProblematica.slice(0, 7).map((p, i) => {
               const maximo = pulso.porProblematica[0]?.valor || 1
               return (
                 <li key={p.etiqueta}>
                   <div className="mb-1 flex items-baseline justify-between gap-3">
-                    <span className="truncate text-[var(--text-menuda)] text-white/75">
-                      {p.etiqueta}
-                    </span>
-                    <span className="shrink-0 text-[var(--text-menuda)] font-semibold tabular-nums">
-                      {cifra(p.valor)}
-                    </span>
+                    <span className="truncate">{p.etiqueta}</span>
+                    <span className="cifra shrink-0">{cifra(p.valor)}</span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                  <div className="h-2 overflow-hidden rounded-full bg-[var(--color-superficie-2)]">
                     <div
                       className="h-full rounded-full"
                       style={{
@@ -141,69 +208,26 @@ export function Tablero({
         </section>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.7fr_1fr]">
-        <section className="rounded-[var(--radius-md)] border border-[#f0836f]/25 bg-[#f0836f]/[0.05] px-5 py-4">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Urgentes sin resolver</h2>
-            <span className="text-[var(--text-menuda)] text-white/55">
-              Ordenadas por antigüedad
-            </span>
-          </div>
-          {pulso.urgentes.length === 0 ? (
-            <p className="py-7 text-center text-[var(--text-menuda)] text-white/60">
-              No hay peticiones urgentes pendientes.
-            </p>
-          ) : (
-            <ul className="divide-y divide-white/[0.07]">
-              {pulso.urgentes.map((u) => (
-                <li key={u.id} className="flex items-center gap-4 py-2">
-                  <span className="w-14 shrink-0 font-mono text-[var(--text-micro)] text-white/50">
-                    {u.folio}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[var(--text-menuda)]">
-                    {u.ciudadano ?? 'Sin ciudadano'}
-                    <span className="ml-2 text-white/55">{u.problematica}</span>
-                  </span>
-                  <span className="hidden w-40 shrink-0 truncate text-[var(--text-menuda)] text-white/60 sm:block">
-                    {u.colonia ?? '—'}
-                  </span>
+      <section className="panel mt-4 px-6 py-5">
+        <h2 className="mb-4 text-[length:var(--text-titulo)] font-semibold">Dónde se concentra</h2>
+        <ul className="grid gap-x-10 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+          {pulso.porColonia.map((c) => {
+            const maximo = pulso.porColonia[0]?.valor || 1
+            return (
+              <li key={c.etiqueta} className="flex items-center gap-3">
+                <span className="w-36 shrink-0 truncate">{c.etiqueta}</span>
+                <span className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-superficie-2)]">
                   <span
-                    className="w-20 shrink-0 text-right text-[var(--text-menuda)] font-semibold tabular-nums"
-                    style={{ color: u.dias > 14 ? '#f0836f' : '#e8c468' }}
-                  >
-                    {u.dias} {u.dias === 1 ? 'día' : 'días'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="rounded-[var(--radius-md)] border border-white/10 bg-white/[0.025] px-5 py-4">
-          <h2 className="mb-4 font-semibold">Dónde se concentra</h2>
-          <ul className="space-y-2">
-            {pulso.porColonia.map((c) => {
-              const maximo = pulso.porColonia[0]?.valor || 1
-              return (
-                <li key={c.etiqueta} className="flex items-center gap-3">
-                  <span className="w-32 shrink-0 truncate text-[var(--text-menuda)] text-white/75">
-                    {c.etiqueta}
-                  </span>
-                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
-                    <span
-                      className="block h-full rounded-full bg-[#a681bd]"
-                      style={{ width: `${Math.max((c.valor / maximo) * 100, 3)}%` }}
-                    />
-                  </span>
-                  <span className="w-9 shrink-0 text-right text-[var(--text-menuda)] font-semibold tabular-nums">
-                    {c.valor}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      </div>
+                    className="block h-full rounded-full bg-[var(--color-acento)]"
+                    style={{ width: `${Math.max((c.valor / maximo) * 100, 3)}%` }}
+                  />
+                </span>
+                <span className="cifra w-12 shrink-0 text-right">{c.valor}</span>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
     </div>
   )
 }
@@ -212,43 +236,33 @@ function Cifra({
   rotulo,
   valor,
   pie,
-  tono,
-  alarma,
+  tono = 'var(--color-tinta)',
   variacion,
 }: {
   rotulo: string
   valor: number | string
   pie: string
-  tono: string
-  alarma?: boolean
+  tono?: string
   /** Cuánto cambió contra el periodo anterior. A tres metros, una
       flecha se lee de un golpe y una frase hay que acercarse a leerla. */
   variacion?: { porcentaje: number; subirEsBueno?: boolean }
 }) {
   return (
-    <div
-      className="rounded-[var(--radius-md)] border px-5 py-4"
-      style={{
-        borderColor: alarma ? 'rgba(240,131,111,.3)' : 'rgba(255,255,255,.1)',
-        background: alarma ? 'rgba(240,131,111,.05)' : 'rgba(255,255,255,.025)',
-      }}
-    >
-      <p className="text-[length:var(--text-micro)] font-semibold uppercase tracking-[0.08em] text-white/55">
-        {rotulo}
-      </p>
+    <div>
+      <p className="rotulo">{rotulo}</p>
       <p
-        className="mt-2 inline-flex items-baseline gap-3 text-[2.75rem] font-semibold leading-none tracking-tight tabular-nums"
+        className="cifra mt-2 inline-flex items-baseline gap-3 text-[2.75rem] leading-none"
         style={{ color: tono }}
       >
         {typeof valor === 'number' ? cifra(valor) : valor}
         {variacion && Math.abs(variacion.porcentaje) >= 0.5 && (
           <span
-            className="text-[1.125rem] font-semibold"
+            className="text-[1.125rem]"
             style={{
               color:
                 variacion.porcentaje > 0 === (variacion.subirEsBueno ?? true)
-                  ? '#7fd0a0'
-                  : '#f0836f',
+                  ? 'var(--color-exito)'
+                  : 'var(--color-alerta)',
             }}
           >
             {variacion.porcentaje > 0 ? '↗' : '↘'}{' '}
@@ -256,7 +270,7 @@ function Cifra({
           </span>
         )}
       </p>
-      <p className="mt-2 text-[var(--text-menuda)] text-white/60">{pie}</p>
+      <p className="mt-2 text-[var(--color-tinta-2)]">{pie}</p>
     </div>
   )
 }
@@ -267,35 +281,37 @@ function Tendencia({ datos }: { datos: { etiqueta: string; valor: number }[] }) 
   const tope = Math.ceil(maximo / 25) * 25 || 25
 
   return (
-    <div className="relative" style={{ height: 190 }}>
+    <div className="relative" style={{ height: 210 }}>
       <div className="pointer-events-none absolute inset-0 flex flex-col justify-between pb-6">
         {[1, 0.5, 0].map((l) => (
           <div key={l} className="flex items-center gap-2">
-            <span className="w-9 shrink-0 text-right text-[length:var(--text-micro)] tabular-nums text-white/60">
+            <span className="cifra w-10 shrink-0 text-right text-[var(--text-menuda)] font-normal text-[var(--color-tinta-3)]">
               {Math.round(tope * l)}
             </span>
-            <span className="h-px flex-1 bg-white/[0.07]" />
+            <span className="h-px flex-1 bg-[var(--color-borde)]" />
           </div>
         ))}
       </div>
 
-      <div className="relative flex h-full items-end gap-2 pl-11">
+      <div className="relative flex h-full items-end gap-2 pl-12">
         {datos.map((d, i) => {
-          const alto = (d.valor / tope) * 158
+          const alto = (d.valor / tope) * 174
           const ultimo = i === datos.length - 1
           return (
             <div key={d.etiqueta} className="group flex flex-1 flex-col items-center justify-end">
-              <span className="mb-1 text-[length:var(--text-micro)] font-semibold tabular-nums text-white/0 transition-colors group-hover:text-white/80">
+              <span className="cifra mb-1 text-[var(--text-menuda)] text-transparent transition-colors group-hover:text-[var(--color-tinta)]">
                 {d.valor}
               </span>
               <div
-                className="w-full max-w-[42px] rounded-t-[4px] transition-colors"
+                className="w-full max-w-[46px] rounded-t-[4px] transition-colors"
                 style={{
                   height: Math.max(alto, d.valor > 0 ? 3 : 0),
-                  background: ultimo ? '#c7add6' : '#8459a0',
+                  // El mes en curso va más claro: lleva días de menos y
+                  // compararlo con los cerrados sin avisar engaña.
+                  background: ultimo ? 'var(--color-acento-borde)' : 'var(--color-acento)',
                 }}
               />
-              <span className="mt-1.5 text-[length:var(--text-micro)] text-white/50">
+              <span className="mt-1.5 text-[var(--text-menuda)] text-[var(--color-tinta-3)]">
                 {mesCorto(d.etiqueta)}
               </span>
             </div>
@@ -321,10 +337,10 @@ function Reloj() {
 
   return (
     <div className="text-right">
-      <p className="text-[1.375rem] font-semibold leading-none tabular-nums">
+      <p className="cifra text-[1.5rem] leading-none">
         {ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
       </p>
-      <p className="mt-1 text-[var(--text-micro)] text-white/55 first-letter:uppercase">
+      <p className="mt-1 text-[var(--text-menuda)] text-[var(--color-tinta-3)] first-letter:uppercase">
         {ahora.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
       </p>
     </div>
