@@ -13,6 +13,14 @@ import { destinoPorClave } from './destinos'
 
 export const metadata: Metadata = { title: 'Importar datos' }
 
+/**
+ * Un lote de quince mil filas tarda unos segundos contra la base de la
+ * nube, bastante más que cualquier otra pantalla. Con el tiempo de
+ * fábrica, un lote lento se mata a la mitad y la carga se marca como
+ * fallida sin que nada estuviera mal.
+ */
+export const maxDuration = 60
+
 export default async function Importar() {
   await exigirAcceso('/configuracion')
   const tenant = await tenantDeLaPeticion()

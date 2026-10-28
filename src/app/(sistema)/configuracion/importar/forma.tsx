@@ -33,23 +33,26 @@ const TOPE_XLSX = 8 * 1024 * 1024
 /**
  * Cuántas filas van por petición.
  *
- * Lo que manda son los bytes: Vercel corta el cuerpo en 4.5 MB y se
- * apunta a 2 MB para tener margen. El número de filas sale del ancho
- * real de las del archivo, porque un padrón de tres columnas y uno de
- * veinticinco no pesan lo mismo.
+ * Hay dos fuerzas opuestas y las dos se midieron.
  *
- * El techo es alto a propósito. Con lotes de cinco mil, veinte mil
- * filas tardaban siete segundos en producción, y medirlo enseñó que el
- * costo no estaba en el tamaño del lote sino en cada llamada: una
- * función sin servidor levanta conexión nueva a la base cada vez, y eso
- * se paga entera por invocación. Menos llamadas y más grandes es lo que
- * baja el tiempo; más chicas no lo bajaba nada.
+ * Lotes más grandes van más rápido: con cinco mil filas por lote,
+ * veinte mil tardaban siete segundos en producción, y bajarlas a un
+ * solo lote de veinte mil las dejó en 3.8. El costo está en cada
+ * llamada —una función sin servidor levanta conexión nueva a la base
+ * cada vez— y eso se paga entero por invocación, no por fila.
+ *
+ * Pero pasado cierto punto la acción de servidor revienta con «The
+ * destination stream closed early»: un lote de cuarenta mil filas, que
+ * son 1.8 MB, falla de inmediato. Así que se apunta a 800 KB por
+ * petición, que es el tamaño con el que se comprobó que aguanta, y el
+ * número de filas sale del ancho real de las del archivo, porque un
+ * padrón de tres columnas y uno de veinticinco no pesan igual.
  */
 function filasPorLote(muestra: string[][]) {
   const bytes = muestra.length
     ? JSON.stringify(muestra).length / muestra.length
     : 200
-  return Math.max(500, Math.min(40000, Math.floor((2 * 1024 * 1024) / bytes)))
+  return Math.max(500, Math.min(15000, Math.floor((800 * 1024) / bytes)))
 }
 
 type Avance = {
